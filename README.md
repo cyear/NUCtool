@@ -13,20 +13,31 @@
 
 
 # NUCtool
-intel NUC 系列风扇曲线控制 LAPAC71H, LAPKC71F 等机型
+> intel NUC 系列风扇曲线控制 LAPAC71H, LAPKC71F[^1] 等[^2]机型
+[^1]: 全部来自反馈的问题所做的适配
+[^2]: 未有其他机型测试, 谨慎使用
+> [!NOTE]
+> 随缘更新, 如果觉得有用请给个⭐
+> 
+> [更新说明及使用说明](./src-tauri/NUCtoolChange.md)
 
-> 随缘更新
+> [!WARNING]
+> [必要说明](assets/分析.md)
+# 
 
+### UI对比
+<details>
+  <summary>
+    0.1.2版本运行界面
+  </summary>
 
-### --> [更新说明及使用说明](./src-tauri/NUCtoolChange.md) <--
+  ![0.1.2](assets/0.1.2.png)
+</details>
 
-### --> [必要说明](assets/分析.md) <--
-
-#### ----------------------------------------------------
-### 0.1.2版本运行界面
-
-![0.1.2](assets/0.1.2.png)
-
-### 0.3.0版本运行界面
-
-![0.3.0](assets/0.3.0.png)
+<details>
+  <summary>
+    0.3.0版本运行界面
+  </summary>
+  
+  ![0.3.0](assets/0.3.0.png)
+</details>
