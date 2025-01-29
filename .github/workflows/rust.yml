@@ -2,9 +2,8 @@ name: "Build"
 
 on:
   push:
-    paths:
-      - 'src/**'
-      - 'src-tauri/**'
+    branches:    
+      - main
   workflow_dispatch:
 
 jobs:
