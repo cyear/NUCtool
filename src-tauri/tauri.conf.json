@@ -1,0 +1,79 @@
+{
+  "build": {
+    "frontendDist": "../src"
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "resources": [
+      "icons/icon.ico",
+      "NUCtoolChange.md"
+    ],
+    "icon": [
+      "icons/icon.png",
+      "icons/icon.ico"
+    ],
+    "publisher": "冫氵丶面包",
+    "copyright": "@cyear 2024",
+    "shortDescription": "NUC 风扇曲线控制",
+    "createUpdaterArtifacts": true,
+    "windows": {
+      "webviewInstallMode": {
+        "type": "skip"
+      },
+      "wix": {
+        "language": "zh-CN"
+      }
+    }
+  },
+  "productName": "NUCtool",
+  "mainBinaryName": "NUC_X15_Fan",
+  "version": "0.3.4",
+  "identifier": "com.nuc.x15.fan.cyear.app",
+  "plugins": {
+    "updater": {
+      "active": true,
+      "dialog": true,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQ2NkVFN0Y3NDRCNkFBQzAKUldUQXFyWkU5K2R1UnVvL0twcHBKY1dQUlZvWDlWZmxRNVdiUHJITVUwYlRWK3FXbHUrY0s4bVAK",
+      "endpoints": ["https://cyear.github.io/nuc_fan/latest.json"],
+      "windows": {
+        "installMode": "passive",
+        "installerArgs": []
+      }
+    }
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "NUCtool",
+        "width": 930,
+        "height": 580,
+        "visible": true,
+        "transparent": true
+      },
+      {
+        "label": "splashscreen",
+        "url": "/splashscreen",
+        "title": "NUCtool Splashscreen",
+        "width": 800,
+        "height": 500,
+        "visible": false,
+        "transparent": true
+      },
+      {
+        "label": "tdp",
+        "url": "/tdp",
+        "title": "NUCtool Debug",
+        "width": 800,
+        "height": 500,
+        "visible": false,
+        "transparent": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  }
+}
