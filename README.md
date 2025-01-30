@@ -11,33 +11,37 @@
 ![GitHub Release](https://img.shields.io/github/v/release/cyear/NUCtool?style=for-the-badge)
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/cyear/NUCtool/latest?style=for-the-badge)
 
-
 # NUCtool
+
 > intel NUC 系列风扇曲线控制 LAPAC71H, LAPKC71F[^1] 等[^2]机型
+
 [^1]: 全部来自反馈的问题所做的适配
+    
 [^2]: 未有其他机型测试, 谨慎使用
+    
 > [!NOTE]
 > 随缘更新, 如果觉得有用请给个⭐
-> 
+>
 > [更新说明及使用说明](./src-tauri/NUCtoolChange.md)
 
 > [!WARNING]
 > [必要说明](assets/分析.md)
+
 # 
 
 ### UI对比
-<details>
-  <summary>
-    0.1.2版本运行界面
-  </summary>
 
-  ![0.1.2](assets/0.1.2.png)
+span
+
+![0.1.2](assets/0.1.2.png)
+
 </details>
 
 <details>
   <summary>
     0.3.0版本运行界面
   </summary>
-  
-  ![0.3.0](assets/0.3.0.png)
+
+![0.3.0](assets/0.3.0.png)
+
 </details>

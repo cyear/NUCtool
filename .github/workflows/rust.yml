@@ -51,9 +51,9 @@ jobs:
         with:
           tagName: NUCtool-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: "NUCtool v__VERSION__"
-          releaseBody: "自动发布的新版本 --> [更新说明及使用说明](./src-tauri/NUCtoolChange.md) <--"
+          releaseBody: "自动发布的新版本"
           releaseDraft: true
-          prerelease: true
+          prerelease: false
           args: ${{ matrix.args }}        
       - uses: peaceiris/actions-gh-pages@v3
         with:
