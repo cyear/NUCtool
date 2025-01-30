@@ -7,36 +7,50 @@ use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent}
 use tauri::{App, Manager};
 use tauri_plugin_notification::NotificationExt;
 use tauri_plugin_updater::UpdaterExt;
+use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
 
 async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
-  if let Some(update) = app.updater()?.check().await? {
-    let mut downloaded = 0;
-
-    // alternatively we could also call update.download() and update.install() separately
-    update
-      .download_and_install(
-        |chunk_length, content_length| {
-          downloaded += chunk_length;
-          println!("downloaded {downloaded} from {content_length:?}");
-        },
-        || {
-          println!("download finished");
-        },
-      )
-      .await?;
-
-    println!("update installed");
-    app.restart();
-  }
-
-  Ok(())
+    if let Some(update) = app.updater()?.check().await? {
+        println!("update found: {:#?}", update.body);
+        app.dialog()
+            .message(update.clone().body.unwrap().as_str())
+            .title("NUCtool 有新版本 v".to_owned()+update.clone().version.as_str())
+            .buttons(MessageDialogButtons::OkCancelCustom("更新".to_string(), "取消".to_string()))
+            .show(|yes| {
+                match yes {
+                    true => {
+                        tauri::async_runtime::spawn(async move {
+                            let mut downloaded = 0;
+                            update
+                                .download_and_install(
+                                    |chunk_length, content_length| {
+                                        downloaded += chunk_length;
+                                        println!("downloaded {downloaded} from {content_length:?}");
+                                    },
+                                    || {
+                                        println!("download finished");
+                                    },
+                                )
+                                .await.expect("download failed");
+                            println!("update installed");
+                            app.restart();
+                        });
+                    },
+                    false => {
+                        println!("update canceled")
+                    }
+                }
+            });
+    }
+    Ok(())
 }
 
 pub fn init(app: &mut App) -> Result<(), Box<dyn Error>> {
     let handle = app.handle().clone();
-      tauri::async_runtime::spawn(async move {
+    tauri::async_runtime::spawn(async move {
         update(handle).await.expect("update failed");
-      });
+    });
+
     let config_tdp = get_config_dir().join("debug.config");
     if config_tdp.exists() {
         let debug = fs::read_to_string(config_tdp)

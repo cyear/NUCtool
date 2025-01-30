@@ -8,6 +8,7 @@
   },
   "private": true,
   "dependencies": {
+    "@tauri-apps/plugin-dialog": "^2.2.0",
     "@tauri-apps/plugin-updater": "^2.3.1",
     "react-chartjs-2": "^5.2.0"
   }
