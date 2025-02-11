@@ -1,5 +1,6 @@
 # NUCtool（Changelog）
 
+
 ## [0.3.6-<font color=red>Alpha</font>] - 2025-2-11
 #### 新特性
 - 自启动
