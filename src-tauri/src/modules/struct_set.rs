@@ -17,6 +17,10 @@ pub static R_FAN_R1: &str = "0x0000010000000464";
 pub static R_FAN_R2: &str = "0x0000010000000465";
 pub static R_TEMP_L: &str = "0x000001000000043E";
 pub static R_TEMP_R: &str = "0x000001000000044F";
+pub static R_FAN_MODE: &str = "0x0000010000000751";
+pub static W_FAN_AC71H_TURBO: &str = "0x0000000000400751";
+pub static W_FAN_KC71F_TURBO: &str = "0x0000000000500751";
+pub static W_FAN_RESET: &str = "0x0000000000A00751";
 
 lazy_static! {
     pub static ref MODEL_ID: i64 = get_model();
@@ -54,8 +58,3 @@ pub struct Tdp {
 pub struct FanControlState {
     pub is_running: Arc<Mutex<bool>>,
 }
-
-// #[derive(Clone)]
-// pub struct ChannelControlState {
-//     pub tx: Arc<Mutex<Sender<String>>>,
-// }

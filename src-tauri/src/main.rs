@@ -20,7 +20,7 @@ use modules::{
     setup,
     tdp::{get_tdp, set_tdp},
     wmi::wmi_security,
-    struct_set::FanControlState
+    struct_set::FanControlState,
 };
 
 fn main() {
