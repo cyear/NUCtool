@@ -28,7 +28,7 @@
   },
   "productName": "NUCtool",
   "mainBinaryName": "NUCtool",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "identifier": "com.nuc.x15.fan.cyear.app",
   "plugins": {
     "updater": {
