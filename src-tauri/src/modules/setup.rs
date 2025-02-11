@@ -5,47 +5,66 @@ use tauri::menu::{MenuBuilder, MenuItemBuilder};
 use tauri::plugin::PermissionState;
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{App, Manager};
-use tauri_plugin_notification::NotificationExt;
-use tauri_plugin_updater::UpdaterExt;
+use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
+use tauri_plugin_notification::NotificationExt;
+use tauri_plugin_updater::{Update, UpdaterExt};
 
 async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
-    if let Some(update) = app.updater()?.check().await? {
-        println!("update found: {:#?}", update.body);
-        app.dialog()
-            .message(update.clone().body.unwrap().as_str())
-            .title("NUCtool 有新版本 v".to_owned()+update.clone().version.as_str())
-            .buttons(MessageDialogButtons::OkCancelCustom("更新".to_string(), "取消".to_string()))
-            .show(|yes| {
-                match yes {
-                    true => {
-                        tauri::async_runtime::spawn(async move {
-                            let mut downloaded = 0;
-                            update
-                                .download_and_install(
-                                    |chunk_length, content_length| {
-                                        downloaded += chunk_length;
-                                        println!("downloaded {downloaded} from {content_length:?}");
-                                    },
-                                    || {
-                                        println!("download finished");
-                                    },
-                                )
-                                .await.expect("download failed");
-                            println!("update installed");
-                            app.restart();
-                        });
-                    },
-                    false => {
-                        println!("update canceled")
-                    }
-                }
-            });
+    let up: Update;
+    match app.updater()?.check().await {
+        Ok(Some(update)) => {
+            up = update;
+        }
+        Err(e) => {
+            println!("update check failed: {:#?}", e);
+            return Ok(());
+        }
+        _ => return Ok(()),
     }
+    println!("update found: {:#?}", up.body);
+    app.dialog()
+        .message(up.clone().body.unwrap().as_str())
+        .title("NUCtool 有新版本 v".to_owned() + up.clone().version.as_str())
+        .buttons(MessageDialogButtons::OkCancelCustom(
+            "更新".to_string(),
+            "取消".to_string(),
+        ))
+        .show(|yes| match yes {
+            true => {
+                tauri::async_runtime::spawn(async move {
+                    let mut downloaded = 0;
+                    up.download_and_install(
+                        |chunk_length, content_length| {
+                            downloaded += chunk_length;
+                            println!("downloaded {downloaded} from {content_length:?}");
+                        },
+                        || {
+                            println!("download finished");
+                        },
+                    )
+                    .await
+                    .expect("download failed");
+                    println!("update installed");
+                    app.restart();
+                });
+            }
+            false => {
+                println!("update canceled")
+            }
+        });
     Ok(())
 }
 
 pub fn init(app: &mut App) -> Result<(), Box<dyn Error>> {
+    // Get the autostart manager
+    let autostart_manager = app.autolaunch();
+    // 启用 autostart
+    let _ = autostart_manager.enable();
+    // 检查 enable 状态
+    println!("registered for autostart? {}", autostart_manager.is_enabled().unwrap());
+    // 禁用 autostart
+    // let _ = autostart_manager.disable();
     let handle = app.handle().clone();
     tauri::async_runtime::spawn(async move {
         update(handle).await.expect("update failed");
