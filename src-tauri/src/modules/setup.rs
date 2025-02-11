@@ -57,42 +57,40 @@ async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
 }
 
 pub fn init(app: &mut App) -> Result<(), Box<dyn Error>> {
-    // Get the autostart manager
-    let autostart_manager = app.autolaunch();
-    // 启用 autostart
-    let _ = autostart_manager.enable();
-    // 检查 enable 状态
-    println!("registered for autostart? {}", autostart_manager.is_enabled().unwrap());
-    // 禁用 autostart
-    // let _ = autostart_manager.disable();
     let handle = app.handle().clone();
     tauri::async_runtime::spawn(async move {
         update(handle).await.expect("update failed");
     });
-
-    let config_tdp = get_config_dir().join("debug.config");
-    if config_tdp.exists() {
-        let debug = fs::read_to_string(config_tdp)
-            .map_err(|e| e.to_string())
-            .unwrap()
-            .parse::<i64>()
-            .unwrap();
-        if debug == 1 {
-            let w = app.get_webview_window("tdp").unwrap();
-            window_vibrancy::apply_acrylic(&w, Some((18, 18, 18, 125)))
-                .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
-            w.show().unwrap();
+    // 自启动
+    let autostart_manager = app.autolaunch();
+    println!("自启动状态: {}", autostart_manager.is_enabled()?);
+    let config_dir = get_config_dir();
+    // 确保配置目录存在
+    fs::create_dir_all(&config_dir).map_err(|e| e.to_string())?;
+    let config_beta = config_dir.join("beta.config");
+    if !config_beta.exists() {
+        println!("beta.config 配置文件不存在");
+        fs::write(&config_beta, "1").map_err(|e| e.to_string())?;
+    }
+    if config_beta.exists() {
+        let beta = fs::read_to_string(config_beta)
+            .map_err(|e| e.to_string())?
+            .parse::<i64>()?;
+        if beta == 1 {
+            let _ = autostart_manager.enable();
+        } else {
+            let _ = autostart_manager.disable();
         }
     }
-    if app.notification().permission_state()? == PermissionState::Denied {
-        app.notification().request_permission()?;
-    }
-    if app.notification().permission_state()? == PermissionState::Granted {
-        app.notification()
-            .builder()
-            .body("可以隐藏到托盘图标，退出前请点击stop按钮!")
-            .show()?;
-    }
+    // if app.notification().permission_state()? == PermissionState::Denied {
+    //     app.notification().request_permission()?;
+    // }
+    // if app.notification().permission_state()? == PermissionState::Granted {
+    //     app.notification()
+    //         .builder()
+    //         .body("可以隐藏到托盘图标，退出前请点击stop按钮!")
+    //         .show()?;
+    // }
     let window = app.get_webview_window("main").unwrap();
     let h = MenuItemBuilder::with_id("h", "显示界面").build(app)?;
     let q = MenuItemBuilder::with_id("q", "退出程序").build(app)?;
@@ -100,7 +98,7 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn Error>> {
     let menu = MenuBuilder::new(app).items(&[&h, &d, &q]).build()?;
     let _tray = TrayIconBuilder::new()
         .menu(&menu)
-        .title("NUC X15 Fan")
+        .title("NUCtool")
         .icon(app.default_window_icon().unwrap().clone())
         .on_menu_event(move |app, event| match event.id().as_ref() {
             "h" => {

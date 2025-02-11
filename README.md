@@ -1,4 +1,3 @@
-![logo](./src-tauri/icons/128x128.png)
 
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/cyear/NUCtool/total?style=for-the-badge)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/cyear/NUCtool?style=for-the-badge)
@@ -13,15 +12,12 @@
 
 # NUCtool
 
-> intel NUC 系列风扇曲线控制 LAPAC71H, LAPKC71F[^1] 等[^2]机型
-
-[^1]: 全部来自反馈的问题所做的适配
-[^2]: 未有其他机型测试谨慎使用
+> intel NUC 系列风扇曲线控制 LAPAC71H, LAPKC71F 等机型
 
 > [!NOTE]
 > 随缘更新, 如果觉得有用请给个⭐
 >
-> [更新说明及使用说明](./src-tauri/NUCtoolChange.md)
+> [详细更新说明](./src-tauri/NUCtoolChange.md)
 
 > [!WARNING]
 > [必要说明](assets/分析.md)
@@ -36,6 +32,16 @@
 | CPU L2 | ✓ | ☐ |
 | GPU L1 | ✓ | ✕ |
 | GPU L2 | ✓ | ✕ |
+
+# 
+
+### 使用方法({}中为必须步骤，[]可选步骤)
+- 打开程序后`{调整风扇曲线}`并点击`{保存配置}`
+> [!WARNING]
+> 首次使用必须执行上述操作
+> 配置路径: `%AppData%\com.nuc.x15.fan.cyear.app`
+- 每次重新打开程序需要点击`加载配置`
+- 点击`Start`
 
 # 
 
