@@ -1,4 +1,3 @@
-![logo](./src-tauri/icons/128x128.png)
 
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/cyear/NUCtool/total?style=for-the-badge)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/cyear/NUCtool?style=for-the-badge)
@@ -28,6 +27,17 @@
 
 # 
 
+|机型支持(以实际为准)|LAPAC71H|LAPKC71F|
+|:--------:|:----:|:----:|
+| 风扇控制 | ✓ | ✓ |
+| 异常恢复 | ✓ | ✓ |
+| CPU L1 | ✓ | ☐ |
+| CPU L2 | ✓ | ☐ |
+| GPU L1 | ✓ | ✕ |
+| GPU L2 | ✓ | ✕ |
+
+# 
+
 ### UI对比
 <details>
   <summary>
@@ -43,4 +53,3 @@
   </summary>
 
 ![0.3.0](assets/0.3.0.png)
-</details>
