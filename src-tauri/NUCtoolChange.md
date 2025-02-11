@@ -1,5 +1,9 @@
 # NUCtool（Changelog）
 
+## [0.3.7-<font color=red>Alpha</font>] - 2025-2-11
+#### 修复
+- 满转转速异常
+- 长时间转速异常
 
 ## [0.3.6-<font color=red>Alpha</font>] - 2025-2-11
 #### 新特性

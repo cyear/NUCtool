@@ -58,6 +58,10 @@ pub fn fan_reset() {
 }
 
 pub fn fan_set(left: i16, right: i16) {
+    if left == 100 && right == 100 {
+        fan_init();
+        return;
+    }
     let (in_cls, svc, obj_path, method_name) = wmi_init();
     let out = wmi_set(
         &in_cls,
@@ -131,8 +135,11 @@ pub fn cpu_temp(left: &Option<&serde_json::Value>, right: &Option<&serde_json::V
     ) & 0xFF;
     println!("CPU Temp: {:?}, GPU Temp: {:?}", &cpu_out, &gpu_out);
     if cpu_out > 95 || gpu_out > 95 {
-        fan_set(100, 100);
+        fan_init();
         return;
+    } else if cpu_out < 0 || gpu_out < 0 { 
+        println!("温度读取异常, cpu: {:?}, gpu: {:?}", cpu_out, gpu_out);
+        return; 
     }
     let (mut l_c, mut s_c, mut r_c, mut s_c_) = (0i64, 0i64, 0i64, 0i64);
     if let (Some(left), Some(right)) = (left.expect("l").as_array(), right.expect("r").as_array()) {
