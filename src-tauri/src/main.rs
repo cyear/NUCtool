@@ -4,35 +4,31 @@
 )]
 use std::{
     env,
-    sync::{mpsc, Arc, Mutex},
     thread,
+    sync::{
+        Arc,
+        Mutex,
+    }
 };
+use tauri_plugin_autostart::MacosLauncher;
+
 mod modules;
 use modules::{
     config::{get_config_dir, load_fan_config, save_fan_config},
     fan::{fan_reset, get_fan_speeds, start_fan_control, stop_fan_control},
     permissions::privilege_escalation,
     setup,
-    struct_set::{ChannelControlState, FanControlState},
     tdp::{get_tdp, set_tdp},
-    wmi::{wmi_init, wmi_security, wmi_set},
+    wmi::wmi_security,
+    struct_set::FanControlState
 };
 
 fn main() {
     privilege_escalation();
-    let (tx, rx) = mpsc::channel::<String>();
-    let (tx1, _rx1) = mpsc::channel::<i64>();
     thread::spawn(move || {
         wmi_security();
-        let (in_cls, svc, obj_path, method_name) = wmi_init();
-        while let Ok(data) = rx.recv() {
-            let out = wmi_set(&in_cls, &svc, &obj_path, &method_name, data.as_str());
-            println!("{:?}", out);
-        }
+        fan_reset();
     });
-    let channel_control_state = ChannelControlState {
-        tx: Arc::new(Mutex::new(tx)),
-    };
     let fan_control_state = FanControlState {
         is_running: Arc::new(Mutex::new(false)),
     };
@@ -42,9 +38,9 @@ fn main() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_notification::init())
-        .setup(|app| setup::init(app))
+        .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec![]), ))
         .manage(fan_control_state)
-        .manage(channel_control_state)
+        .setup(|app| setup::init(app))
         .invoke_handler(tauri::generate_handler![
             start_fan_control,
             stop_fan_control,
