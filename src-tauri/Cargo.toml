@@ -38,4 +38,5 @@ strip = true # Ensures debug symbols are removed.
 debug-assertions = false
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-autostart = "2"
 tauri-plugin-updater = "2"

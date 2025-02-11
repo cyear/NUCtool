@@ -1,6 +1,6 @@
 use crate::modules::{
     struct_set::{
-        ChannelControlState, FanControlState, FanSpeeds, MODEL_ID, R_FAN_L1, R_FAN_L2, R_FAN_R1,
+        FanControlState, FanSpeeds, MODEL_ID, R_FAN_L1, R_FAN_L2, R_FAN_R1,
         R_FAN_R2, R_TEMP_L, R_TEMP_R,
     },
     wmi::{wmi_init, wmi_set},
@@ -9,7 +9,7 @@ use notify_rust::Notification;
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
-use tauri::State;
+use tauri::{Emitter, State, Window};
 
 /**
 * @Author: cyear
@@ -27,13 +27,21 @@ pub fn fan_init() {
         &method_name,
         "0x0000010000000751".to_string().as_str(),
     );
-    if out - 27728 == -64 {
+    if out == 27664 {
         let _ = wmi_set(
             &in_cls,
             &svc,
             &obj_path,
             &method_name,
             "0x0000000000400751".to_string().as_str(),
+        );
+    } else if out == 27648 {
+        let _ = wmi_set(
+            &in_cls,
+            &svc,
+            &obj_path,
+            &method_name,
+            "0x0000000000500751".to_string().as_str(),
         );
     }
 }
@@ -58,7 +66,7 @@ pub fn fan_set(left: i16, right: i16) {
         &method_name,
         "0x0000010000000751".to_string().as_str(),
     );
-    if out - 27728 == -64 && out - 27728 == -80 {
+    if out == 27664 && out == 27648 {
         fan_init();
         println!("风扇状态异常已尝试恢复");
     }
@@ -105,7 +113,7 @@ pub fn speed_c(speed_n: i64, speed_l: i64, temp_n: i64, temp_l: i64, temp: i64) 
             * (temp - temp_l) as f64) as i64
 }
 
-pub(crate) fn cpu_temp(left: &Option<&serde_json::Value>, right: &Option<&serde_json::Value>) {
+pub fn cpu_temp(left: &Option<&serde_json::Value>, right: &Option<&serde_json::Value>) {
     let (in_cls, svc, obj_path, method_name) = wmi_init();
     let cpu_out = wmi_set(
         &in_cls,
@@ -160,42 +168,57 @@ pub(crate) fn cpu_temp(left: &Option<&serde_json::Value>, right: &Option<&serde_
 }
 
 #[tauri::command]
-pub async fn get_fan_speeds() -> FanSpeeds {
-    let (in_cls, svc, obj_path, method_name) = wmi_init();
-    let l_fan_1 = wmi_set(&in_cls, &svc, &obj_path, &method_name, R_FAN_L1);
-    let l_fan_2 = wmi_set(&in_cls, &svc, &obj_path, &method_name, R_FAN_L2);
-    let r_fan_1 = wmi_set(&in_cls, &svc, &obj_path, &method_name, R_FAN_R1);
-    let r_fan_2 = wmi_set(&in_cls, &svc, &obj_path, &method_name, R_FAN_R2);
-    let l_temp = wmi_set(&in_cls, &svc, &obj_path, &method_name, R_TEMP_L);
-    let r_temp = wmi_set(&in_cls, &svc, &obj_path, &method_name, R_TEMP_R);
-    if *MODEL_ID == 1 {
-        FanSpeeds {
-            left_fan_speed: (l_fan_1 & 0xFF) << 8 | l_fan_2,
-            right_fan_speed: (r_fan_1 & 0xFF) << 8 | r_fan_2,
-            left_temp: l_temp,
-            right_temp: r_temp & 0xFF,
+pub fn get_fan_speeds(window: Window) {
+    thread::spawn(move || {
+        println!("get fan loop...");
+        let (in_cls, svc, obj_path, method_name) = wmi_init();
+        loop {
+            let l_fan_1 = wmi_set(&in_cls, &svc, &obj_path, &method_name, R_FAN_L1);
+            let l_fan_2 = wmi_set(&in_cls, &svc, &obj_path, &method_name, R_FAN_L2);
+            let r_fan_1 = wmi_set(&in_cls, &svc, &obj_path, &method_name, R_FAN_R1);
+            let r_fan_2 = wmi_set(&in_cls, &svc, &obj_path, &method_name, R_FAN_R2);
+            let l_temp = wmi_set(&in_cls, &svc, &obj_path, &method_name, R_TEMP_L);
+            let r_temp = wmi_set(&in_cls, &svc, &obj_path, &method_name, R_TEMP_R);
+            if *MODEL_ID == 1 {
+                window
+                    .emit(
+                        "get-fan-speeds",
+                        FanSpeeds {
+                            left_fan_speed: (l_fan_1 & 0xFF) << 8 | l_fan_2,
+                            right_fan_speed: (r_fan_1 & 0xFF) << 8 | r_fan_2,
+                            left_temp: l_temp,
+                            right_temp: r_temp & 0xFF,
+                        },
+                    )
+                    .unwrap()
+            } else {
+                window
+                    .emit(
+                        "get-fan-speeds",
+                        FanSpeeds {
+                            left_fan_speed: (r_fan_1 & 0xFF) << 8 | r_fan_2,
+                            right_fan_speed: (l_fan_1 & 0xFF) << 8 | l_fan_2,
+                            left_temp: l_temp,
+                            right_temp: r_temp & 0xFF,
+                        },
+                    )
+                    .unwrap()
+            }
+            thread::sleep(Duration::from_secs_f64(2.5));
         }
-    } else {
-        FanSpeeds {
-            left_fan_speed: (r_fan_1 & 0xFF) << 8 | r_fan_2,
-            right_fan_speed: (l_fan_1 & 0xFF) << 8 | l_fan_2,
-            left_temp: l_temp,
-            right_temp: r_temp & 0xFF,
-        }
-    }
+    });
 }
 
 #[tauri::command]
 pub fn start_fan_control(
     fan_data: serde_json::Value,
     state: State<FanControlState>,
-    tx: State<ChannelControlState>,
 ) {
-    Arc::clone(&tx.tx)
-        .lock()
-        .unwrap()
-        .send("0x000001000000044F".to_string())
-        .unwrap();
+    // Arc::clone(&tx.tx)
+    //     .lock()
+    //     .unwrap()
+    //     .send("0x000001000000044F".to_string())
+    //     .unwrap();
     let is_running = Arc::clone(&state.is_running);
     Notification::new()
         .summary("NUC X15 Fan Control")
@@ -206,13 +229,13 @@ pub fn start_fan_control(
     // 打印接收到的风扇数据
     // println!("left fan data: {:?}", fan_data.get("left_fan"));
     // println!("right fan data: {:?}", fan_data.get("right_fan"));
-    println!("接受风扇配置信息");
-    fan_init();
     // 如果已经在运行，跳过启动
     if *is_running.lock().unwrap() {
         println!("Fan control is already running.");
         return;
     }
+    fan_init();
+    println!("接受风扇配置信息");
     // 启动新的控制线程
     *is_running.lock().unwrap() = true;
     thread::spawn(move || {
@@ -220,7 +243,7 @@ pub fn start_fan_control(
             // 模拟执行时间
             // println!("Fan control loop running...");
             cpu_temp(&fan_data.get("left_fan"), &fan_data.get("right_fan"));
-            thread::sleep(Duration::from_secs(1));
+            thread::sleep(Duration::from_secs(2));
             // println!("TEMP: {}", cpu_temp());
         }
         println!("Fan control stopped.");

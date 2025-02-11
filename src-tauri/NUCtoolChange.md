@@ -1,5 +1,15 @@
 # NUCtool（Changelog）
 
+
+## [0.3.6-<font color=red>Alpha</font>] - 2025-2-11
+#### 新特性
+- 自启动
+#### 修复
+- 更新导致闪退
+- 获取转速逻辑优化(失败)
+- 滞后写入时间
+- 对`LAPKC71F`风扇初始化(未测试)
+
 ## [0.3.5-<font color=red>Alpha</font>] - 2025-1-30
 #### 新特性
 - 询问是否更新
@@ -9,11 +19,7 @@
 
 ## [0.3.4-<font color=red>Alpha</font>] - 2025-1-26
 #### 修复
-- LAPKC71F 获取转速异常
-
-## [0.3.4-<font color=red>Alpha</font>] - 2025-1-26
-#### 修复
-- LAPKC71F 获取转速异常
+- `LAPKC71F`获取转速异常
 
 ## [0.3.3-<font color=pink>Beta</font>] - 2025-1-24
 #### 测试版本号
