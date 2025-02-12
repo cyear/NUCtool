@@ -44,7 +44,7 @@
 
 # 
 
-### UI对比
+### UI记录
 <details>
   <summary>
     0.1.2版本运行界面
@@ -60,3 +60,7 @@
 
 ![0.3.0](assets/0.3.0.png)
 </details>
+
+### Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=cyear/NUCtool&type=Timeline)](https://star-history.com/#cyear/NUCtool&Timeline)
