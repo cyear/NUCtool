@@ -20,9 +20,7 @@
 
 > [!WARNING]
 > [必要说明](assets/分析.md)
-
 # 
-
 |机型支持(以实际为准)|LAPAC71H|LAPKC71F|
 |:--------:|:----:|:----:|
 | 风扇控制 | ✓ | ✓ |
@@ -31,9 +29,7 @@
 | CPU L2 | ✓ | ☐ |
 | GPU L1 | ✓ | ✕ |
 | GPU L2 | ✓ | ✕ |
-
 # 
-
 > [!WARNING]
 > 注意事项
 > 1. 非WIN11系统需检查是否安装webview2
@@ -41,28 +37,7 @@
 > 3. 每次重新打开程序需要点击`加载配置`
 > 4. 点击`Start`
 > 5. 配置路径: `%AppData%\com.nuc.x15.fan.cyear.app`
-
 # 
-
-### UI记录
-<details>
-  <summary>
-    0.1.2版本运行界面
-  </summary>
-
-![0.1.2](assets/0.1.2.png)
-</details>
-
-<details>
-  <summary>
-    0.3.0版本运行界面
-  </summary>
-
-![0.3.0](assets/0.3.0.png)
-</details>
-
-#
-
 ### Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=cyear/NUCtool&type=Timeline)](https://star-history.com/#cyear/NUCtool&Timeline)
