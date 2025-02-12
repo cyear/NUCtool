@@ -11,6 +11,7 @@ use windows::{
         IWbemClassObject, IWbemServices
     }
 };
+use colored::Colorize;
 // use notify_rust::Notification;
 
 use crate::modules::{
@@ -31,32 +32,38 @@ use crate::modules::{
 
 pub fn fan_init() {
     let (in_cls, svc, obj_path, method_name) = wmi_init();
-    let out = wmi_set(&in_cls, &svc, &obj_path, &method_name, R_FAN_MODE);
-    if out == 27664 {
+    // let out = wmi_set(&in_cls, &svc, &obj_path, &method_name, R_FAN_MODE);
+    // if out == 27664 {
+    //     let _ = wmi_set(&in_cls, &svc, &obj_path, &method_name, W_FAN_AC71H_TURBO);
+    // } else if out == 27648 {
+    //     let _ = wmi_set(&in_cls, &svc, &obj_path, &method_name, W_FAN_KC71F_TURBO);
+    // } else {
+    //     return;
+    // }
+    if *MODEL_ID == 1 {
         let _ = wmi_set(&in_cls, &svc, &obj_path, &method_name, W_FAN_AC71H_TURBO);
-    } else if out == 27648 {
+    } else {
         let _ = wmi_set(&in_cls, &svc, &obj_path, &method_name, W_FAN_KC71F_TURBO);
     }
+    println!("{}", "风扇初始化成功".green());
 }
 
 pub fn fan_reset() {
     let (in_cls, svc, obj_path, method_name) = wmi_init();
     let _ = wmi_set(&in_cls, &svc, &obj_path, &method_name, W_FAN_RESET);
+    println!("{}", "风扇状态重置".red());
 }
 
 pub fn fan_set(left: i16, right: i16, (in_cls, svc, obj_path, method_name): (&IWbemClassObject, &IWbemServices, &BSTR, &BSTR)) {
-    if left == 100 && right == 100 {
-        fan_init();
-        return;
-    }
     let out = wmi_set(in_cls, svc, obj_path, method_name, R_FAN_MODE);
-    if out == 27664 && out == 27648 {
+    if out == 27664 || out == 27648 {
+        println!("{}", "风扇状态异常".red());
+        fan_reset();
         fan_init();
-        println!("风扇状态异常已尝试恢复");
     }
+    println!("FAN_L: {}% / FAN_R: {}% / OUT: {}", left, right, out);
     let mut left = left * 2;
     let mut right = right * 2;
-    println!("FAN_L: {}, FAN_R: {}", left, right);
     if *MODEL_ID != 1 {
         swap(&mut left, &mut right);
     }
@@ -86,7 +93,8 @@ pub fn cpu_temp(
     let gpu_out = wmi_set(in_cls, svc, obj_path, method_name, R_TEMP_R.to_string().as_str()) & 0xFF;
     println!("CPU Temp: {:?}, GPU Temp: {:?}", &cpu_out, &gpu_out);
     if cpu_out > 95 || gpu_out > 95 {
-        fan_init();
+        fan_set(100, 100, (in_cls, svc, obj_path, method_name));
+        // fan_init();
         return;
     } else if cpu_out < 0 || gpu_out < 0 {
         println!("温度读取异常, cpu: {:?}, gpu: {:?}", cpu_out, gpu_out);
@@ -129,8 +137,8 @@ pub fn cpu_temp(
 #[tauri::command]
 pub fn get_fan_speeds(window: Window) {
     thread::spawn(move || {
-        println!("get fan loop...");
         let (in_cls, svc, obj_path, method_name) = wmi_init();
+        println!("{}", "推送风扇信息".green());
         loop {
             let mut l_fan_1 = wmi_set(&in_cls, &svc, &obj_path, &method_name, R_FAN_L1);
             let l_fan_2 = wmi_set(&in_cls, &svc, &obj_path, &method_name, R_FAN_L2);
@@ -182,7 +190,6 @@ pub fn start_fan_control(fan_data: serde_json::Value, state: State<FanControlSta
             println!("---------------------------------------------------------------");
             thread::sleep(Duration::from_secs(3));
         }
-        println!("Fan control stopped.");
     });
 }
 
@@ -194,4 +201,5 @@ pub fn stop_fan_control(state: State<FanControlState>) {
         thread::sleep(Duration::from_secs(2));
         fan_reset();
     });
+    println!("{}", "Fan control stopped.".green());
 }

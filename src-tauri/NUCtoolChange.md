@@ -1,5 +1,12 @@
 # NUCtool（Changelog）
 
+## [0.3.8-<font color=red>Alpha</font>] - 2025-2-12
+#### 新特性
+- debug 添加更多信息
+#### 修复
+- 风扇异常始终无法控制的逻辑错误
+- 优化调度
+
 ## [0.3.7-<font color=red>Alpha</font>] - 2025-2-11
 #### 新特性
 - 自启动(默认开启, beta.config 为 0 关闭)
