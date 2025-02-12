@@ -1,4 +1,3 @@
-
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/cyear/NUCtool/total?style=for-the-badge)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/cyear/NUCtool?style=for-the-badge)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-closed/cyear/NUCtool?style=for-the-badge)
@@ -37,11 +36,11 @@
 
 > [!WARNING]
 > 注意事项
-> 0.非WIN11系统需检查是否安装webview2
-> 1.首次使用需`{调整风扇曲线}`并点击`{保存配置}`
-> 2.每次重新打开程序需要点击`加载配置`
-> 3.点击`Start`
-> PS: 配置路径: `%AppData%\com.nuc.x15.fan.cyear.app`
+> 1. 非WIN11系统需检查是否安装webview2
+> 2. 首次使用需`调整风扇曲线`并点击`保存配置`
+> 3. 每次重新打开程序需要点击`加载配置`
+> 4. 点击`Start`
+> 5. 配置路径: `%AppData%\com.nuc.x15.fan.cyear.app`
 
 # 
 
