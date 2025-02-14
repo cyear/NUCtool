@@ -21,7 +21,7 @@
 > [!WARNING]
 > [必要说明](assets/分析.md)
 # 
-|Windows/Linux支持|LAPAC71H|LAPKC71F|
+|Windows\Linux支持|LAPAC71H|LAPKC71F|
 |:--------:|:----:|:----:|
 | 风扇控制 | ✓/✕ | ✓/✕ |
 | 异常恢复 | ✓/✕ | ✓/✕ |
