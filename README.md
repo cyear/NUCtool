@@ -33,7 +33,7 @@
 > [!WARNING]
 > 平台支持
 > 1. Windows 10
-> 2. Windiws 11
+> 2. Windows 11
 > 
 > 使用教程
 > 1. 非WIN11系统需检查是否安装webview2
