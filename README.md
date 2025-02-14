@@ -9,35 +9,14 @@
 ![GitHub Release](https://img.shields.io/github/v/release/cyear/NUCtool?style=for-the-badge)
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/cyear/NUCtool/latest?style=for-the-badge)
 
-# NUCtool
+# NUCtool for Linux
 
 > intel NUC 系列风扇曲线控制 LAPAC71H, LAPKC71F 等机型
 
-> [!NOTE]
-> 随缘更新, 如果觉得有用请给个⭐
->
-> [详细更新说明](./src-tauri/NUCtoolChange.md)
+> [!WARNING]
+> 你可能需要等待许久
+> 全新的道路，一切都是未知的
 
-> [!WARNING]
-> [必要说明](assets/分析.md)
-# 
-|机型支持(以实际为准)|LAPAC71H|LAPKC71F|
-|:--------:|:----:|:----:|
-| 风扇控制 | ✓ | ✓ |
-| 异常恢复 | ✓ | ✓ |
-| CPU L1 | ✓ | ☐ |
-| CPU L2 | ✓ | ☐ |
-| GPU L1 | ✓ | ✕ |
-| GPU L2 | ✓ | ✕ |
-# 
-> [!WARNING]
-> 注意事项
-> 1. 非WIN11系统需检查是否安装webview2
-> 2. 首次使用需`调整风扇曲线`并点击`保存配置`
-> 3. 每次重新打开程序需要点击`加载配置`
-> 4. 点击`Start`
-> 5. 配置路径: `%AppData%\com.nuc.x15.fan.cyear.app`
-# 
 ### Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=cyear/NUCtool&type=Timeline)](https://star-history.com/#cyear/NUCtool&Timeline)
