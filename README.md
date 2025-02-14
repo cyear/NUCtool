@@ -21,7 +21,7 @@
 > [!WARNING]
 > [必要说明](assets/分析.md)
 # 
-|Windows支持|LAPAC71H|LAPKC71F|
+|Windows 支持|LAPAC71H|LAPKC71F|
 |:--------:|:----:|:----:|
 | 风扇控制 | ✓ | ✓ |
 | 异常恢复 | ✓ | ✓ |
@@ -30,7 +30,7 @@
 | GPU L1 | ✓ | ✕ |
 | GPU L2 | ✓ | ✕ |
 
-|Linux支持|LAPAC71H|LAPKC71F|
+|Linux   支持|LAPAC71H|LAPKC71F|
 |:--------:|:----:|:----:|
 | 风扇控制 | ✕ | ✕ |
 | 异常恢复 | ✕ | ✕ |
