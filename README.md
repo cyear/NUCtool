@@ -16,12 +16,12 @@
 > [!NOTE]
 > 随缘更新, 如果觉得有用请给个⭐
 >
-> [Windows详细更新说明](./assets/NUCtoolChange_Windows.md)
-> [Linux详细更新说明](./assets/NUCtoolChange_Linux.md)
+> 1. [Windows详细更新说明](./assets/NUCtoolChange_Windows.md)
+> 2. [Linux详细更新说明](./assets/NUCtoolChange_Linux.md)
 
 > [!WARNING]
-> 有损坏硬件风险, 使用此程序即认为接受风险, 出现问题概不负责
-> [必要说明](assets/分析.md)
+> 1. 有损坏硬件风险, 使用此程序即认为接受风险, 出现问题概不负责
+> 2. [必要说明](assets/分析.md)
 # 
 |Windows 支持|LAPAC71H|LAPKC71F|
 |:--------:|:----:|:----:|
@@ -44,6 +44,7 @@
 > [!WARNING]
 > 有损坏硬件风险, 使用此程序即认为接受风险, 出现问题概不负责
 > 平台支持
+>
 > 1. Windows 10
 > 2. Windows 11
 > 3. Linux
@@ -59,7 +60,6 @@
 > 1. 有损坏硬件风险, 使用此程序即认为接受风险, 出现问题概不负责
 > 2. 内核要求>=6.13(或>=6.10)
 > 3. 更新中...
-
 # 
 ### Star History
 
