@@ -1,4 +1,4 @@
-# NUCtool（Changelog）
+# NUCtool for Windows（Changelog）
 
 ## [0.3.8-<font color=red>Alpha</font>] - 2025-2-12
 #### 新特性
