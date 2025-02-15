@@ -6,8 +6,6 @@
     "active": true,
     "targets": "all",
     "resources": [
-      "icons/icon.ico",
-      "NUCtoolChange.md"
     ],
     "icon": [
       "icons/icon.png",
@@ -24,11 +22,15 @@
       "wix": {
         "language": "zh-CN"
       }
+    },
+    "linux": {
+      "appimage": {
+      }
     }
   },
   "productName": "NUCtool",
   "mainBinaryName": "NUCtool",
-  "version": "0.3.8",
+  "version": "0.4.0",
   "identifier": "com.nuc.x15.fan.cyear.app",
   "plugins": {
     "updater": {

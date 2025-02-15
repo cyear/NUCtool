@@ -1,7 +1,3 @@
-#![cfg_attr(
-    all(not(debug_assertions), target_os = "windows"),
-    windows_subsystem = "windows"
-)]
 use std::{
     env,
     thread,
@@ -10,9 +6,13 @@ use std::{
         Mutex,
     }
 };
+use tauri::Manager;
+#[cfg(windows)]
 use tauri_plugin_autostart::MacosLauncher;
 
+#[cfg(windows)]
 mod modules;
+#[cfg(windows)]
 use modules::{
     config::{get_config_dir, load_fan_config, save_fan_config},
     fan::{fan_reset, get_fan_speeds, start_fan_control, stop_fan_control},
@@ -23,6 +23,17 @@ use modules::{
     struct_set::FanControlState,
 };
 
+#[cfg(unix)]
+fn main() {
+    tauri::Builder::default()
+        .setup(|app| {
+            let window = app.get_webview_window("splashscreen").unwrap();
+            Ok(())
+        })
+        .run(tauri::generate_context!()).unwrap()
+}
+
+#[cfg(windows)]
 fn main() {
     privilege_escalation();
     thread::spawn(move || {
