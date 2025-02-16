@@ -16,12 +16,13 @@
 > [!NOTE]
 > 随缘更新, 如果觉得有用请给个⭐
 >
-> 1. [Windows详细更新说明](./assets/NUCtoolChange_Windows.md)
-> 2. [Linux详细更新说明](./assets/NUCtoolChange_Linux.md)
+> 1. [Windows 详细更新说明](./assets/NUCtoolChange_Windows.md)
+> 2. [Linux 详细更新说明](./assets/NUCtoolChange_Linux.md)
 
 > [!WARNING]
 > 1. 有损坏硬件风险, 使用此程序即认为接受风险, 出现问题概不负责
-> 2. [必要说明](assets/分析.md)
+> 2. 本程序可能有严重缺陷, 请在保障安全情况下使用此程序
+> 3. [必要说明](assets/分析.md)
 # 
 |Windows 支持|LAPAC71H|LAPKC71F|
 |:--------:|:----:|:----:|
@@ -34,8 +35,8 @@
 |        |   |    |
 |        |   |    |
 |**Linux 支持**|**LAPAC71H**|**LAPKC71F**|
-| 风扇控制 | ✕ | ✕ |
-| 异常恢复 | ✕ | ✕ |
+| 风扇控制 | ✓ | ✕ |
+| 异常恢复 | ✓ | ✕ |
 | CPU L1 | ✕ | ✕ |
 | CPU L2 | ✕ | ✕ |
 | GPU L1 | ✕ | ✕ |

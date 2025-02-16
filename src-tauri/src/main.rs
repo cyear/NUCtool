@@ -1,41 +1,46 @@
-use std::{
-    env,
-    thread,
-    sync::{
-        Arc,
-        Mutex,
-    }
-};
-use tauri::Manager;
-#[cfg(windows)]
+use std::env;
+use std::sync::{Arc, Mutex};
 use tauri_plugin_autostart::MacosLauncher;
 
 #[cfg(windows)]
-mod modules;
-#[cfg(windows)]
-use modules::{
-    config::{get_config_dir, load_fan_config, save_fan_config},
-    fan::{fan_reset, get_fan_speeds, start_fan_control, stop_fan_control},
-    permissions::privilege_escalation,
+mod win_plug;
+#[cfg(unix)]
+mod linux_plug;
+mod plug;
+use plug::{
     setup,
-    tdp::{get_tdp, set_tdp},
-    wmi::wmi_security,
-    struct_set::FanControlState,
+    config::{save_fan_config, load_fan_config},
+    struct_set::FanControlState
 };
 
-#[cfg(unix)]
-fn main() {
-    tauri::Builder::default()
-        .setup(|app| {
-            let window = app.get_webview_window("splashscreen").unwrap();
-            Ok(())
-        })
-        .run(tauri::generate_context!()).unwrap()
-}
-
 #[cfg(windows)]
+use win_plug::{
+    fan::{fan_reset, get_fan_speeds, start_fan_control, stop_fan_control},
+    permissions::privilege_escalation,
+    tdp::{get_tdp, set_tdp},
+    wmi::wmi_security,
+};
+#[cfg(unix)]
+use linux_plug::{
+    sysfs::{get_tdp, set_tdp},
+    fan::{start_fan_control, stop_fan_control, get_fan_speeds}
+};
+
 fn main() {
+    // This should be called as early in the execution of the app as possible
+    #[cfg(debug_assertions)] // only enable instrumentation in development builds
+    let devtools = tauri_plugin_devtools::init();
+
+    let mut builder = tauri::Builder::default();
+
+    #[cfg(debug_assertions)]
+    {
+        builder = builder.plugin(devtools);
+    }
+
+    #[cfg(windows)]
     privilege_escalation();
+    #[cfg(windows)]
     thread::spawn(move || {
         wmi_security();
         fan_reset();
@@ -43,7 +48,7 @@ fn main() {
     let fan_control_state = FanControlState {
         is_running: Arc::new(Mutex::new(false)),
     };
-    tauri::Builder::default()
+    builder
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_shell::init())
