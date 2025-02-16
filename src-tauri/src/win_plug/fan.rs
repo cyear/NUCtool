@@ -14,7 +14,7 @@ use windows::{
 use colored::Colorize;
 // use notify_rust::Notification;
 
-use crate::modules::{
+use crate::win_plug::{
     struct_set::{
         FanControlState, FanSpeeds, MODEL_ID, R_FAN_L1, R_FAN_L2, R_FAN_R1,
         R_FAN_R2, R_TEMP_L, R_TEMP_R, R_FAN_MODE, W_FAN_AC71H_TURBO, W_FAN_KC71F_TURBO,

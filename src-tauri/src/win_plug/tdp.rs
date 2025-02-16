@@ -1,4 +1,4 @@
-use crate::modules::{
+use crate::win_plug::{
     struct_set::{Tdp, R_TDP_CPU1, R_TDP_CPU2, R_TDP_GPU1, R_TDP_GPU2, R_TDP_TCC},
     wmi::{wmi_init, wmi_set},
 };
