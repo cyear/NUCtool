@@ -22,7 +22,7 @@ use win_plug::{
 };
 #[cfg(unix)]
 use linux_plug::{
-    sysfs::{get_tdp, set_tdp},
+    sysfs::{get_tdp, set_tdp, sys_init},
     fan::{start_fan_control, stop_fan_control, get_fan_speeds}
 };
 
@@ -37,7 +37,6 @@ fn main() {
     {
         builder = builder.plugin(devtools);
     }
-
     #[cfg(windows)]
     privilege_escalation();
     #[cfg(windows)]
@@ -45,6 +44,8 @@ fn main() {
         wmi_security();
         fan_reset();
     });
+    #[cfg(unix)]
+    sys_init();
     let fan_control_state = FanControlState {
         is_running: Arc::new(Mutex::new(false)),
     };
