@@ -71,7 +71,7 @@ pub fn get_kernel_version() -> i64 {
         println!("Linux Kernel Version: {:?}", kernel_version);
         return if kernel_version[0].parse::<i64>().unwrap() == 6 {
             match kernel_version[1] {
-                "13" => 2,
+                "13" => 4,
                 "12" => 3,
                 "11" => 2,
                 "10" => 1,
@@ -107,7 +107,7 @@ pub fn sys_init() {
     } else {
         println!("{}", "获取模块...".green());
         let out: Output;
-        if *KERNEL_ID >= 2 {
+        if *KERNEL_ID >= 4 {
             out = Command::new("git")
                 .args(["clone", "https://github.com/cyear/uniwill-laptop"])
                 .args(["--branch", "kernel-6.13"])
