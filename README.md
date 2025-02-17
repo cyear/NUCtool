@@ -68,9 +68,9 @@
 
 PS: 如果模块加载有问题等，可以手动编译加载
 ```shell
-# 内核版本>=6.13执行
+# 内核版本>=6.13 执行
 git clone https://github.com/cyear/uniwill-laptop --branch kernel-6.13 /root/.config/nuc_model
-# 内核版本<6.13执行
+# 内核版本>=6.10 执行
 git clone https://github.com/cyear/uniwill-laptop /root/.config/nuc_model
 # 以下均可执行
 cd /root/.config/nuc_model
