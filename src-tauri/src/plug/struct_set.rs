@@ -9,10 +9,9 @@ use std::sync::{
 use crate::win_plug::wmi::get_model;
 #[cfg(unix)]
 use crate::{
-    linux_plug::sysfs::{get_sys, set_sys},
+    linux_plug::sysfs::{get_sys, set_sys, get_kernel_version, get_model_id},
     plug::config::find_hwmon_with_name
 };
-
 
 pub static R_TDP_GPU1: &str = "0x000001000000073d";
 pub static R_TDP_GPU2: &str = "0x0000010000000733";
@@ -33,6 +32,15 @@ pub static W_FAN_RESET: &str = "0x0000000000A00751";
 lazy_static! {
     pub static ref MODEL_ID: i64 = get_model();
 }
+#[cfg(unix)]
+lazy_static! {
+    pub static ref MODEL_ID: i64 = get_model_id();
+}
+#[cfg(unix)]
+lazy_static! {
+    pub static ref KERNEL_ID: i64 = get_kernel_version();
+}
+
 #[cfg(unix)]
 lazy_static! {
     pub static ref DRIVER_PATH: PathBuf = find_hwmon_with_name();
@@ -73,13 +81,13 @@ pub struct FanControlState {
 
 #[cfg(unix)]
 pub struct ApiFan {
-    cpu: PathBuf,
-    gpu: PathBuf,
-    r_fan_l: PathBuf,
-    r_fan_r: PathBuf,
-    w_fan_l: PathBuf,
-    w_fan_r: PathBuf,
-    mode: PathBuf
+    pub cpu: PathBuf,
+    pub gpu: PathBuf,
+    pub r_fan_l: PathBuf,
+    pub r_fan_r: PathBuf,
+    pub w_fan_l: PathBuf,
+    pub w_fan_r: PathBuf,
+    pub mode: PathBuf
 }
 
 #[cfg(unix)]
@@ -92,6 +100,17 @@ impl ApiFan {
             r_fan_r: DRIVER_PATH.join("fan1_input"),
             w_fan_l: DRIVER_PATH.join("pwm2"),
             w_fan_r: DRIVER_PATH.join("pwm1"),
+            mode: DRIVER_PATH.join("pwm1_enable")
+        }
+    }
+    pub fn init_0() -> Self {
+        ApiFan {
+            cpu: DRIVER_PATH.join("temp1_input"),
+            gpu: DRIVER_PATH.join("temp2_input"),
+            r_fan_l: DRIVER_PATH.join("fan1_input"),
+            r_fan_r: DRIVER_PATH.join("fan2_input"),
+            w_fan_l: DRIVER_PATH.join("pwm1"),
+            w_fan_r: DRIVER_PATH.join("pwm2"),
             mode: DRIVER_PATH.join("pwm1_enable")
         }
     }

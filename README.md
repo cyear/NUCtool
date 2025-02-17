@@ -35,8 +35,8 @@
 |        |   |    |
 |        |   |    |
 |**Linux 支持**|**LAPAC71H**|**LAPKC71F**|
-| 风扇控制 | ✓ | ✕ |
-| 异常恢复 | ✓ | ✕ |
+| 风扇控制 | ✓ | ☐ |
+| 异常恢复 | ✓ | ☐ |
 | CPU L1 | ✕ | ✕ |
 | CPU L2 | ✕ | ✕ |
 | GPU L1 | ✕ | ✕ |
@@ -61,7 +61,24 @@
 > Linux 使用教程(支持功能以实际为准)
 > 1. 有损坏硬件风险, 使用此程序即认为接受风险, 出现问题概不负责
 > 2. 内核要求>=6.13(或>=6.10)
-> 3. 更新中...
+> 3. 必要依赖: dmidecode make git
+> 4. 需要在`sudo`下运行
+>
+> 致谢 [Wer-Wolf](https://github.com/Wer-Wolf/uniwill-laptop) 大佬
+
+PS: 如果模块加载有问题等，可以手动编译加载
+```shell
+# 内核版本>=6.13 执行
+git clone https://github.com/cyear/uniwill-laptop --branch kernel-6.13 /root/.config/nuc_model
+# 内核版本>=6.10 执行
+git clone https://github.com/cyear/uniwill-laptop /root/.config/nuc_model
+# 以下均可执行
+cd /root/.config/nuc_model
+make
+insmod /root/.config/nuc_model/uniwill-wmi.ko
+insmod /root/.config/nuc_model/uniwill-laptop.ko
+```
+
 # 
 ### Star History
 

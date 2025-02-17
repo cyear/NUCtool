@@ -1,5 +1,8 @@
-use std::env;
-use std::sync::{Arc, Mutex};
+use std::{
+    env,
+    thread,
+    sync::{Arc, Mutex}
+};
 use tauri_plugin_autostart::MacosLauncher;
 
 #[cfg(windows)]
@@ -22,22 +25,18 @@ use win_plug::{
 };
 #[cfg(unix)]
 use linux_plug::{
-    sysfs::{get_tdp, set_tdp},
+    sysfs::{get_tdp, set_tdp, sys_init},
     fan::{start_fan_control, stop_fan_control, get_fan_speeds}
 };
 
 fn main() {
-    // This should be called as early in the execution of the app as possible
-    #[cfg(debug_assertions)] // only enable instrumentation in development builds
+    #[cfg(debug_assertions)]
     let devtools = tauri_plugin_devtools::init();
-
     let mut builder = tauri::Builder::default();
-
     #[cfg(debug_assertions)]
     {
         builder = builder.plugin(devtools);
     }
-
     #[cfg(windows)]
     privilege_escalation();
     #[cfg(windows)]
@@ -45,6 +44,8 @@ fn main() {
         wmi_security();
         fan_reset();
     });
+    #[cfg(unix)]
+    sys_init();
     let fan_control_state = FanControlState {
         is_running: Arc::new(Mutex::new(false)),
     };

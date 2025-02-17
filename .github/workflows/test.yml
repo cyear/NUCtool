@@ -51,7 +51,7 @@ jobs:
           tagName: NUCtool-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: "NUCtool v__VERSION__"
           releaseBody: "自动发布的新版本"
-          releaseDraft: false
+          releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
       - name: Upload Build Artifact
