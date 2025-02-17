@@ -9,10 +9,9 @@ use std::sync::{
 use crate::win_plug::wmi::get_model;
 #[cfg(unix)]
 use crate::{
-    linux_plug::sysfs::{get_sys, set_sys},
+    linux_plug::sysfs::{get_sys, set_sys, get_kernel_version, get_model_id},
     plug::config::find_hwmon_with_name
 };
-use crate::linux_plug::sysfs::{get_kernel_version, get_model_id};
 
 pub static R_TDP_GPU1: &str = "0x000001000000073d";
 pub static R_TDP_GPU2: &str = "0x0000010000000733";

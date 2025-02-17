@@ -1,5 +1,9 @@
 # NUCtool for Windows（Changelog）
 
+## [0.4.0-<font color=red>Alpha</font>] - 2025-2-17
+#### 修复
+- 托盘左击显示菜单，目前显示页面了
+
 ## [0.3.8-<font color=red>Alpha</font>] - 2025-2-12
 #### 新特性
 - debug 添加更多信息

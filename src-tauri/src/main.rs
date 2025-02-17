@@ -1,5 +1,8 @@
-use std::env;
-use std::sync::{Arc, Mutex};
+use std::{
+    env,
+    thread,
+    sync::{Arc, Mutex}
+};
 use tauri_plugin_autostart::MacosLauncher;
 
 #[cfg(windows)]
@@ -27,12 +30,9 @@ use linux_plug::{
 };
 
 fn main() {
-    // This should be called as early in the execution of the app as possible
-    #[cfg(debug_assertions)] // only enable instrumentation in development builds
+    #[cfg(debug_assertions)]
     let devtools = tauri_plugin_devtools::init();
-
     let mut builder = tauri::Builder::default();
-
     #[cfg(debug_assertions)]
     {
         builder = builder.plugin(devtools);

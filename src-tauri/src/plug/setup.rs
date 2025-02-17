@@ -103,7 +103,7 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn Error>> {
     let menu = MenuBuilder::new(app).items(&[&h, &d, &q]).build()?;
     let _tray = TrayIconBuilder::new()
         .menu(&menu)
-        .title("NUCtool")
+        .menu_on_left_click(false)
         .icon(app.default_window_icon().unwrap().clone())
         .on_menu_event(move |app, event| match event.id().as_ref() {
             "h" => {
@@ -136,15 +136,23 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn Error>> {
             }
             _ => (),
         })
-        .on_tray_icon_event(|_tray, event| {
-            if let TrayIconEvent::Click {
-                button: MouseButton::Left,
-                button_state: MouseButtonState::Up,
-                ..
-            } = event
-            {}
-        })
-        .build(app)?;
+        .on_tray_icon_event(|tray, event| match event {
+            TrayIconEvent::Click {
+              button: MouseButton::Left,
+              button_state: MouseButtonState::Up,
+              ..
+            } => {
+              println!("left click pressed and released");
+              let app = tray.app_handle();
+              if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.set_focus();
+              }
+            }
+            _ => {
+                // println!("unhandled event {event:?}");
+            }
+        }).build(app)?;
     #[cfg(windows)]
     window_vibrancy::apply_acrylic(&window, Some((18, 18, 18, 125)))
         .expect("Unsupported platform! 'apply_blur' is only supported on Windows");

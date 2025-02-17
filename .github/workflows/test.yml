@@ -14,7 +14,7 @@ jobs:
           - platform: "windows-latest"
             args: ""
           - platform: "ubuntu-22.04"
-            args: "-c src-tauri/tauri.config.linux.json"
+            args: ""
 
     runs-on: ${{ matrix.platform }}
     steps:
