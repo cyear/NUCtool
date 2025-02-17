@@ -52,7 +52,7 @@ pub fn fan_set(left: i64, right: i64, driver: &ApiFan) {
 /// ```
 pub fn speed_handle(temp_old: i64, speed_old: i64, temp: i64, speed: i64, temp_now: i64) -> i64 {
     println!("temp_old: {:?}, speed_old: {:?}, temp: {:?}, speed: {:?}, temp_now: {:?}", temp_old, speed_old, temp, speed, temp_now);
-    (speed_old + ((speed - speed_old) * (temp_now - temp_old) / (temp - temp_old)))
+    speed_old + ((speed - speed_old) * (temp_now - temp_old) / (temp - temp_old))
 }
 
 pub fn cpu_temp(left: &Option<&serde_json::Value>, right: &Option<&serde_json::Value>, driver: &ApiFan) {
@@ -127,7 +127,7 @@ pub fn get_fan_speeds(window: Window) {
 }
 
 #[tauri::command]
-pub fn start_fan_control(fan_data: serde_json::Value, state: State<FanControlState>, ) {
+pub fn start_fan_control(fan_data: serde_json::Value, state: State<FanControlState>) {
     let is_running = Arc::clone(&state.is_running);
     if *is_running.lock().unwrap() {
         println!("Fan control is already running.");
