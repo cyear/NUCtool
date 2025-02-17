@@ -10,6 +10,7 @@ use windows::Win32::System::Wmi::{
     WBEM_FLAG_RETURN_ERROR_OBJECT, WBEM_FLAG_RETURN_WBEM_COMPLETE, WBEM_INFINITE,
 };
 use wmi::{COMLibrary, WMIConnection};
+use colored::Colorize;
 
 pub fn wmi_security() {
     unsafe {
@@ -31,6 +32,7 @@ pub fn wmi_security() {
         .context("Initializing COM security")
         .expect("Initializing COM security Error");
     }
+    println!("{}", "初始化 COM security".green());
 }
 
 pub fn wmi_init() -> (IWbemClassObject, IWbemServices, BSTR, BSTR) {
@@ -107,26 +109,17 @@ pub fn wmi_init() -> (IWbemClassObject, IWbemServices, BSTR, BSTR) {
             .context("Getting method")
             .expect("Get method Error");
     }
-
+    println!("{}", "初始化 WMI".green());
     (in_cls.unwrap(), svc, obj_path, method_name)
 }
 
-pub fn wmi_set(
-    in_cls: &IWbemClassObject,
-    svc: &IWbemServices,
-    obj_path: &BSTR,
-    method_name: &BSTR,
-    size: &str,
-) -> i64 {
+pub fn wmi_set(in_cls: &IWbemClassObject, svc: &IWbemServices, obj_path: &BSTR, method_name: &BSTR, size: &str) -> i64 {
     let in_params = unsafe {
         in_cls
             .SpawnInstance(0)
             .context("Creating input params")
             .unwrap()
     };
-
-    // Set the desired parameters on the input parameter object.
-    // let size =  0x0000000000C01809u64.to_string();
     unsafe {
         // in_params.Put(&BSTR::from("AssignDriveLetter"), 0, &VARIANT::from(true), 0).context("Setting AssignDriveLetter")?;
         in_params
@@ -144,7 +137,6 @@ pub fn wmi_set(
             .context("Setting Size")
             .unwrap();
     }
-
     // Call the method and check the return value.
     // println!("Calling method with {}", unsafe { in_params.GetObjectText(0).unwrap() });
     let mut out_params: Option<IWbemClassObject> = None;
@@ -186,8 +178,8 @@ pub fn get_model() -> i64 {
         .raw_query("SELECT Model, Manufacturer FROM Win32_ComputerSystem")
         .unwrap();
     for laptop in results {
-        println!("Manufacturer: {}", laptop.manufacturer);
-        println!("Model: {}", laptop.model);
+        println!("Manufacturer: {}", laptop.manufacturer.blue());
+        println!("Model: {}", laptop.model.blue());
         match laptop.model.as_str() {
             "LAPKC71F" => return 0,
             "LAPAC71H" => return 1,

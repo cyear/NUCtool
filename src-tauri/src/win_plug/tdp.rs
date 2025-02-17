@@ -1,6 +1,6 @@
-use crate::modules::{
-    struct_set::{Tdp, R_TDP_CPU1, R_TDP_CPU2, R_TDP_GPU1, R_TDP_GPU2, R_TDP_TCC},
-    wmi::{wmi_init, wmi_set},
+use crate::{
+    plug::struct_set::{Tdp, R_TDP_CPU1, R_TDP_CPU2, R_TDP_GPU1, R_TDP_GPU2, R_TDP_TCC},
+    win_plug::wmi::{wmi_init, wmi_set},
 };
 use notify_rust::Notification;
 

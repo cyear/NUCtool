@@ -1,38 +1,55 @@
-#![cfg_attr(
-    all(not(debug_assertions), target_os = "windows"),
-    windows_subsystem = "windows"
-)]
 use std::{
     env,
     thread,
-    sync::{
-        Arc,
-        Mutex,
-    }
+    sync::{Arc, Mutex}
 };
 use tauri_plugin_autostart::MacosLauncher;
 
-mod modules;
-use modules::{
-    config::{get_config_dir, load_fan_config, save_fan_config},
+#[cfg(windows)]
+mod win_plug;
+#[cfg(unix)]
+mod linux_plug;
+mod plug;
+use plug::{
+    setup,
+    config::{save_fan_config, load_fan_config},
+    struct_set::FanControlState
+};
+
+#[cfg(windows)]
+use win_plug::{
     fan::{fan_reset, get_fan_speeds, start_fan_control, stop_fan_control},
     permissions::privilege_escalation,
-    setup,
     tdp::{get_tdp, set_tdp},
     wmi::wmi_security,
-    struct_set::FanControlState,
+};
+#[cfg(unix)]
+use linux_plug::{
+    sysfs::{get_tdp, set_tdp, sys_init},
+    fan::{start_fan_control, stop_fan_control, get_fan_speeds}
 };
 
 fn main() {
+    #[cfg(debug_assertions)]
+    let devtools = tauri_plugin_devtools::init();
+    let mut builder = tauri::Builder::default();
+    #[cfg(debug_assertions)]
+    {
+        builder = builder.plugin(devtools);
+    }
+    #[cfg(windows)]
     privilege_escalation();
+    #[cfg(windows)]
     thread::spawn(move || {
         wmi_security();
         fan_reset();
     });
+    #[cfg(unix)]
+    sys_init();
     let fan_control_state = FanControlState {
         is_running: Arc::new(Mutex::new(false)),
     };
-    tauri::Builder::default()
+    builder
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_shell::init())
