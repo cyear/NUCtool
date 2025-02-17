@@ -63,6 +63,8 @@
 > 2. 内核要求>=6.13(或>=6.10)
 > 3. 必要依赖: dmidecode make git
 > 4. 需要在`sudo`下运行
+>
+> 致谢 [Wer-Wolf](https://github.com/Wer-Wolf/uniwill-laptop) 大佬
 # 
 ### Star History
 
