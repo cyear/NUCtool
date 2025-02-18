@@ -107,14 +107,8 @@ pub fn cpu_temp(left: &Option<&serde_json::Value>, right: &Option<&serde_json::V
 pub fn get_fan_speeds(window: Window) {
     thread::spawn(move || {
         println!("{}", "推送风扇信息".green());
-        let driver: ApiFan;
-        if *MODEL_ID == 1 {
-            driver = ApiFan::init();
-        } else { 
-            driver = ApiFan::init_0();
-        }
+        let driver = ApiFan::init();
         loop {
-
             window
                 .emit(
                     "get-fan-speeds",
@@ -134,12 +128,7 @@ pub fn start_fan_control(fan_data: serde_json::Value, state: State<FanControlSta
         return;
     }
     fan_init();
-    let driver: ApiFan;
-    if *MODEL_ID == 1 {
-        driver = ApiFan::init();
-    } else { 
-        driver = ApiFan::init_0();
-    }
+    let driver = ApiFan::init();
     // 启动新的控制线程
     *is_running.lock().unwrap() = true;
     thread::spawn(move || {

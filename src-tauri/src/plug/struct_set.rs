@@ -93,25 +93,26 @@ pub struct ApiFan {
 #[cfg(unix)]
 impl ApiFan {
     pub fn init() -> Self {
-        ApiFan {
-            cpu: DRIVER_PATH.join("temp1_input"),
-            gpu: DRIVER_PATH.join("temp2_input"),
-            r_fan_l: DRIVER_PATH.join("fan2_input"),
-            r_fan_r: DRIVER_PATH.join("fan1_input"),
-            w_fan_l: DRIVER_PATH.join("pwm2"),
-            w_fan_r: DRIVER_PATH.join("pwm1"),
-            mode: DRIVER_PATH.join("pwm1_enable")
-        }
-    }
-    pub fn init_0() -> Self {
-        ApiFan {
-            cpu: DRIVER_PATH.join("temp1_input"),
-            gpu: DRIVER_PATH.join("temp2_input"),
-            r_fan_l: DRIVER_PATH.join("fan1_input"),
-            r_fan_r: DRIVER_PATH.join("fan2_input"),
-            w_fan_l: DRIVER_PATH.join("pwm1"),
-            w_fan_r: DRIVER_PATH.join("pwm2"),
-            mode: DRIVER_PATH.join("pwm1_enable")
+        if *MODEL_ID == 1 {
+            ApiFan {
+                cpu: DRIVER_PATH.join("temp1_input"),
+                gpu: DRIVER_PATH.join("temp2_input"),
+                r_fan_l: DRIVER_PATH.join("fan2_input"),
+                r_fan_r: DRIVER_PATH.join("fan1_input"),
+                w_fan_l: DRIVER_PATH.join("pwm2"),
+                w_fan_r: DRIVER_PATH.join("pwm1"),
+                mode: DRIVER_PATH.join("pwm1_enable")
+            }
+        } else {
+            ApiFan {
+                cpu: DRIVER_PATH.join("temp1_input"),
+                gpu: DRIVER_PATH.join("temp2_input"),
+                r_fan_l: DRIVER_PATH.join("fan1_input"),
+                r_fan_r: DRIVER_PATH.join("fan2_input"),
+                w_fan_l: DRIVER_PATH.join("pwm1"),
+                w_fan_r: DRIVER_PATH.join("pwm2"),
+                mode: DRIVER_PATH.join("pwm1_enable")
+            }
         }
     }
     pub fn get_cpu_temp(&self) -> i64 {
@@ -123,7 +124,6 @@ impl ApiFan {
     pub fn get_fan_l(&self) -> i64 {
         get_sys(&self.r_fan_l)
     }
-
     pub fn get_fan_r(&self) -> i64 {
         get_sys(&self.r_fan_r)
     }

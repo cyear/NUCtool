@@ -2,6 +2,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{exit, Command, Output};
 use colored::Colorize;
+use nix::unistd::Uid;
 use crate::{
     plug::struct_set::{
         Tdp, KERNEL_ID
@@ -85,6 +86,12 @@ pub fn get_kernel_version() -> i64 {
 }
 
 pub fn sys_init() {
+    if Uid::current().is_root() {
+        println!("{}", "当前以 root 用户身份运行".red());
+    } else {
+        println!("{}", "用户拒绝自动部署".red());
+        return;
+    }
     if *KERNEL_ID == 0 {
         println!("{}", "内核版本不支持".red());
         exit(0)

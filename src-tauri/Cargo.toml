@@ -21,6 +21,7 @@ dirs = "6.0.0"
 serde = { version = "1.0.210", features = ["derive"] }
 lazy_static = "1.5.0"
 tauri-plugin-devtools = "2.0.0"
+nix = "0.29.0"
 
 [target.'cfg(windows)'.dependencies]
 notify-rust = "4.11.3"
