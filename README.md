@@ -77,6 +77,7 @@ cd /root/.config/nuc_model
 make
 insmod /root/.config/nuc_model/uniwill-wmi.ko
 insmod /root/.config/nuc_model/uniwill-laptop.ko
+# 如出现严重问题，请立刻断电或者卸载模块(请不要改为开机自动加载)
 ```
 
 # 
