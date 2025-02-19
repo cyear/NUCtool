@@ -1,0 +1,11 @@
+{
+  "version": "0.4.1",
+  "notes": "自动发布的新版本",
+  "pub_date": "2025-02-19T15:52:12.139Z",
+  "platforms": {
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUQXFyWkU5K2R1UnN6bzhoUksrbzh0Y2I1aVFrZVp3d05zZnVZajRhQ2NZeWlLS2JKYU5DSWxZZ2tuOXZEN3Z5T0duRFZ0dW9ZZ3B6OTh6VWlreUxJRnZBUHFoMjY2b3dFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzM5OTgwMzI5CWZpbGU6TlVDdG9vbF8wLjQuMV94NjRfemgtQ04ubXNpCktKcHkzNmU5a05ZYjhtc2EvQkF6cFRWK3hydVhuLzY1RElPZDRDZ295WXRtNmRWUDc1cFlnUXNHV2ZqaWJRUHJnRzNhZFJySGlpT0ZqaGY0MDExK0N3PT0K",
+      "url": "https://github.com/cyear/NUCtool/releases/download/NUCtool-v0.4.1/NUCtool_0.4.1_x64_zh-CN.msi"
+    }
+  }
+}

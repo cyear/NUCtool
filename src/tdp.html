@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fan Controller</title>
+    <link rel="stylesheet" href="b.css"></link>
+</head>
+<body style="background: rgb(255, 255, 255, 0.00);" oncontextmenu="return false;" onselectstart="return false;" ondragstart="return false;" >
+    <div>
+        <h1>TDP 测试(0可能为未限制/未解锁/无法读取/等原因)</h1>
+        <div style="margin: auto; text-align: center;">
+            <h3>CPU/L1:</h3>
+            <input type="text" style="margin: auto;padding: 0.85em 0.15em;background: transparent;color: #595F6E;" id="cpu1" placeholder="TDP/W"></input>
+            <h3>CPU/L2:</h3>
+            <input type="text" style="margin: auto;padding: 0.85em 0.15em;background: transparent;color: #595F6E;" id="cpu2" placeholder="TDP/W"></input>
+            <h3>GPU/L1(仅限 Arc GPU):</h3>
+            <input type="text" style="margin: auto;padding: 0.85em 0.15em;background: transparent;color: #595F6E;" id="gpu1" placeholder="TDP/W"></input>
+            <h3>GPU/L2(仅限 Arc GPU):</h3>
+            <input type="text" style="margin: auto;padding: 0.85em 0.15em;background: transparent;color: #595F6E;" id="gpu2" placeholder="TDP/W"></input>
+            <h3>温度墙偏移量:</h3>
+            <input type="text" style="margin: auto;padding: 0.85em 0.15em;background: transparent;color: #595F6E;" id="tcc" placeholder="TCC/℃"></input>
+            <h3 style="color: red">警告！谨慎使用</h3>
+            <button style="margin: auto;padding: 0.85em 0.15em;background: transparent;color: #595F6E;" id="b">应用更改</button>
+        </div>
+    </div>
+<script>
+    const gpu1 = document.getElementById("gpu1");
+    const gpu2 = document.getElementById("gpu2");
+    const cpu1 = document.getElementById("cpu1");
+    const cpu2 = document.getElementById("cpu2");
+    const tcc = document.getElementById("tcc");
+    document.addEventListener('DOMContentLoaded', async () => {
+        const [c1, c2, g1, g2, cc] = await window.__TAURI__.core.invoke('get_tdp');
+        console.log(c1, c2, g1, g2, cc);
+        cpu1.value = c1;
+        cpu2.value = c2;
+        gpu1.value = g1;
+        gpu2.value = g2;
+        tcc.value = cc;
+        console.log("cpu l1:" + cpu1.value, "\ncpu l2:" + cpu2.value, "\ngpu l1:" + gpu1.value, "\ngpu l2:" + gpu2.value, "\ntcc:" + tcc.value);
+    })
+    const b = document.getElementById('b');
+    b.addEventListener('click', async () => {
+        const t = {cpu1: parseInt(cpu1.value), cpu2: parseInt(cpu2.value), gpu1: parseInt(gpu1.value), gpu2: parseInt(gpu2.value), tcc: parseInt(tcc.value)};
+        await window.__TAURI__.core.invoke('set_tdp', { t });
+        location.reload();
+    })
+</script>
+</body>
+</html>
