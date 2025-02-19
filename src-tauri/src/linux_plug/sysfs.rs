@@ -41,7 +41,6 @@ pub fn get_model_id() -> i64 {
 
     if output.status.success() {
         let dmidecode_output = String::from_utf8_lossy(&output.stdout);
-        // 在输出中查找包含 "Product Name" 的行
         for line in dmidecode_output.lines() {
             if line.contains("Product Name"){
                 if let Some(line) =  line.to_string().split(" ").last() {
@@ -134,8 +133,6 @@ pub fn sys_init() {
             exit(0)
         }
     }
-    // sudo insmod /home/nian/data/uniwill-laptop/uniwill-laptop/uniwill-wmi.ko
-    // sudo insmod /home/nian/data/uniwill-laptop/uniwill-laptop/uniwill-laptop.ko;
     let m1 = "/root/.config/nuc_model/uniwill-laptop.ko";
     let m2 = "/root/.config/nuc_model/uniwill-wmi.ko";
     if Path::new(m1).exists() || Path::new(m2).exists() {

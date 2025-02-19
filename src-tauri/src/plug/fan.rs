@@ -3,14 +3,12 @@ use std::{
     time::Duration,
     thread
 };
-use std::mem::swap;
 use tauri::{Emitter, State, Window};
 use colored::Colorize;
 
 use crate::plug::{
     struct_set::{
-        FanControlState, ApiFan, MODEL_ID
-
+        FanControlState, ApiFan
     },
 };
 
@@ -31,14 +29,16 @@ pub fn fan_reset() {
     println!("{}", "风扇状态重置".red());
 }
 
+
 pub fn fan_set(left: i64, right: i64, driver: &ApiFan) {
+    #[cfg(windows)]
+    let (l, r) = (left * 2, right * 2);
+    #[cfg(unix)]
     let (mut l, mut r): (i64, i64) = ((2.55 * left as f64) as i64, (2.55 * right as f64) as i64);
-    if l >= 254 {
-        l = 255
-    }
-    if r >= 254 {
-        r = 255
-    }
+    #[cfg(unix)]
+    if l >= 254 { l = 255 }
+    #[cfg(unix)]
+    if r >= 254 { r = 255 }
     println!("FAN_L: {}% / FAN_R: {}% OUT: {} / {} {}", left, right, l, r, driver.set_fan(l, r));
 }
 
@@ -72,11 +72,12 @@ pub fn cpu_temp(left: &Option<&serde_json::Value>, right: &Option<&serde_json::V
     let (mut temp_old_l, mut speed_old_l) = (0i64, 0i64);
     let (mut temp_old_r, mut speed_old_r) = (0i64, 0i64);
     let (mut handle_left, mut handle_right) = (0i64, 0i64);
-    if let (Some(left), Some(right)) = (left.unwrap().as_array(), right.unwrap().as_array()) {
+    if let (Some(left), Some(right)) = (
+        left.unwrap().as_array(), right.unwrap().as_array()
+    ) {
         for l_ in left {
             if let (Some(temp_left), Some(speed_left)) = (
-                l_.get("temperature").unwrap().as_i64(),
-                l_.get("speed").unwrap().as_i64(),
+                l_.get("temperature").unwrap().as_i64(), l_.get("speed").unwrap().as_i64(),
             ) {
                 if temp_left >= cpu_out {
                     handle_left = speed_handle(temp_old_l, speed_old_l, temp_left, speed_left, cpu_out);
@@ -88,8 +89,7 @@ pub fn cpu_temp(left: &Option<&serde_json::Value>, right: &Option<&serde_json::V
         }
         for r_ in right {
             if let (Some(temp_right), Some(speed_right)) = (
-                r_.get("temperature").unwrap().as_i64(),
-                r_.get("speed").unwrap().as_i64(),
+                r_.get("temperature").unwrap().as_i64(), r_.get("speed").unwrap().as_i64(),
             ) {
                 if temp_right >= gpu_out {
                     handle_right = speed_handle(temp_old_r, speed_old_r, temp_right, speed_right, gpu_out);
@@ -104,7 +104,7 @@ pub fn cpu_temp(left: &Option<&serde_json::Value>, right: &Option<&serde_json::V
 }
 
 #[tauri::command]
-pub fn get_fan_speeds(window: Window) {
+pub async fn get_fan_speeds(window: Window) {
     thread::spawn(move || {
         println!("{}", "推送风扇信息".green());
         let driver = ApiFan::init();
@@ -128,10 +128,10 @@ pub fn start_fan_control(fan_data: serde_json::Value, state: State<FanControlSta
         return;
     }
     fan_init();
-    let driver = ApiFan::init();
     // 启动新的控制线程
     *is_running.lock().unwrap() = true;
     thread::spawn(move || {
+        let driver = ApiFan::init();
         while *is_running.lock().unwrap() {
             println!("---------------------------------------------------------------");
             cpu_temp(&fan_data.get("left_fan"), &fan_data.get("right_fan"), &driver);

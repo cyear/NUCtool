@@ -9,15 +9,10 @@ use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
 use tauri_plugin_notification::NotificationExt;
 use tauri_plugin_updater::{Update, UpdaterExt};
 
-#[cfg(windows)]
-use crate::win_plug::{
+use crate::plug::{
+    config::get_config_dir,
     fan::fan_reset
 };
-#[cfg(unix)]
-use crate::linux_plug::{
-    fan::fan_reset
-};
-use crate::plug::config::get_config_dir;
 
 async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
     let up: Update;
@@ -103,7 +98,7 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn Error>> {
     let menu = MenuBuilder::new(app).items(&[&h, &d, &q]).build()?;
     let _tray = TrayIconBuilder::new()
         .menu(&menu)
-        .menu_on_left_click(false)
+        .show_menu_on_left_click(false)
         .icon(app.default_window_icon().unwrap().clone())
         .on_menu_event(move |app, event| match event.id().as_ref() {
             "h" => {

@@ -1,3 +1,4 @@
+#[cfg(unix)]
 use std::path::PathBuf;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
@@ -6,7 +7,16 @@ use std::sync::{
 };
 
 #[cfg(windows)]
-use crate::win_plug::wmi::get_model;
+use crate::win_plug::wmi::{
+    wmi_init, wmi_set, get_model
+};
+#[cfg(windows)]
+use windows::{
+    core::BSTR,
+    Win32::System::Wmi::{
+        IWbemClassObject, IWbemServices
+    }
+};
 #[cfg(unix)]
 use crate::{
     linux_plug::sysfs::{get_sys, set_sys, get_kernel_version, get_model_id},
@@ -79,6 +89,82 @@ pub struct FanControlState {
     pub is_running: Arc<Mutex<bool>>,
 }
 
+#[cfg(windows)]
+pub struct ApiFan {
+    in_cls: IWbemClassObject,
+    svc: IWbemServices,
+    obj_path: BSTR,
+    method_name: BSTR,
+    r_fan_l1: &'static str,
+    r_fan_l2: &'static str,
+    r_fan_r1: &'static str,
+    r_fan_r2: &'static str,
+}
+
+#[cfg(windows)]
+impl ApiFan {
+    pub fn init() -> Self {
+        let (in_cls, svc, obj_path, method_name) = wmi_init();
+        let (r_fan_l1, r_fan_l2, r_fan_r1, r_fan_r2) = if *MODEL_ID == 1 {
+            (R_FAN_L1, R_FAN_L2, R_FAN_R1, R_FAN_R2)
+        } else {
+            (R_FAN_R1, R_FAN_R2, R_FAN_L1, R_FAN_L2)
+        };
+        ApiFan {
+            in_cls, svc, obj_path, method_name,
+            r_fan_l1, r_fan_l2, r_fan_r1, r_fan_r2,
+        }
+    }
+    pub fn get_cpu_temp(&self) -> i64 {
+        wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_TEMP_L)
+    }
+    pub fn get_gpu_temp(&self) -> i64 {
+        wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_TEMP_R) & 0xFF
+    }
+    pub fn get_fan_l(&self) -> i64 {
+        (wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, &self.r_fan_l1) & 0xFF) << 8 |
+            wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, &self.r_fan_l2)
+    }
+    pub fn get_fan_r(&self) -> i64 {
+        (wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, &self.r_fan_r1) & 0xFF) << 8 |
+            wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, &self.r_fan_r2)
+    }
+    fn _set_fan(&self, l: i64, r: i64) {
+        let _ = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, format!("0x000000000{:02x}1809", l).as_str());
+        let _ = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, format!("0x000000000{:02x}1804", r).as_str());
+    }
+    /// MAX speed 200
+    pub fn set_fan(&self, l: i64, r: i64) -> bool {
+        let _ = if *MODEL_ID == 1 { &self._set_fan(l ,r) } else { &self._set_fan(r, l) };
+        true
+    }
+    pub fn set_fan_auto(&self) -> bool {
+        let _ = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, W_FAN_RESET);
+        true
+    }
+    pub fn set_fan_control(&self) -> bool {
+        if *MODEL_ID == 1 {
+            wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, W_FAN_AC71H_TURBO);
+        } else {
+            wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, W_FAN_KC71F_TURBO);
+        }
+        true
+    }
+    /// 1 - control, 2 - auto
+    pub fn get_fan_mode(&self) -> i64 {
+        let out = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_FAN_MODE);
+        if out == 27664 || out == 27648 { 2 } else { 1 }
+    }
+    pub fn get_fan_speeds(&self) -> FanSpeeds {
+        FanSpeeds {
+            left_fan_speed: self.get_fan_l(),
+            right_fan_speed: self.get_fan_r(),
+            left_temp: self.get_cpu_temp(),
+            right_temp: self.get_gpu_temp()
+        }
+    }
+}
+
 #[cfg(unix)]
 pub struct ApiFan {
     pub cpu: PathBuf,
@@ -93,26 +179,16 @@ pub struct ApiFan {
 #[cfg(unix)]
 impl ApiFan {
     pub fn init() -> Self {
-        if *MODEL_ID == 1 {
-            ApiFan {
-                cpu: DRIVER_PATH.join("temp1_input"),
-                gpu: DRIVER_PATH.join("temp2_input"),
-                r_fan_l: DRIVER_PATH.join("fan2_input"),
-                r_fan_r: DRIVER_PATH.join("fan1_input"),
-                w_fan_l: DRIVER_PATH.join("pwm2"),
-                w_fan_r: DRIVER_PATH.join("pwm1"),
-                mode: DRIVER_PATH.join("pwm1_enable")
-            }
+        let (r_fan_l, r_fan_r, w_fan_l, w_fan_r) = if *MODEL_ID == 1 {
+            (DRIVER_PATH.join("fan2_input"), DRIVER_PATH.join("fan1_input"), DRIVER_PATH.join("pwm2"), DRIVER_PATH.join("pwm1"))
         } else {
-            ApiFan {
-                cpu: DRIVER_PATH.join("temp1_input"),
-                gpu: DRIVER_PATH.join("temp2_input"),
-                r_fan_l: DRIVER_PATH.join("fan1_input"),
-                r_fan_r: DRIVER_PATH.join("fan2_input"),
-                w_fan_l: DRIVER_PATH.join("pwm1"),
-                w_fan_r: DRIVER_PATH.join("pwm2"),
-                mode: DRIVER_PATH.join("pwm1_enable")
-            }
+            (DRIVER_PATH.join("fan1_input"), DRIVER_PATH.join("fan2_input"), DRIVER_PATH.join("pwm1"), DRIVER_PATH.join("pwm2"))
+        };
+        ApiFan {
+            cpu: DRIVER_PATH.join("temp1_input"),
+            gpu: DRIVER_PATH.join("temp2_input"),
+            r_fan_l, r_fan_r, w_fan_l, w_fan_r,
+            mode: DRIVER_PATH.join("pwm1_enable"),
         }
     }
     pub fn get_cpu_temp(&self) -> i64 {
@@ -133,6 +209,7 @@ impl ApiFan {
     pub fn set_fan_r(&self, n: i64) -> bool {
         set_sys(&self.w_fan_r, n)
     }
+    /// MAX speed 255
     pub fn set_fan(&self, l: i64, r: i64) -> bool {
         self.set_fan_l(l) && self.set_fan_r(r)
     }

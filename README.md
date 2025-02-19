@@ -16,8 +16,7 @@
 > [!NOTE]
 > 随缘更新, 如果觉得有用请给个⭐
 >
-> 1. [Windows 详细更新说明](./assets/NUCtoolChange_Windows.md)
-> 2. [Linux 详细更新说明](./assets/NUCtoolChange_Linux.md)
+> [详细更新说明](./assets/NUCtoolChange.md)
 
 > [!WARNING]
 > 1. 有损坏硬件风险, 使用此程序即认为接受风险, 出现问题概不负责

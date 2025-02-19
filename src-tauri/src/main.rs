@@ -12,13 +12,13 @@ mod linux_plug;
 mod plug;
 use plug::{
     setup,
+    struct_set::FanControlState,
     config::{save_fan_config, load_fan_config},
-    struct_set::FanControlState
+    fan::{fan_reset, get_fan_speeds, start_fan_control, stop_fan_control},
 };
 
 #[cfg(windows)]
 use win_plug::{
-    fan::{fan_reset, get_fan_speeds, start_fan_control, stop_fan_control},
     permissions::privilege_escalation,
     tdp::{get_tdp, set_tdp},
     wmi::wmi_security,
@@ -26,7 +26,6 @@ use win_plug::{
 #[cfg(unix)]
 use linux_plug::{
     sysfs::{get_tdp, set_tdp, sys_init},
-    fan::{start_fan_control, stop_fan_control, get_fan_speeds}
 };
 
 fn main() {

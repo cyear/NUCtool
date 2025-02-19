@@ -1,6 +1,12 @@
-# NUCtool for Windows（Changelog）
+# NUCtool(Changelog)
+
+## [0.4.1-<font color=red>Alpha</font>] - 2025-2-19
+### 性能改进
+- 合并统一部分代码(未经过Linux测试)
 
 ## [0.4.0-<font color=red>Alpha</font>] - 2025-2-17
+#### 新特性
+- 新增对 Linux 支持
 #### 修复
 - 托盘左击显示菜单，目前显示页面了
 
@@ -86,7 +92,7 @@
 - 优化代码逻辑
 - 优化调度细节
 #### <font color=red>已知BUG</font>
-- 退出程序风扇未恢复自动###### 概率问题(待修复)
+- 退出程序风扇未恢复自动, 概率问题(待修复)
 - <font color=red>获取设备数据异常(疑似反复实例wmi导致，待解决)</font>
 
 ## [0.2.0-<font color=red>Alpha</font>] - 2024-10-12

@@ -1,7 +1,6 @@
 use crate::plug::struct_set::FanData;
 use std::{
-    fs::{self, File},
-    io::Read,
+    fs::self,
     path::PathBuf
 };
 
@@ -19,15 +18,18 @@ pub fn get_config_file_path() -> Result<PathBuf, String> {
     Ok(config_file)
 }
 
+#[cfg(unix)]
 pub fn find_hwmon_with_name() -> PathBuf {
     let hwmon_dir = "/sys/class/hwmon";
     for entry in fs::read_dir(hwmon_dir).unwrap() {
         let entry = entry.unwrap();
         let path = entry.path();
-        if path.is_dir() && path.file_name().map(|name| name.to_str().unwrap_or("").starts_with("hwmon")).unwrap_or(false) {
+        if path.is_dir() && path.file_name().map(
+            |name| name.to_str().unwrap_or("").starts_with("hwmon")
+        ).unwrap_or(false) {
             let name_path = path.join("name");
             if name_path.exists() {
-                let mut name_file = File::open(name_path).unwrap();
+                let mut name_file = fs::File::open(name_path).unwrap();
                 let mut content = String::new();
                 name_file.read_to_string(&mut content).unwrap();
                 if content.trim() == "uniwill" {
