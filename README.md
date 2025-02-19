@@ -62,7 +62,7 @@
 > 1. 有损坏硬件风险, 使用此程序即认为接受风险, 出现问题概不负责
 > 2. 内核要求>=6.13(或>=6.10)
 > 3. 必要依赖: dmidecode make git
-> 4. 需要在`sudo`下运行
+> 4. 需要在`sudo`下运行(如果不赋予root权限将不会控制你的设备)
 >
 > 致谢 [Wer-Wolf](https://github.com/Wer-Wolf/uniwill-laptop) 大佬
 
