@@ -1,7 +1,7 @@
 # NUCtool(Changelog)
 
 ## [0.4.1-<font color=red>Alpha</font>] - 2025-2-19
-### 性能改进
+#### 性能改进
 - 合并统一部分代码(未经过Linux测试)
 
 ## [0.4.0-<font color=red>Alpha</font>] - 2025-2-17
