@@ -11,8 +11,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: "windows-latest"
-            args: ""
           - platform: "ubuntu-22.04"
             args: ""
 
@@ -59,3 +57,9 @@ jobs:
         with:
           name: build-output
           path: ./src-tauri/target/release/bundle
+      - uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages-linux
+          publish_dir: ./
+          force_orphan: true
