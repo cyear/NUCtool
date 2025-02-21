@@ -1,6 +1,6 @@
 use crate::plug::struct_set::FanData;
 use std::{
-    fs::self,
+    fs::{self, Read, File},
     path::PathBuf
 };
 
@@ -29,7 +29,7 @@ pub fn find_hwmon_with_name() -> PathBuf {
         ).unwrap_or(false) {
             let name_path = path.join("name");
             if name_path.exists() {
-                let mut name_file = fs::File::open(name_path).unwrap();
+                let mut name_file = File::open(name_path).unwrap();
                 let mut content = String::new();
                 name_file.read_to_string(&mut content).unwrap();
                 if content.trim() == "uniwill" {
@@ -38,7 +38,7 @@ pub fn find_hwmon_with_name() -> PathBuf {
             }
         }
     }
-    panic!("未找到匹配的 hwmon 路径");
+    panic!("未找到匹配的设备");
 }
 
 #[tauri::command]
