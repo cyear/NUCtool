@@ -63,6 +63,8 @@
 > 3. 必要依赖: dmidecode make git
 > 4. 需要在`sudo`下运行(如果不赋予root权限将不会控制你的设备)
 >
+> 致谢 [Carey Evans](https://users.rust-lang.org/u/carey/summary) 大佬
+> 
 > 致谢 [Wer-Wolf](https://github.com/Wer-Wolf/uniwill-laptop) 大佬
 
 PS: Linux 如果模块加载有问题等，可以手动编译加载
