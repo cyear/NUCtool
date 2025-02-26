@@ -16,7 +16,7 @@
 > [!NOTE]
 > 随缘更新, 如果觉得有用请给个⭐
 >
-> [English document](./assets/README_English.md)
+> [English Document](./assets/README_English.md)
 >
 > [详细更新说明](./assets/NUCtoolChange.md)
 
