@@ -68,6 +68,7 @@
 > 2. 内核要求>=6.13(或>=6.10)
 > 3. 必要依赖: dmidecode make git
 > 4. 需要在`sudo`下运行(如果不赋予root权限将不会控制你的设备)
+> 5. 注: 模块不会检查更新，请查看下面PS
 >
 > 致谢 [Carey Evans](https://users.rust-lang.org/u/carey/summary) 大佬
 > 
@@ -81,9 +82,10 @@ git clone https://github.com/cyear/uniwill-laptop --branch kernel-6.13 /root/.co
 git clone https://github.com/cyear/uniwill-laptop /root/.config/nuc_model
 # 以下均可执行
 cd /root/.config/nuc_model
-make
-insmod /root/.config/nuc_model/uniwill-wmi.ko
-insmod /root/.config/nuc_model/uniwill-laptop.ko
+# 检查更新看这里(如果需要更新)
+git pull
+# 卸载编译安装加载
+sudo sh u.sh
 # 如出现严重问题，请立刻断电或者卸载模块(请不要改为开机自动加载)
 ```
 
