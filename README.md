@@ -76,9 +76,9 @@
 > 6. 使用教程同Windows(2-4 step)
 >
 
-> 致谢 [Carey Evans](https://users.rust-lang.org/u/carey/summary) 大佬
+> 致谢 [Carey Evans(Rust)](https://users.rust-lang.org/u/carey/summary) 大佬
 > 
-> 致谢 [Wer-Wolf](https://github.com/Wer-Wolf) 大佬
+> 致谢 [Wer-Wolf(uniwill-laptop)](https://github.com/Wer-Wolf/uniwill-laptop) 大佬
 
 PS: Linux 如果模块加载有问题等，可以手动编译加载
 ```shell
