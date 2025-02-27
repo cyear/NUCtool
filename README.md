@@ -11,7 +11,7 @@
 
 # NUCtool
 
-> intel NUC 系列风扇曲线控制 LAPAC71H, LAPKC71F 等机型
+> Intel NUC X15 系列工具用于 LAPAC71H, LAPKC71F 等机型
 
 > [!NOTE]
 > 随缘更新, 如果觉得有用请给个⭐
