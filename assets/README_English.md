@@ -25,7 +25,7 @@
 >  
 > This program may have serious flaws, so please use it under safe conditions.  
 >  
-> [Necessary Instructions](assets/分析.md)
+> Please read before giving feedback [Necessary Instructions](assets/分析.md)
 
 ---
 
