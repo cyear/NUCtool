@@ -17,6 +17,8 @@
 > Updated casually; if you find it useful, please give it a ⭐.  
 >  
 > [Detailed Update Notes](./assets/NUCtoolChange.md)
+>
+> This document is almost entirely translated by chatgpt.
 
 > [!WARNING]  
 > There is a risk of hardware damage. Using this program means you accept the risk, and no issues will be held responsible.  
