@@ -11,7 +11,7 @@
 
 # NUCtool
 
-> Intel NUC Series Fan Curve Control for models such as LAPAC71H, LAPKC71F, etc.
+> Intel NUC X15 Series Tools for LAPAC71H, LAPKC71F and other models
 
 > [!NOTE]  
 > Updated casually; if you find it useful, please give it a ⭐.  
@@ -36,6 +36,7 @@
 | GPU L1              | ✓            | ✕            |
 | GPU L2              | ✓            | ✕            |
 | GPU MAX             | 100          | ✕            |
+| TCC                 | ✓            | ☐            |
 | Auto Update         | ✓            | ✓            |
 | Auto Start on Boot  | ✓            | ✓            |
 |                     |              |              |
@@ -48,6 +49,7 @@
 | GPU L1              | *            | ✕            |
 | GPU L2              | *            | ✕            |
 | GPU MAX             | 85           | ✕            |
+| TCC                 | *            | *            |
 | Auto Update         | ✓            | ✓            |
 | Auto Start on Boot  | ☐            | ☐            |
 
