@@ -4,9 +4,7 @@ use std::process::{exit, Command, Output};
 use colored::Colorize;
 use nix::unistd::Uid;
 use crate::{
-    plug::struct_set::{
-        Tdp, KERNEL_ID
-    }
+    plug::struct_set::KERNEL_ID
 };
 
 pub fn get_sys(driver: &PathBuf) -> i64 {

@@ -267,13 +267,13 @@ impl ApiFan {
             get_sys(&self.cpu_pl2) / 1000,
             get_sys(&self.gpu_pl1) / 1000,
             get_sys(&self.gpu_pl2) / 1000,
+            0
         )
     }
     pub fn set_tdp(&self, t: Tdp) -> bool {
-        set_sys(&self.w_fan_l, &t.cpu1)
-            && set_sys(&self.w_fan_r, &t.cpu2)
-            && set_sys(&self.w_fan_l, &t.gpu1)
-            && set_sys(&self.w_fan_r, &t.gpu2)
-            && set_sys(&self.w_fan_l, &t.tcc)
+        set_sys(&self.cpu_pl1, t.cpu1 * 1000)
+            && set_sys(&self.cpu_pl2, t.cpu2 * 1000)
+            && set_sys(&self.gpu_pl1, t.gpu1 * 1000)
+            && set_sys(&self.gpu_pl2, t.gpu2 * 1000)
     }
 }

@@ -25,7 +25,7 @@
         "title": "NUCtool Debug",
         "width": 800,
         "height": 500,
-        "visible": false,
+        "visible": true,
         "transparent": false
       }
     ],
