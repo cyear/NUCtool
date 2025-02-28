@@ -1,5 +1,14 @@
 # NUCtool(Changelog)
 
+## [0.4.2-<font color=red>Alpha</font>] - 2025-2-28
+#### 新特性
+- Linux 支持TDP设置
+#### 修复
+- 禁用Windows下显示终端信息
+- #12 修复TDP设置
+#### 性能改进
+- #20 仅剩托盘时不再推送信息
+
 ## [0.4.1-<font color=red>Alpha</font>] - 2025-2-19
 #### 性能改进
 - 合并重复代码

@@ -109,13 +109,20 @@ pub async fn get_fan_speeds(window: Window) {
         println!("{}", "推送风扇信息".green());
         let driver = ApiFan::init();
         loop {
+            thread::sleep(Duration::from_secs_f64(2.5));
+            if match window.is_visible() {
+                Ok(visible) => !visible,
+                Err(_) => false
+            } {
+                // println!("{}", "取消风扇推送".green());
+                continue;
+            }
             window
                 .emit(
                     "get-fan-speeds",
                     driver.get_fan_speeds()
                 )
                 .unwrap();
-            thread::sleep(Duration::from_secs_f64(2.5));
         }
     });
 }

@@ -1,3 +1,7 @@
+#![cfg_attr(
+    all(not(debug_assertions), target_os = "windows"),
+    windows_subsystem = "windows"
+)]
 use std::{
     env,
     thread,
@@ -15,17 +19,17 @@ use plug::{
     struct_set::FanControlState,
     config::{save_fan_config, load_fan_config},
     fan::{fan_reset, get_fan_speeds, start_fan_control, stop_fan_control},
+    tdp::{get_tdp, set_tdp},
 };
 
 #[cfg(windows)]
 use win_plug::{
     permissions::privilege_escalation,
-    tdp::{get_tdp, set_tdp},
     wmi::wmi_security,
 };
 #[cfg(unix)]
 use linux_plug::{
-    sysfs::{get_tdp, set_tdp, sys_init},
+    sysfs::sys_init,
 };
 
 fn main() {

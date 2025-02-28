@@ -17,6 +17,8 @@
     "shell:default",
     "fs:default",
     "dialog:default",
-    "notification:allow-is-permission-granted"
+    "notification:allow-is-permission-granted",
+    "updater:allow-check",
+    "updater:allow-download-and-install"
   ]
 }

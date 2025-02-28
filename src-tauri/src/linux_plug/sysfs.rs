@@ -9,14 +9,6 @@ use crate::{
     }
 };
 
-#[tauri::command]
-pub async fn get_tdp() -> (i64, i64, i64, i64, i64) {
-    (0, 0 ,0, 0, 0)
-}
-
-#[tauri::command]
-pub async fn set_tdp(t: Tdp) {}
-
 pub fn get_sys(driver: &PathBuf) -> i64 {
     match fs::read_to_string(driver) {
         Ok(content) => content.trim().parse::<i64>().unwrap_or(0),
