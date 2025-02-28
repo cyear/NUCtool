@@ -78,27 +78,23 @@
 > Linux 使用教程(支持功能以实际为准)
 > 1. 有损坏硬件风险, 使用此程序即认为接受风险, 出现问题概不负责
 > 2. 内核要求>=6.13(或>=6.10)
-> 3. 必要依赖: dmidecode make git
-> 4. 需要在`sudo`下运行(如果不赋予root权限将不会控制你的设备)
-> 5. 注: 模块不会检查更新，请查看下面PS
-> 6. 使用教程同Windows(2-4 step)
+> 3. 必要步骤: 请查看下面PS
+> 4. 使用教程同Windows(2-4 step)
 >
 
 > 致谢 [Carey Evans(Rust)](https://users.rust-lang.org/u/carey/summary) 大佬
 > 
 > 致谢 [Wer-Wolf(uniwill-laptop)](https://github.com/Wer-Wolf/uniwill-laptop) 大佬
 
-PS: Linux 如果模块加载有问题等，可以手动编译加载
+PS: Linux 请看这里
 ```shell
 # 内核版本>=6.13 执行
-git clone https://github.com/cyear/uniwill-laptop --branch kernel-6.13 /root/.config/nuc_model
+git clone https://github.com/cyear/uniwill-laptop --branch kernel-6.13
 # 内核版本>=6.10 执行
-git clone https://github.com/cyear/uniwill-laptop /root/.config/nuc_model
+git clone https://github.com/cyear/uniwill-laptop
 # 以下均可执行
-cd /root/.config/nuc_model
-# 检查更新看这里(如果需要更新)
-git pull
-# 卸载编译安装加载
+cd uniwill-laptop
+# 编译安装加载
 sudo sh u.sh
 # 如出现严重问题，请立刻断电或者卸载模块(请不要改为开机自动加载)
 ```
