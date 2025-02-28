@@ -2,11 +2,11 @@
 
 ## [0.4.2-<font color=red>Alpha</font>] - 2025-2-28
 #### 新特性
-- Linux 支持TDP设置
+- Linux 支持 TDP 设置
+- Linux 下无需 root 权限
 #### 修复
 - 禁用 Windows 下显示终端信息
 - #12 修复TDP设置
-- 暂时 Linux 默认打开 调试界面(无托盘问题)
 #### 性能改进
 - #20 仅剩托盘时不再推送信息
 
