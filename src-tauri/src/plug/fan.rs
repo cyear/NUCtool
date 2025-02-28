@@ -67,6 +67,10 @@ pub fn cpu_temp(left: &Option<&serde_json::Value>, right: &Option<&serde_json::V
         return;
     }
     if driver.get_fan_mode() == 2 {
+        fan_reset();
+        thread::sleep(Duration::from_secs_f64(0.5));
+        fan_init();
+        thread::sleep(Duration::from_secs_f64(0.5));
         println!("风扇异常自动恢复: {}", driver.set_fan_control());
     }
     let (mut temp_old_l, mut speed_old_l) = (0i64, 0i64);
@@ -109,13 +113,20 @@ pub async fn get_fan_speeds(window: Window) {
         println!("{}", "推送风扇信息".green());
         let driver = ApiFan::init();
         loop {
+            thread::sleep(Duration::from_secs_f64(2.5));
+            if match window.is_visible() {
+                Ok(visible) => !visible,
+                Err(_) => false
+            } {
+                // println!("{}", "取消风扇推送".green());
+                continue;
+            }
             window
                 .emit(
                     "get-fan-speeds",
                     driver.get_fan_speeds()
                 )
                 .unwrap();
-            thread::sleep(Duration::from_secs_f64(2.5));
         }
     });
 }

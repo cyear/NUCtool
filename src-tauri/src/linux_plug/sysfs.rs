@@ -3,19 +3,9 @@ use std::path::{Path, PathBuf};
 use std::process::{exit, Command, Output};
 use colored::Colorize;
 use nix::unistd::Uid;
-use crate::{
-    plug::struct_set::{
-        Tdp, KERNEL_ID
-    }
-};
-
-#[tauri::command]
-pub async fn get_tdp() -> (i64, i64, i64, i64, i64) {
-    (0, 0 ,0, 0, 0)
-}
-
-#[tauri::command]
-pub async fn set_tdp(t: Tdp) {}
+// use crate::{
+//     plug::struct_set::KERNEL_ID
+// };
 
 pub fn get_sys(driver: &PathBuf) -> i64 {
     match fs::read_to_string(driver) {
@@ -87,10 +77,12 @@ pub fn get_kernel_version() -> i64 {
 pub fn sys_init() {
     if Uid::current().is_root() {
         println!("{}", "当前以 root 用户身份运行".red());
+        return;
     } else {
-        println!("{}", "用户拒绝自动部署".red());
+        println!("{}", "当前以普通用户身份运行".red());
         return;
     }
+    /*
     if *KERNEL_ID == 0 {
         println!("{}", "内核版本不支持".red());
         exit(0)
@@ -106,7 +98,7 @@ pub fn sys_init() {
         } else {
             println!("{}", "模块未加载".red());
         }
-    } 
+    }
     let model_path = "/root/.config/nuc_model";
     if Path::new(model_path).is_dir() {
         println!("{}", "模块存在跳过".blue());
@@ -155,8 +147,9 @@ pub fn sys_init() {
         .arg(m1).output().unwrap();
     if out1.status.success() && out2.status.success() {
         println!("{}", "加载模块成功".green());
-    } else { 
+    } else {
         println!("{}: {} {}", "加载模块失败".red(), String::from_utf8_lossy(&out1.stderr), String::from_utf8_lossy(&out2.stderr));
         exit(0);
     }
+    */
 }

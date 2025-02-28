@@ -32,7 +32,7 @@ pub fn wmi_security() {
         .context("Initializing COM security")
         .expect("Initializing COM security Error");
     }
-    println!("{}", "初始化 COM security".green());
+    // println!("{}", "初始化 COM security".green());
 }
 
 pub fn wmi_init() -> (IWbemClassObject, IWbemServices, BSTR, BSTR) {
@@ -109,7 +109,7 @@ pub fn wmi_init() -> (IWbemClassObject, IWbemServices, BSTR, BSTR) {
             .context("Getting method")
             .expect("Get method Error");
     }
-    println!("{}", "初始化 WMI".green());
+    // println!("{}", "初始化 WMI".green());
     (in_cls.unwrap(), svc, obj_path, method_name)
 }
 

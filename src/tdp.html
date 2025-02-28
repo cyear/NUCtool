@@ -30,21 +30,24 @@
     const cpu1 = document.getElementById("cpu1");
     const cpu2 = document.getElementById("cpu2");
     const tcc = document.getElementById("tcc");
-    document.addEventListener('DOMContentLoaded', async () => {
+    async function get() {
         const [c1, c2, g1, g2, cc] = await window.__TAURI__.core.invoke('get_tdp');
         console.log(c1, c2, g1, g2, cc);
+        // console.log("cpu l1:" + cpu1.value, "\ncpu l2:" + cpu2.value, "\ngpu l1:" + gpu1.value, "\ngpu l2:" + gpu2.value, "\ntcc:" + tcc.value);
         cpu1.value = c1;
         cpu2.value = c2;
         gpu1.value = g1;
         gpu2.value = g2;
         tcc.value = cc;
-        console.log("cpu l1:" + cpu1.value, "\ncpu l2:" + cpu2.value, "\ngpu l1:" + gpu1.value, "\ngpu l2:" + gpu2.value, "\ntcc:" + tcc.value);
-    })
+    }
+    get();
     const b = document.getElementById('b');
     b.addEventListener('click', async () => {
         const t = {cpu1: parseInt(cpu1.value), cpu2: parseInt(cpu2.value), gpu1: parseInt(gpu1.value), gpu2: parseInt(gpu2.value), tcc: parseInt(tcc.value)};
+        console.log(t);
         await window.__TAURI__.core.invoke('set_tdp', { t });
-        location.reload();
+        // location.reload();
+        get();
     })
 </script>
 </body>

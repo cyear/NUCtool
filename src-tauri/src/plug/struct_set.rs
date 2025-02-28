@@ -5,7 +5,8 @@ use serde::{Deserialize, Serialize};
 use std::sync::{
     {Arc, Mutex},
 };
-
+use std::thread;
+use std::time::Duration;
 #[cfg(windows)]
 use crate::win_plug::wmi::{
     wmi_init, wmi_set, get_model
@@ -23,8 +24,8 @@ use crate::{
     plug::config::find_hwmon_with_name
 };
 
-pub static R_TDP_GPU1: &str = "0x000001000000073d";
-pub static R_TDP_GPU2: &str = "0x0000010000000733";
+pub static R_TDP_GPU1: &str = "0x000001000000072d";
+pub static R_TDP_GPU2: &str = "0x000001000000072e";
 pub static R_TDP_CPU1: &str = "0x0000010000000783";
 pub static R_TDP_CPU2: &str = "0x0000010000000784";
 pub static R_TDP_TCC: &str = "0x0000010000000786";
@@ -153,6 +154,8 @@ impl ApiFan {
     /// 1 - control, 2 - auto
     pub fn get_fan_mode(&self) -> i64 {
         let out = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_FAN_MODE);
+        println!("MODE: {}", out);
+        if out < 0 { return 1 } // 异常不管了
         if out == 27664 || out == 27648 { 2 } else { 1 }
     }
     pub fn get_fan_speeds(&self) -> FanSpeeds {
@@ -162,6 +165,28 @@ impl ApiFan {
             left_temp: self.get_cpu_temp(),
             right_temp: self.get_gpu_temp()
         }
+    }
+    /// (gpu1, gpu2, cpu1, cpu2, tcc)
+    pub fn get_tdp(&self) -> (i64, i64, i64, i64, i64) {
+        (
+            wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_TDP_CPU1) & 0xFF,
+            wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_TDP_CPU2) & 0xFF,
+            wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_TDP_GPU1) & 0xFF,
+            wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_TDP_GPU2) & 0xFF,
+            wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_TDP_TCC)
+        )
+    }
+    pub fn set_tdp(&self, t: Tdp) -> bool {
+        let _ = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, format!("0x000000000{:02x}0783", t.cpu1).as_str());
+        thread::sleep(Duration::from_secs_f64(0.5));
+        let _ = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, format!("0x000000000{:02x}0784", t.cpu2).as_str());
+        thread::sleep(Duration::from_secs_f64(0.5));
+        let _ = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, format!("0x000000000{:02x}072d", t.gpu1).as_str());
+        thread::sleep(Duration::from_secs_f64(0.5));
+        let _ = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, format!("0x000000000{:02x}072e", t.gpu2).as_str());
+        thread::sleep(Duration::from_secs_f64(0.5));
+        let _ = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, format!("0x000000000{:02x}0786", t.tcc).as_str());
+        true
     }
 }
 
@@ -173,7 +198,11 @@ pub struct ApiFan {
     pub r_fan_r: PathBuf,
     pub w_fan_l: PathBuf,
     pub w_fan_r: PathBuf,
-    pub mode: PathBuf
+    pub mode: PathBuf,
+    pub cpu_pl1: PathBuf,
+    pub cpu_pl2: PathBuf,
+    pub gpu_pl1: PathBuf,
+    pub gpu_pl2: PathBuf,
 }
 
 #[cfg(unix)]
@@ -189,6 +218,10 @@ impl ApiFan {
             gpu: DRIVER_PATH.join("temp2_input"),
             r_fan_l, r_fan_r, w_fan_l, w_fan_r,
             mode: DRIVER_PATH.join("pwm1_enable"),
+            cpu_pl1: DRIVER_PATH.join("power1_input"),
+            cpu_pl2: DRIVER_PATH.join("power2_input"),
+            gpu_pl1: DRIVER_PATH.join("power3_input"),
+            gpu_pl2: DRIVER_PATH.join("power4_input"),
         }
     }
     pub fn get_cpu_temp(&self) -> i64 {
@@ -229,5 +262,20 @@ impl ApiFan {
             left_temp: self.get_cpu_temp(),
             right_temp: self.get_gpu_temp()
         }
+    }
+    pub fn get_tdp(&self) -> (i64, i64, i64, i64, i64) {
+        (
+            get_sys(&self.cpu_pl1) / 1000,
+            get_sys(&self.cpu_pl2) / 1000,
+            get_sys(&self.gpu_pl1) / 1000,
+            get_sys(&self.gpu_pl2) / 1000,
+            0
+        )
+    }
+    pub fn set_tdp(&self, t: Tdp) -> bool {
+        set_sys(&self.cpu_pl1, t.cpu1 * 1000)
+            && set_sys(&self.cpu_pl2, t.cpu2 * 1000)
+            && set_sys(&self.gpu_pl1, t.gpu1 * 1000)
+            && set_sys(&self.gpu_pl2, t.gpu2 * 1000)
     }
 }
