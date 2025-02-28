@@ -154,6 +154,8 @@ impl ApiFan {
     /// 1 - control, 2 - auto
     pub fn get_fan_mode(&self) -> i64 {
         let out = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_FAN_MODE);
+        println!("MODE: {}", out);
+        if out < 0 { return 1 } // 异常不管了
         if out == 27664 || out == 27648 { 2 } else { 1 }
     }
     pub fn get_fan_speeds(&self) -> FanSpeeds {
