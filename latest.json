@@ -1,0 +1,15 @@
+{
+  "version": "0.4.2",
+  "notes": "自动发布的新版本",
+  "pub_date": "2025-02-28T11:37:43.369Z",
+  "platforms": {
+    "linux-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUQXFyWkU5K2R1UnJ1T0haYk8vMkVLNWJLTGtRQkF6UjJzTllDeWlnYndRVXJzYmpRUkYvaFVrS0FIaktVRlAzNTY3emo4TjNDS0dRYUpqcDNteDhNYml6UmdoNWpVdlFvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQwNzQyNTI5CWZpbGU6TlVDdG9vbF8wLjQuMl9hbWQ2NC5BcHBJbWFnZQpEZExlUWNJaytCTThYcTVzeEpDWXVMcjlXd2tjRHdodlZidTJYTzNWaHhlSGhnaERnTlFvc1Bnb1JyS0NQemhpYkttOEk4djdvZzZuNlIyRVlnQWxCZz09Cg==",
+      "url": "https://github.com/cyear/NUCtool/releases/download/NUCtool-v0.4.2/NUCtool_0.4.2_amd64.AppImage"
+    },
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUQXFyWkU5K2R1Umg1OUFGaXJzZUlvUys3RzB4ZmpjczhsWUQxYU1EZkxSL1Y5MVUya3lQYWhCeCs4Wk5WajVsejhBa2R3S0JCa2dGbytGdDdlVmxXU2Q0M2FOL2cvTVFZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzQwNzQyNjYwCWZpbGU6TlVDdG9vbF8wLjQuMl94NjRfemgtQ04ubXNpCktIeXNyTUxJYTM4S1I1UnBmd1RjeG1uei9odURxSDNaZldxMmpwVS9vU0I1NVVteng2alhjZms1MkZlanpBKzBGaHFQczhrMWNVNDFZcmY5NUV2RkF3PT0K",
+      "url": "https://github.com/cyear/NUCtool/releases/download/NUCtool-v0.4.2/NUCtool_0.4.2_x64_zh-CN.msi"
+    }
+  }
+}

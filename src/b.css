@@ -1,0 +1,141 @@
+*{
+    /* 初始化 取消页面元素的内外边距 */
+    margin: 0;
+    padding: 0;
+    /* 这个是告诉浏览器：你想要设置的边框和内边距的值是包含在总宽高内的 */
+    box-sizing: border-box;
+}
+body{
+    /* 弹性布局 水平、垂直居中 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* 100%窗口高度 */
+    height: 100vh;
+    position: relative;
+}
+.container{
+    /* 弹性布局 */
+    display: flex;
+    /* 允许换行 */
+    flex-wrap: wrap;
+    /* 将元素靠边对齐 */
+    justify-content: space-around;
+    background: transparent;
+    margin: auto;
+}
+.container .btn{
+    /* 相对定位 */
+    position: relative;
+    width: 200px;
+    height: 60px;
+    margin: 20px;
+    background: transparent;
+}
+.container .btn a{
+    /* 绝对定位 */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255,255,255,0.15);
+    /* 阴影 */
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: #fff;
+    z-index: 1;
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-align: center;
+    text-decoration: none;
+    /* 溢出隐藏 */
+    overflow: hidden;
+    transition: 0.5s;
+    /* 背景模糊 */
+    backdrop-filter: blur(15px);
+}
+.container .btn:hover a{
+    /* 字间距 */
+    letter-spacing: 5px;
+}
+/* 扫光效果 */
+.container .btn a::before{
+    content: "";
+    /* 绝对定位 */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    /* 渐变背景 透明到白色 */
+    background: linear-gradient(to right,transparent,rgba(255,255,255,0.15));
+    /* 沿X轴倾斜45度,向右平移0像素 */
+    transform: skewX(45deg) translateX(0);
+    /* 动画过渡 */
+    transition: 0.5s;
+}
+.container .btn:hover a::before{
+    /* 沿X轴倾斜45度,向右平移200% */
+    transform: skewX(45deg) translateX(200%);
+}
+/* 按钮上下两个发光层 */
+.container .btn::before,
+.container .btn::after{
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 10px;
+    /* 设置背景颜色,--c是自定义属性(颜色),通过var函数调用 */
+    background: var(--c);
+    /* 圆角 */
+    border-radius: 5px;
+    /* 设置阴影 */
+    box-shadow:
+        0 0 5px var(--c),
+        0 0 15px var(--c),
+        0 0 30px var(--c),
+        0 0 60px var(--c)
+    ;
+    transition: 0.5s;
+}
+.container .btn:hover::before,
+.container .btn:hover::after{
+    height: 50%;
+    width: 80%;
+    border-radius: 15px;
+    /* 动画延迟 */
+    transition-delay: 0.3s;
+}
+.container .btn::before{
+    bottom: -5px;
+}
+.container .btn:hover::before{
+    bottom: 0;
+}
+.container .btn::after{
+    top: -5px;
+}
+.container .btn:hover::after{
+    top: 0;
+}
+/* 分别设置自定义属性--c */
+.container .btn:nth-child(1)::before,
+.container .btn:nth-child(1)::after{
+    --c: #12c2e9;
+}
+.container .btn:nth-child(2)::before,
+.container .btn:nth-child(2)::after{
+    --c: #c471ed;
+}
+.container .btn:nth-child(3)::before,
+.container .btn:nth-child(3)::after{
+    --c: #f64f59;
+}
