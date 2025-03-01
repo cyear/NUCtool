@@ -39,6 +39,13 @@ pub static R_FAN_MODE: &str = "0x0000010000000751";
 pub static W_FAN_AC71H_TURBO: &str = "0x0000000000400751";
 pub static W_FAN_KC71F_TURBO: &str = "0x0000000000500751";
 pub static W_FAN_RESET: &str = "0x0000000000A00751";
+pub static R_AC_LED_COLOR: &str = "0x00000100000007EA";
+pub static R_DC_LED_COLOR: &str = "0x00000100000007EB";
+pub static W_AC_LED_COLOR_Y: &str = "0x00000000002A07EA";
+pub static W_AC_LED_COLOR_N: &str = "0x00000000000A07EA";
+pub static W_DC_LED_COLOR_Y: &str = "0x00000000002A07EB";
+pub static W_DC_LED_COLOR_N: &str = "0x00000000000A07EB";
+// RGB: i64 = 标准RGB值 / 51 * 10
 #[cfg(windows)]
 lazy_static! {
     pub static ref MODEL_ID: i64 = get_model();
@@ -69,7 +76,7 @@ pub struct FanData {
     pub right_fan: Vec<FanPoint>,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct FanSpeeds {
     pub left_fan_speed: i64,
     pub right_fan_speed: i64,
@@ -187,6 +194,37 @@ impl ApiFan {
         thread::sleep(Duration::from_secs_f64(0.5));
         let _ = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, format!("0x000000000{:02x}0786", t.tcc).as_str());
         true
+    }
+    pub fn set_ac_led_color_y(&self) -> bool {
+        let _ = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, W_AC_LED_COLOR_Y);
+        true
+    }
+    pub fn set_ac_led_color_n(&self) -> bool {
+        let _ = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, W_AC_LED_COLOR_N);
+        true
+    }
+    pub fn set_dc_led_color_y(&self) -> bool {
+        let _ = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, W_DC_LED_COLOR_Y);
+        true
+    }
+    pub fn set_dc_led_color_n(&self) -> bool {
+        let _ = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, W_DC_LED_COLOR_N);
+        true
+    }
+    /// 0 - Error, 1 - off, 2 - on
+    pub fn get_ac_led_color(&self) -> i64 {
+        match wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_AC_LED_COLOR) { 
+            2562 => 1,
+            2594 => 2,
+            _ => 0,
+        }
+    }
+    pub fn get_dc_led_color(&self) -> i64 {
+        match wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_DC_LED_COLOR) {
+            10 => 1,
+            64 => 2,
+            _ => 0,
+        }
     }
 }
 

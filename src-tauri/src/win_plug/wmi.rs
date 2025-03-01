@@ -18,7 +18,7 @@ pub fn wmi_security() {
             .ok()
             .context("Initializing COM")
             .expect("Initializing Error");
-        CoInitializeSecurity(
+        match CoInitializeSecurity(
             None,
             -1,
             None,
@@ -28,9 +28,14 @@ pub fn wmi_security() {
             None,
             EOAC_NONE,
             None,
-        )
-        .context("Initializing COM security")
-        .expect("Initializing COM security Error");
+        ) {
+            Ok(_) => {}
+            Err(e) => {
+                println!("Error: {e}");
+            }
+        }
+        // .context("Initializing COM security")
+        // .expect("Initializing COM security Error");
     }
     // println!("{}", "初始化 COM security".green());
 }

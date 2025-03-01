@@ -1,5 +1,12 @@
 # NUCtool(Changelog)
 
+## [0.4.3-<font color=red>Alpha</font>] - 2025-3-1
+#### 新特性
+- 支持 LED 灯光修改
+- 添加 test 自动化测试
+#### 修复
+- 托盘title
+
 ## [0.4.2-<font color=red>Alpha</font>] - 2025-2-28
 #### 新特性
 - Linux 支持 TDP 设置

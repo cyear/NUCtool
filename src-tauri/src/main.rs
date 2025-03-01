@@ -14,6 +14,8 @@ mod win_plug;
 #[cfg(unix)]
 mod linux_plug;
 mod plug;
+mod tests;
+
 use plug::{
     setup,
     struct_set::FanControlState,
