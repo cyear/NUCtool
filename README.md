@@ -66,7 +66,7 @@
 
 > [!CAUTION]
 > ```shell
-> Linux 必要步骤
+> # Linux 必要步骤
 > # 内核版本>=6.13 执行
 > git clone https://github.com/cyear/uniwill-laptop --branch kernel-6.13
 > # 内核版本>=6.10 执行
@@ -78,12 +78,11 @@
 > # 如出现严重问题，请立刻断电或者卸载模块(请不要改为开机自动加载)
 ```
 
-# 
-### Star History
+#### Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=cyear/NUCtool&type=Timeline)](https://star-history.com/#cyear/NUCtool&Timeline)]
+[![Star History Chart](https://api.star-history.com/svg?repos=cyear/NUCtool&type=Timeline)](https://star-history.com/#cyear/NUCtool&Timeline)
 
+#### Thank
 
-> 致谢 [Carey Evans(Rust)](https://users.rust-lang.org/u/carey/summary) 大佬
-> 
-> 致谢 [Wer-Wolf(uniwill-laptop)](https://github.com/Wer-Wolf/uniwill-laptop) 大佬
+###### 致谢 [Carey Evans(Rust)](https://users.rust-lang.org/u/carey/summary) 大佬
+###### 致谢 [Wer-Wolf(uniwill-laptop)](https://github.com/Wer-Wolf/uniwill-laptop) 大佬
