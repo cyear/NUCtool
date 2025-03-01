@@ -26,43 +26,28 @@
 > 本程序可能有严重缺陷, 请在保障安全情况下使用此程序
 >
 > 反馈前请看 [必要说明](assets/分析.md)
-# 
-|  Windows 支持  |   LAPAC71H   |   LAPKC71F   |
+
+| Windows/Linux 支持 |   LAPAC71H   |   LAPKC71F   |
 |:------------:|:------------:|:------------:|
-|     风扇控制     |      ✓       |      ✓       |
-|     异常恢复     |      ✓       |      ✓       |
-|    CPU L1    |      ✓       |      ☐       |
-|    CPU L2    |      ✓       |      ☐       |
-|    GPU L1    |      ✓       |      ✕       |
-|    GPU L2    |      ✓       |      ✕       |
-|   GPU MAX    |     100      |      ✕       |
-|     温度墙      |      ✓       |      ☐       |
-|   键盘彩色LED    |      *       |      *       |
-|   键盘自定义LED   |      *       |      *       |
-|     自动更新     |      ✓       |      ✓       |
-|     开机自启     |      ✓       |      ✓       |
-|              |              |              |
-|              |              |              |
-| **Linux 支持** | **LAPAC71H** | **LAPKC71F** |
-|     风扇控制     |      ✓       |      ☐       |
-|     异常恢复     |      ✓       |      ☐       |
-|    CPU L1    |      ✓       |      ☐       |
-|    CPU L2    |      ✓       |      ☐       |
-|    GPU L1    |      ✓       |      ✕       |
-|    GPU L2    |      ✓       |      ✕       |
-|   GPU MAX    |      85      |      ✕       |
-|     温度墙      |      ?       |      ✕       |
-|   键盘彩色LED    |      ?       |      ?       |
-|   键盘自定义LED   |      ?       |      ?       |
-|     自动更新     |      ✓       |      ✓       |
-|     开机自启     |      ☐       |      ☐       |
+|   风扇控制    |      ✓ ✓      |    ✓ ☐     |
+|   异常恢复    |      ✓ ✓      |    ✓ ☐     |
+|    CPU L1    |      ✓ ✓      |    ☐ ☐     |
+|    CPU L2    |      ✓ ✓      |    ☐ ☐     |
+|    GPU L1    |      ✓ ✓      |    ✕ ✕     |
+|    GPU L2    |      ✓ ✓      |    ✕ ✕     |
+|   GPU MAX    |     100 85     |   ✕ ✕     |
+|    温度墙     |      ✓ ?      |    ☐ ☐     |
+|  键盘彩色LED  |      * ?       |    * ?     |
+| 键盘自定义LED |      * ?       |    * ?     |
+|   自动更新    |      ✓ ✓       |    ✓ ✓    |
+|   开机自启    |      ✓ ☐      |    ✓ ☐     |
 
 `✓`: 支持 `✕`: 不支持 
 
 `☐`: 未测试 `*`: 等待更新 
 
 `?`: 也许支持但没必要支持
-# 
+
 > [!WARNING]
 > 有损坏硬件风险, 使用此程序即认为接受风险, 出现问题概不负责
 >
@@ -96,7 +81,7 @@
 # 
 ### Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=cyear/NUCtool&type=Timeline)](https://star-history.com/#cyear/NUCtool&Timeline)
+[![Star History Chart](https://api.star-history.com/svg?repos=cyear/NUCtool&type=Timeline)](https://star-history.com/#cyear/NUCtool&Timeline)]
 
 
 > 致谢 [Carey Evans(Rust)](https://users.rust-lang.org/u/carey/summary) 大佬
