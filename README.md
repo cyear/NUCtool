@@ -83,22 +83,21 @@
 > 3. 必要步骤: 请查看下面PS
 > 4. 使用教程同Windows(2-4 step)
 >
-
 > 致谢 [Carey Evans(Rust)](https://users.rust-lang.org/u/carey/summary) 大佬
 > 
 > 致谢 [Wer-Wolf(uniwill-laptop)](https://github.com/Wer-Wolf/uniwill-laptop) 大佬
 
-PS: Linux 请看这里
-```shell
-# 内核版本>=6.13 执行
-git clone https://github.com/cyear/uniwill-laptop --branch kernel-6.13
-# 内核版本>=6.10 执行
-git clone https://github.com/cyear/uniwill-laptop
-# 以下均可执行
-cd uniwill-laptop
-# 编译安装加载
-sudo sh u.sh
-# 如出现严重问题，请立刻断电或者卸载模块(请不要改为开机自动加载)
+> [!CAUTION]
+> ```shell
+> # 内核版本>=6.13 执行
+> git clone https://github.com/cyear/uniwill-laptop --branch kernel-6.13
+> # 内核版本>=6.10 执行
+> git clone https://github.com/cyear/uniwill-laptop
+> # 以下均可执行
+> cd uniwill-laptop
+> # 编译安装加载
+> sudo sh u.sh
+> # 如出现严重问题，请立刻断电或者卸载模块(请不要改为开机自动加载)
 ```
 
 # 
