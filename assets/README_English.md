@@ -11,7 +11,12 @@
 
 # NUCtool
 
-> Intel NUC X15 Series Tools for LAPAC71H, LAPKC71F and other models
+> Intel NUC X15 Series Tools for LAPAC71H, LAPKC71F and other models.
+
+> [!CAUTION]
+> This document may be out of date, please check the latest Chinese document.
+> 
+> This document was last updated on: Feb, 28, 2025.
 
 > [!NOTE]  
 > Updated casually; if you find it useful, please give it a ⭐.  
