@@ -52,6 +52,8 @@
 |    GPU L2    |      ✓       |      ✕       |
 |   GPU MAX    |      85      |      ✕       |
 |     温度墙      |      ?       |      ✕       |
+|   键盘彩色LED    |      ?       |      ?       |
+|   键盘自定义LED   |      ?       |      ?       |
 |     自动更新     |      ✓       |      ✓       |
 |     开机自启     |      ☐       |      ☐       |
 
@@ -59,36 +61,27 @@
 
 `☐`: 未测试 `*`: 等待更新 
 
-`?`: 支持但没必要更新
+`?`: 也许支持但没必要支持
 # 
 > [!WARNING]
 > 有损坏硬件风险, 使用此程序即认为接受风险, 出现问题概不负责
 >
 > 平台支持
 >
-> 1. Windows 10
-> 2. Windows 11
-> 3. Linux
+> 1. Windows 11 / Windows 10(依赖webview2)
+> 2. Linux(依赖make)
 >
 > Windows 使用教程(支持功能以实际为准)
-> 1. 非WIN11系统需检查是否安装webview2
-> 2. 首次使用需`调整风扇曲线`并点击`保存配置`
-> 3. 每次重新打开程序需要点击`加载配置`
-> 4. 点击`Start`
-> 5. 配置路径: `%AppData%\com.nuc.x15.fan.cyear.app`
+> 1. 首次使用需`调整风扇曲线`并点击`保存配置`
+> 2. 配置路径: `%AppData%\com.nuc.x15.fan.cyear.app`
 >
 > Linux 使用教程(支持功能以实际为准)
-> 1. 有损坏硬件风险, 使用此程序即认为接受风险, 出现问题概不负责
-> 2. 内核要求>=6.13(或>=6.10)
-> 3. 必要步骤: 请查看下面PS
-> 4. 使用教程同Windows(2-4 step)
->
-> 致谢 [Carey Evans(Rust)](https://users.rust-lang.org/u/carey/summary) 大佬
-> 
-> 致谢 [Wer-Wolf(uniwill-laptop)](https://github.com/Wer-Wolf/uniwill-laptop) 大佬
+> 1. 内核要求>=6.13(或>=6.10)
+> 2. 请看下方 Linux 必要步骤，使用同Windows(2-3)
 
 > [!CAUTION]
 > ```shell
+> Linux 必要步骤
 > # 内核版本>=6.13 执行
 > git clone https://github.com/cyear/uniwill-laptop --branch kernel-6.13
 > # 内核版本>=6.10 执行
@@ -104,3 +97,8 @@
 ### Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=cyear/NUCtool&type=Timeline)](https://star-history.com/#cyear/NUCtool&Timeline)
+
+
+> 致谢 [Carey Evans(Rust)](https://users.rust-lang.org/u/carey/summary) 大佬
+> 
+> 致谢 [Wer-Wolf(uniwill-laptop)](https://github.com/Wer-Wolf/uniwill-laptop) 大佬
