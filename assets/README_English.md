@@ -21,16 +21,16 @@
 > [!NOTE]
 > Updates are not guaranteed. If you find it useful, please give a ⭐.
 >
-> [English Document](./assets/README_English.md)
+> [English Document](./README_English.md)
 >
-> [Detailed Update Notes](./assets/NUCtoolChange.md)
+> [Detailed Update Notes](./NUCtoolChange.md)
 
 > [!WARNING]
 > There is a risk of hardware damage. By using this program, you accept the risk. Any issues arising are at your own responsibility.
 >
 > This program may have serious defects. Please ensure safety before using it.
 >
-> Before submitting feedback, please read [Essential Information](assets/分析.md).
+> Before submitting feedback, please read [Essential Information](./分析.md).
 
 | Windows/Linux Support |   LAPAC71H   |   LAPKC71F   |
 |:----------------:|:------------:|:------------:|
