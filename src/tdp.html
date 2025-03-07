@@ -1,54 +1,334 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fan Controller</title>
-    <link rel="stylesheet" href="b.css"></link>
-</head>
-<body style="background: rgb(255, 255, 255, 0.00);" oncontextmenu="return false;" onselectstart="return false;" ondragstart="return false;" >
-    <div>
-        <h1>TDP 测试(0可能为未限制/未解锁/无法读取/等原因)</h1>
-        <div style="margin: auto; text-align: center;">
-            <h3>CPU/L1:</h3>
-            <input type="text" style="margin: auto;padding: 0.85em 0.15em;background: transparent;color: #595F6E;" id="cpu1" placeholder="TDP/W"></input>
-            <h3>CPU/L2:</h3>
-            <input type="text" style="margin: auto;padding: 0.85em 0.15em;background: transparent;color: #595F6E;" id="cpu2" placeholder="TDP/W"></input>
-            <h3>GPU/L1(仅限 Arc GPU):</h3>
-            <input type="text" style="margin: auto;padding: 0.85em 0.15em;background: transparent;color: #595F6E;" id="gpu1" placeholder="TDP/W"></input>
-            <h3>GPU/L2(仅限 Arc GPU):</h3>
-            <input type="text" style="margin: auto;padding: 0.85em 0.15em;background: transparent;color: #595F6E;" id="gpu2" placeholder="TDP/W"></input>
-            <h3>温度墙偏移量:</h3>
-            <input type="text" style="margin: auto;padding: 0.85em 0.15em;background: transparent;color: #595F6E;" id="tcc" placeholder="TCC/℃"></input>
-            <h3 style="color: red">警告！谨慎使用</h3>
-            <button style="margin: auto;padding: 0.85em 0.15em;background: transparent;color: #595F6E;" id="b">应用更改</button>
-        </div>
-    </div>
-<script>
-    const gpu1 = document.getElementById("gpu1");
-    const gpu2 = document.getElementById("gpu2");
-    const cpu1 = document.getElementById("cpu1");
-    const cpu2 = document.getElementById("cpu2");
-    const tcc = document.getElementById("tcc");
-    async function get() {
-        const [c1, c2, g1, g2, cc] = await window.__TAURI__.core.invoke('get_tdp');
-        console.log(c1, c2, g1, g2, cc);
-        // console.log("cpu l1:" + cpu1.value, "\ncpu l2:" + cpu2.value, "\ngpu l1:" + gpu1.value, "\ngpu l2:" + gpu2.value, "\ntcc:" + tcc.value);
-        cpu1.value = c1;
-        cpu2.value = c2;
-        gpu1.value = g1;
-        gpu2.value = g2;
-        tcc.value = cc;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fan Controller</title>
+<!--  <link rel="stylesheet" href="b.css">-->
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
     }
+    body {
+      background: white;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 800px;
+      margin: auto;
+      height: 100vh;
+      padding: 20px;
+      overflow: auto;
+      background: transparent;
+      text-align: center;
+    }
+    h1, h3 {
+      color: #000;
+      margin-bottom: 10px;
+    }
+    /* 输入框统一为 250px，添加模糊效果 */
+    input[type="text"] {
+      width: 250px;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1em;
+      outline: none;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(5px);
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    /* 按钮统一为 250px，并居中显示 */
+    button {
+      width: 250px;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+      color: #fff;
+      font-size: 1em;
+      display: block;
+      margin: 10px auto;
+    }
+    /* 应用 RGB 按钮默认为红色 */
+    .red-button {
+      background: red;
+    }
+    button {
+      background: red;
+    }
+    /* CPU/GPU 输入区域 */
+    .row {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .column {
+      width: 45%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    /* RGB 设置区整体布局 */
+    .rgb-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      align-items: flex-start;
+      margin-top: 20px;
+    }
+    .rgb-settings {
+      flex: 1;
+      text-align: left;
+    }
+    .rgb-toggle-container {
+      flex: 1;
+      text-align: right;
+    }
+    .rgb-input {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .rgb-input label {
+      width: 20px;
+      text-align: left;
+    }
+    .rgb-input input[type=range] {
+      flex: 1;
+      margin: 0 10px;
+      -webkit-appearance: none;
+      height: 8px;
+      border-radius: 5px;
+      backdrop-filter: blur(3px);
+    }
+    .rgb-input span {
+      width: 30px;
+      text-align: left;
+    }
+    /* RGB 滑条样式：不同颜色 */
+    #rgb_r::-webkit-slider-runnable-track {
+      background: rgba(255,0,0,0.5);
+    }
+    #rgb_g::-webkit-slider-runnable-track {
+      background: rgba(0,255,0,0.5);
+    }
+    #rgb_b::-webkit-slider-runnable-track {
+      background: rgba(0,0,255,0.5);
+    }
+    .rgb-input input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      border: 1px solid #999;
+      margin-top: -6px;
+    }
+    /* 禁用状态下滑条样式 */
+    input[type=range]:disabled::-webkit-slider-runnable-track {
+      background: #ccc !important;
+    }
+    input[type=range]:disabled::-webkit-slider-thumb {
+      background: #eee;
+    }
+    /* 彩色预览框 */
+    .color-preview {
+      width: 100px;
+      height: 100px;
+      margin: 10px auto;
+      border-radius: 10px;
+      background: rgb(0, 0, 0);
+      border: 2px solid #000;
+    }
+    /* 彩色模式开关样式 */
+    .toggle-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .toggle {
+      width: 50px;
+      height: 25px;
+      background: #777;
+      border-radius: 20px;
+      position: relative;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .toggle:before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: #fff;
+      border-radius: 50%;
+      top: 50%;
+      left: 5px;
+      transform: translateY(-50%);
+      transition: 0.3s;
+    }
+    .toggle.active {
+      background: #4CAF50;
+    }
+    .toggle.active:before {
+      left: 25px;
+    }
+  </style>
+</head>
+<!--<body>-->
+
+<body style="background: rgb(255, 255, 255, 0.00);" oncontextmenu="return false;" onselectstart="return false;" ondragstart="return false;" >
+  <div class="container">
+    <h1>TDP 测试</h1>
+    <div class="row">
+      <div class="column">
+        <h3>CPU/L1:</h3>
+        <input type="text" id="cpu1" placeholder="TDP/W">
+        <h3>CPU/L2:</h3>
+        <input type="text" id="cpu2" placeholder="TDP/W">
+      </div>
+      <div class="column">
+        <h3>GPU/L1 (仅限 Arc GPU):</h3>
+        <input type="text" id="gpu1" placeholder="TDP/W">
+        <h3>GPU/L2 (仅限 Arc GPU):</h3>
+        <input type="text" id="gpu2" placeholder="TDP/W">
+      </div>
+    </div>
+    <h3>温度墙偏移量:</h3>
+    <input type="text" id="tcc" placeholder="TCC/℃">
+    <button id="a">获取TDP</button>
+    <button id="b">应用更改</button>
+
+    <h3>RGB 颜色选择</h3>
+    <div class="rgb-container">
+      <!-- 左侧：RGB 滑动设置 -->
+      <div class="rgb-settings">
+        <div class="rgb-input">
+          <label for="rgb_r">R</label>
+          <input type="range" id="rgb_r" min="0" max="50" value="0">
+          <span id="r_val">0</span>
+        </div>
+        <div class="rgb-input">
+          <label for="rgb_g">G</label>
+          <input type="range" id="rgb_g" min="0" max="50" value="0">
+          <span id="g_val">0</span>
+        </div>
+        <div class="rgb-input">
+          <label for="rgb_b">B</label>
+          <input type="range" id="rgb_b" min="0" max="50" value="0">
+          <span id="b_val">0</span>
+        </div>
+        <button id="rgb_button" class="red-button">应用 RGB</button>
+      </div>
+      <!-- 右侧：彩色模式开关及颜色预览 -->
+      <div class="rgb-toggle-container">
+        <div class="color-preview" id="colorPreview"></div>
+        <div class="toggle-container">
+          <div class="toggle" id="rgb_toggle"></div>
+          <span>彩色模式</span>
+        </div>
+      </div>
+    </div>
+  </div>
+<script>
+  const gpu1 = document.getElementById("gpu1");
+  const gpu2 = document.getElementById("gpu2");
+  const cpu1 = document.getElementById("cpu1");
+  const cpu2 = document.getElementById("cpu2");
+  const tcc = document.getElementById("tcc");
+  // console.log(gpu1, gpu2, tcc);
+  const a = document.getElementById("a");
+  const b = document.getElementById('b');
+  const rInput = document.getElementById("rgb_r");
+  const gInput = document.getElementById("rgb_g");
+  const bInput = document.getElementById("rgb_b");
+  const rVal = document.getElementById("r_val");
+  const gVal = document.getElementById("g_val");
+  const bVal = document.getElementById("b_val");
+  const colorPreview = document.getElementById("colorPreview");
+  const rgbButton = document.getElementById("rgb_button");
+  const toggle = document.getElementById("rgb_toggle");
+  // 更新颜色预览和数值显示
+  function updateColorPreview() {
+    const r = Math.round(rInput.value * 5.1);
+    const g = Math.round(gInput.value * 5.1);
+    const b = Math.round(bInput.value * 5.1);
+    // 当彩色模式未开启时，预览框显示滑条颜色转换后的值
+    if (!toggle.classList.contains('active')) {
+      colorPreview.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+    }
+    rVal.textContent = rInput.value;
+    gVal.textContent = gInput.value;
+    bVal.textContent = bInput.value;
+  }
+
+  [rInput, gInput, bInput].forEach(input => {
+    input.addEventListener('input', updateColorPreview);
+    input.addEventListener('change', updateColorPreview);
+  });
+  updateColorPreview();
+
+  // 彩色模式切换
+  toggle.addEventListener('click', () => {
+    toggle.classList.toggle('active');
+    const disabled = toggle.classList.contains('active');
+    rInput.disabled = disabled;
+    gInput.disabled = disabled;
+    bInput.disabled = disabled;
+    rgbButton.disabled = disabled;
+    if (disabled) {
+      // 彩色模式打开时，预览框显示灰色，滑条和应用按钮锁定为灰色
+      rgbButton.style.background = 'gray';
+      colorPreview.style.backgroundColor = 'gray';
+    } else {
+      rgbButton.style.background = 'red';
+      updateColorPreview();
+    }
+  });
+
+  rgbButton.addEventListener('click', async () => {
+    if(rgbButton.disabled) return;
+    const r = Math.round(rInput.value * 5.1);
+    const g = Math.round(gInput.value * 5.1);
+    const b = Math.round(bInput.value * 5.1);
+    await window.__TAURI__.core.invoke('set_rgb', { r, g, b });
+  });
+
+  async function get() {
+    // console.log(window.__TAURI__);
+    const [c1, c2, g1, g2, cc] = await window.__TAURI__.core.invoke('get_tdp');
+    console.log(c1, c2, g1, g2, cc);
+    // console.log("cpu l1:" + cpu1.value, "\ncpu l2:" + cpu2.value, "\ngpu l1:" + gpu1.value, "\ngpu l2:" + gpu2.value, "\ntcc:" + tcc.value);
+    cpu1.value = c1;
+    cpu2.value = c2;
+    gpu1.value = g1;
+    gpu2.value = g2;
+    tcc.value = cc;
+  }
+  b.addEventListener('click', async () => {
+    const t = {cpu1: parseInt(cpu1.value), cpu2: parseInt(cpu2.value), gpu1: parseInt(gpu1.value), gpu2: parseInt(gpu2.value), tcc: parseInt(tcc.value)};
+    console.log(t);
+    window.__TAURI__.core.invoke('set_tdp', { t });
+    // location.reload();
     get();
-    const b = document.getElementById('b');
-    b.addEventListener('click', async () => {
-        const t = {cpu1: parseInt(cpu1.value), cpu2: parseInt(cpu2.value), gpu1: parseInt(gpu1.value), gpu2: parseInt(gpu2.value), tcc: parseInt(tcc.value)};
-        console.log(t);
-        await window.__TAURI__.core.invoke('set_tdp', { t });
-        // location.reload();
-        get();
-    })
+  });
+  a.addEventListener('click', async () => {
+    get();
+  })
 </script>
 </body>
 </html>

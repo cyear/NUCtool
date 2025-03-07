@@ -85,12 +85,19 @@ pub struct FanSpeeds {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Tdp {
+pub struct TDP {
     pub cpu1: i64,
     pub cpu2: i64,
     pub gpu1: i64,
     pub gpu2: i64,
     pub tcc: i64,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RGB {
+    r: i64,
+    g: i64,
+    b: i64
 }
 
 pub struct FanControlState {
@@ -183,7 +190,7 @@ impl ApiFan {
             wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_TDP_TCC)
         )
     }
-    pub fn set_tdp(&self, t: Tdp) -> bool {
+    pub fn set_tdp(&self, t: TDP) -> bool {
         let _ = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, format!("0x000000000{:02x}0783", t.cpu1).as_str());
         thread::sleep(Duration::from_secs_f64(0.5));
         let _ = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, format!("0x000000000{:02x}0784", t.cpu2).as_str());

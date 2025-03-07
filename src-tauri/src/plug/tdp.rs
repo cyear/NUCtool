@@ -4,7 +4,7 @@
 * @Description: 
 * @Version: 1
 **/
-use crate::plug::struct_set::{ApiFan, Tdp};
+use crate::plug::struct_set::{RGB, TDP, ApiFan};
 
 #[tauri::command]
 pub fn get_tdp() -> (i64, i64, i64, i64, i64) {
@@ -12,6 +12,11 @@ pub fn get_tdp() -> (i64, i64, i64, i64, i64) {
 }
 
 #[tauri::command]
-pub fn set_tdp(t: Tdp) {
+pub fn set_tdp(t: TDP) {
     ApiFan::init().set_tdp(t);
+}
+
+#[tauri::command]
+pub fn set_rgb(rgb: RGB) {
+    println!("{:#?}", rgb);
 }

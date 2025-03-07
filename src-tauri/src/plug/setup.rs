@@ -152,5 +152,8 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn Error>> {
     #[cfg(windows)]
     window_vibrancy::apply_acrylic(&window, Some((18, 18, 18, 125)))
         .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
+    #[cfg(windows)]
+    window_vibrancy::apply_acrylic(&app.get_webview_window("tdp").unwrap(), Some((18, 18, 18, 125)))
+        .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
     Ok(())
 }
