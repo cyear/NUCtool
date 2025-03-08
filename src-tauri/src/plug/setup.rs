@@ -99,7 +99,7 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn Error>> {
     let _tray = TrayIconBuilder::new()
         .menu(&menu)
         .show_menu_on_left_click(false)
-        .title("NUCtool")
+        // .title("NUCtool")
         .icon(app.default_window_icon().unwrap().clone())
         .on_menu_event(move |app, event| match event.id().as_ref() {
             "h" => {

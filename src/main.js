@@ -224,6 +224,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const fanData = getFanCurveData();
         window.__TAURI__.core.invoke('save_fan_config', {fanData});
     });
+
+    const autostartEnable = await window.__TAURI__.core.invoke('plugin:autostart|is_enabled');
+    console.log(autostartEnable);
+    if(autostartEnable) {
+        console.log("自动运行");
+        // loadConfigData();
+        loadConfigButton.click();
+        startStopButton.click();
+    }
+
 });
 
 // 获取所有点信息并传递给 Rust

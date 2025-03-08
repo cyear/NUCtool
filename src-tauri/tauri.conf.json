@@ -17,7 +17,7 @@
     "createUpdaterArtifacts": true,
     "windows": {
       "webviewInstallMode": {
-        "type": "skip"
+        "type": "downloadBootstrapper"
       },
       "wix": {
         "language": "zh-CN"

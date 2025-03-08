@@ -95,9 +95,9 @@ pub struct TDP {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RGB {
-    r: i64,
-    g: i64,
-    b: i64
+    pub(crate) r: i64,
+    pub(crate) g: i64,
+    pub(crate) b: i64
 }
 
 pub struct FanControlState {
@@ -169,7 +169,7 @@ impl ApiFan {
     pub fn get_fan_mode(&self) -> i64 {
         let out = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_FAN_MODE);
         println!("MODE: {}", out);
-        if out < 0 { return 1 } // 异常不管了
+        if out <= 0 { return 1 } // 异常不管了
         if out == 27664 || out == 27648 { 2 } else { 1 }
     }
     pub fn get_fan_speeds(&self) -> FanSpeeds {
@@ -220,17 +220,27 @@ impl ApiFan {
     }
     /// 0 - Error, 1 - off, 2 - on
     pub fn get_ac_led_color(&self) -> i64 {
-        match wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_AC_LED_COLOR) { 
-            2562 => 1,
-            2594 => 2,
-            _ => 0,
+        let out = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_AC_LED_COLOR);
+        match out & 0xff {
+            2 => 1,
+            4 => 1,
+            34 => 2,
+            36 => 2,
+            _ => {
+                println!("COLOR AC ERROR: {}", out);
+                0
+            },
         }
     }
     pub fn get_dc_led_color(&self) -> i64 {
-        match wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_DC_LED_COLOR) {
+        let out =wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_DC_LED_COLOR); 
+        match out {
             10 => 1,
             64 => 2,
-            _ => 0,
+            _ => { 
+                println!("COLOR DC ERROR: {}", out);
+                0
+            },
         }
     }
 }
