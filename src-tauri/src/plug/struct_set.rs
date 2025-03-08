@@ -85,12 +85,19 @@ pub struct FanSpeeds {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Tdp {
+pub struct TDP {
     pub cpu1: i64,
     pub cpu2: i64,
     pub gpu1: i64,
     pub gpu2: i64,
     pub tcc: i64,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RGB {
+    pub(crate) r: i64,
+    pub(crate) g: i64,
+    pub(crate) b: i64
 }
 
 pub struct FanControlState {
@@ -162,7 +169,7 @@ impl ApiFan {
     pub fn get_fan_mode(&self) -> i64 {
         let out = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_FAN_MODE);
         println!("MODE: {}", out);
-        if out < 0 { return 1 } // 异常不管了
+        if out <= 0 { return 1 } // 异常不管了
         if out == 27664 || out == 27648 { 2 } else { 1 }
     }
     pub fn get_fan_speeds(&self) -> FanSpeeds {
@@ -183,7 +190,7 @@ impl ApiFan {
             wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_TDP_TCC)
         )
     }
-    pub fn set_tdp(&self, t: Tdp) -> bool {
+    pub fn set_tdp(&self, t: TDP) -> bool {
         let _ = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, format!("0x000000000{:02x}0783", t.cpu1).as_str());
         thread::sleep(Duration::from_secs_f64(0.5));
         let _ = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, format!("0x000000000{:02x}0784", t.cpu2).as_str());
@@ -213,17 +220,27 @@ impl ApiFan {
     }
     /// 0 - Error, 1 - off, 2 - on
     pub fn get_ac_led_color(&self) -> i64 {
-        match wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_AC_LED_COLOR) { 
-            2562 => 1,
-            2594 => 2,
-            _ => 0,
+        let out = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_AC_LED_COLOR);
+        match out & 0xff {
+            2 => 1,
+            4 => 1,
+            34 => 2,
+            36 => 2,
+            _ => {
+                println!("COLOR AC ERROR: {}", out);
+                0
+            },
         }
     }
     pub fn get_dc_led_color(&self) -> i64 {
-        match wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_DC_LED_COLOR) {
+        let out =wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_DC_LED_COLOR); 
+        match out {
             10 => 1,
             64 => 2,
-            _ => 0,
+            _ => { 
+                println!("COLOR DC ERROR: {}", out);
+                0
+            },
         }
     }
 }

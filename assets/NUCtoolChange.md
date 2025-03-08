@@ -1,11 +1,15 @@
 # NUCtool(Changelog)
 
-## [0.4.3-<font color=red>Alpha</font>] - 2025-3-1
+## [0.4.3-<font color=red>Alpha</font>] - 2025-3-8
 #### 新特性
-- 支持 LED 灯光修改
+- ~~支持 LED 灯光修改~~
+- 支持键盘彩虹模式
 - 添加 test 自动化测试
+- 支持自动自启动运行(需要手动点击UAC, 以及关闭主窗口)
 #### 修复
-- 托盘title
+- ~~托盘title~~
+- webview2 更改为下载引导程序安装
+- 优化风扇异常逻辑(Beta, 去除不必要操作，添加延迟等)
 
 ## [0.4.2-<font color=red>Alpha</font>] - 2025-2-28
 #### 新特性

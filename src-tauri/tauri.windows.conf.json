@@ -24,9 +24,9 @@
         "url": "/tdp",
         "title": "NUCtool Debug",
         "width": 800,
-        "height": 500,
+        "height": 700,
         "visible": false,
-        "transparent": false
+        "transparent": true
       }
     ],
     "security": {

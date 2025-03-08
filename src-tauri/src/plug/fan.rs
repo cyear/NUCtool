@@ -67,10 +67,10 @@ pub fn cpu_temp(left: &Option<&serde_json::Value>, right: &Option<&serde_json::V
         return;
     }
     if driver.get_fan_mode() == 2 {
-        fan_reset();
-        thread::sleep(Duration::from_secs_f64(0.5));
+        // fan_reset();
+        thread::sleep(Duration::from_secs_f64(1.5));
         fan_init();
-        thread::sleep(Duration::from_secs_f64(0.5));
+        thread::sleep(Duration::from_secs_f64(2.5));
         println!("风扇异常自动恢复: {}", driver.set_fan_control());
     }
     let (mut temp_old_l, mut speed_old_l) = (0i64, 0i64);

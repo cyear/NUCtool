@@ -21,7 +21,7 @@ use plug::{
     struct_set::FanControlState,
     config::{save_fan_config, load_fan_config},
     fan::{fan_reset, get_fan_speeds, start_fan_control, stop_fan_control},
-    tdp::{get_tdp, set_tdp},
+    tdp::{get_tdp, set_tdp, set_rgb, get_rgb, set_rgb_color_y, set_rgb_color_n, get_rgb_color},
 };
 
 #[cfg(windows)]
@@ -71,6 +71,11 @@ fn main() {
             get_fan_speeds,
             get_tdp,
             set_tdp,
+            set_rgb,
+            get_rgb,
+            set_rgb_color_y,
+            set_rgb_color_n,
+            get_rgb_color
         ])
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {

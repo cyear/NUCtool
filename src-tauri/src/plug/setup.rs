@@ -99,7 +99,7 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn Error>> {
     let _tray = TrayIconBuilder::new()
         .menu(&menu)
         .show_menu_on_left_click(false)
-        .title("NUCtool")
+        // .title("NUCtool")
         .icon(app.default_window_icon().unwrap().clone())
         .on_menu_event(move |app, event| match event.id().as_ref() {
             "h" => {
@@ -151,6 +151,9 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn Error>> {
         }).build(app)?;
     #[cfg(windows)]
     window_vibrancy::apply_acrylic(&window, Some((18, 18, 18, 125)))
+        .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
+    #[cfg(windows)]
+    window_vibrancy::apply_acrylic(&app.get_webview_window("tdp").unwrap(), Some((18, 18, 18, 125)))
         .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
     Ok(())
 }
