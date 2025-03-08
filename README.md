@@ -20,13 +20,13 @@
 >
 > [详细更新说明](./assets/NUCtoolChange.md)
 >
-> 这里有话说了
+> 这里有话说了:
 > 
 > 你: 主播主播有没有比这个还好用的软件
 >
 > 主播: 兄弟有的有的, 这种软件还有两种
 >
-> (机械革命控制台)/[tuxedo-control-center Linux](https://github.com/tuxedocomputers/tuxedo-control-center)
+> [机械革命控制台 windows](http://mechrevo.com/)/[tuxedo-control-center Linux](https://github.com/tuxedocomputers/tuxedo-control-center)
 
 > [!WARNING]
 > 有损坏硬件风险, 使用此程序即认为接受风险, 出现问题概不负责
