@@ -1,0 +1,36 @@
+{
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "NUCtool",
+        "width": 930,
+        "height": 580,
+        "visible": true,
+        "transparent": true
+      },
+      {
+        "label": "splashscreen",
+        "url": "/splashscreen",
+        "title": "NUCtool Splashscreen",
+        "width": 800,
+        "height": 500,
+        "visible": false,
+        "transparent": true
+      },
+      {
+        "label": "tdp",
+        "url": "/tdp",
+        "title": "NUCtool Debug",
+        "width": 800,
+        "height": 700,
+        "visible": false,
+        "transparent": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  }
+}
