@@ -12,6 +12,70 @@ use windows::Win32::System::Wmi::{
 use wmi::{COMLibrary, WMIConnection};
 use colored::Colorize;
 
+use std::ptr;
+use winapi::shared::minwindef::{LRESULT, UINT, WPARAM, LPARAM};
+use winapi::shared::windef::HWND;
+use winapi::um::winuser::{DefWindowProcW, RegisterClassW, CreateWindowExW, MSG, GetMessageW, TranslateMessage, DispatchMessageW, WM_QUERYENDSESSION, WM_ENDSESSION, WNDCLASSW, CS_HREDRAW, CS_VREDRAW}; //, PostQuitMessage};
+use winapi::um::libloaderapi::GetModuleHandleW;
+use crate::plug::struct_set::ApiFan;
+
+unsafe extern "system" fn window_proc(hwnd: HWND, msg: UINT, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
+    match msg {
+        WM_QUERYENDSESSION => {
+            println!("系统即将关机, 恢复默认");
+            let api = ApiFan::init();
+            while api.get_fan_mode() == 1 {
+                api.set_fan_auto();
+            }
+            1
+        }
+        WM_ENDSESSION => {
+            if wparam == 1 {
+                println!("Windows 关机中...");
+            }
+            0
+        }
+        _ => DefWindowProcW(hwnd, msg, wparam, lparam),
+    }
+}
+
+pub fn power_off() {
+    unsafe {
+        let class_name = [b'M' as u16, b'y' as u16, b'C' as u16, b'l' as u16, b'a' as u16, b's' as u16, b's' as u16, 0];
+
+        let h_instance = GetModuleHandleW(ptr::null());
+
+        let wnd_class = WNDCLASSW {
+            style: CS_HREDRAW | CS_VREDRAW,
+            lpfnWndProc: Some(window_proc),
+            hInstance: h_instance,
+            lpszClassName: class_name.as_ptr(),
+            ..std::mem::zeroed()
+        };
+
+        RegisterClassW(&wnd_class);
+
+        let hwnd = CreateWindowExW(
+            0,
+            class_name.as_ptr(),
+            ptr::null(),
+            0,
+            0, 0, 0, 0,
+            ptr::null_mut(),
+            ptr::null_mut(),
+            h_instance,
+            ptr::null_mut(),
+        );
+
+        let mut msg: MSG = std::mem::zeroed();
+        while GetMessageW(&mut msg, hwnd, 0, 0) > 0 {
+            TranslateMessage(&msg);
+            DispatchMessageW(&msg);
+        }
+    }
+}
+
+
 pub fn wmi_security() {
     unsafe {
         CoInitializeEx(None, COINIT_MULTITHREADED)

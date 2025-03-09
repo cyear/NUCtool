@@ -1,5 +1,9 @@
 # NUCtool(Changelog)
 
+## [0.4.4] - 2025-3-9
+#### 新特性
+- Windows 关机前恢复风扇
+
 ## [0.4.3-<font color=red>Alpha</font>] - 2025-3-8
 #### 新特性
 - ~~支持 LED 灯光修改~~
