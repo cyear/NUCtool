@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fan Controller</title>
+    <link rel="stylesheet" href="b.css">
+    <script src="assets/chart.js"></script>
+    <script src="assets/chartjs-plugin-dragdata.js"></script>
+    <style>
+        #startStopButton {
+            width: 150px;
+            height: 50px;
+            font-size: 20px;
+            background-color: rgb(255, 182, 193, 0.3);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        /*#startStopButton.stopped {*/
+        /*    background-color: red;*/
+        /*}*/
+        #saveConfigButton {
+            width: 150px;
+            height: 50px;
+            font-size: 20px;
+            background-color: rgb(99, 180, 240, 0.3);
+            color: white;
+            border: none;
+            border-radius: 10px;
+        }
+        #loadConfigButton {
+            width: 150px;
+            height: 50px;
+            font-size: 20px;
+            background-color: rgb(99, 180, 240, 0.3);
+            color: white;
+            border: none;
+            border-radius: 10px;
+          }
+    </style>
+</head>
+<body style="background: rgb(255, 255, 255, 0.00);" oncontextmenu="return false;" onselectstart="return false;" ondragstart="return false;" >
+    <div style="display: flex;flex-wrap: wrap;">
+        <div style="width: 50%;">
+            <canvas id="leftFanCurve"></canvas>
+            <canvas id="rightFanCurve"></canvas>
+        </div>
+        <div style="width: 50%;margin: auto;">
+            <canvas id="left_fan_speed"></canvas> <!-- 左风扇实时转速 -->
+            <canvas id="right_fan_speed"></canvas> <!-- 右风扇实时转速 -->
+        </div>
+        <div class="container">
+            <button id="startStopButton" class="btn"><a>Start</a></button>
+            <button id="loadConfigButton" class="btn"><a>加载配置</a></button>
+            <button id="saveConfigButton" class="btn"><a>保存配置</a></button>
+        </div>
+    </div>
+
+    <script src="main.js" type="module"></script>
+</body>
+</html>

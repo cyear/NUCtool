@@ -1,0 +1,24 @@
+{
+  "identifier": "migrated",
+  "description": "permissions that were migrated from v1",
+  "local": true,
+  "platforms": [
+    "windows",
+    "linux"
+  ],
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "shell:allow-execute",
+    "shell:allow-open",
+    "fs:default",
+    "shell:default",
+    "fs:default",
+    "dialog:default",
+    "notification:allow-is-permission-granted",
+    "updater:allow-check",
+    "updater:allow-download-and-install"
+  ]
+}
