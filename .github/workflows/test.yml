@@ -51,8 +51,8 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          tagName: NUCtool-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
-          releaseName: "NUCtool fix v__VERSION__"
+          tagName: NUCtool-v__VERSION__-fix # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          releaseName: "NUCtool v__VERSION__-fix"
           releaseBody: "自动发布的修复版本"
           releaseDraft: true
           prerelease: false
