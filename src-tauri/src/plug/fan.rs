@@ -66,7 +66,7 @@ pub fn cpu_temp(left: &Option<&serde_json::Value>, right: &Option<&serde_json::V
         println!("温度读取异常, cpu: {:?}, gpu: {:?}", cpu_out, gpu_out);
         return;
     }
-    if driver.get_fan_mode() == 2 {
+    if driver.get_fan_mode() == 2 && cpu_out < 74 && gpu_out < 74 {
         // fan_reset();
         thread::sleep(Duration::from_secs_f64(1.5));
         fan_init();
@@ -146,7 +146,7 @@ pub fn start_fan_control(fan_data: serde_json::Value, state: State<FanControlSta
         while *is_running.lock().unwrap() {
             println!("---------------------------------------------------------------");
             cpu_temp(&fan_data.get("left_fan"), &fan_data.get("right_fan"), &driver);
-            thread::sleep(Duration::from_secs(3));
+            thread::sleep(Duration::from_secs_f64(3.5));
         }
         println!("---------------------------------------------------------------");
     });
@@ -157,7 +157,7 @@ pub fn stop_fan_control(state: State<FanControlState>) {
     let mut is_running = state.is_running.lock().unwrap();
     *is_running = false; // 停止风扇控制
     thread::spawn(move || {
-        thread::sleep(Duration::from_secs(2));
+        thread::sleep(Duration::from_secs(1));
         fan_reset();
     });
     println!("{}", "Fan control stopped.".green());
