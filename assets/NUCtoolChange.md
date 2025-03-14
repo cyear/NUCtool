@@ -1,7 +1,7 @@
 # NUCtool(Changelog)
 
 ## [0.4.4] - 2025-3-14
-####修复
+#### 修复
 - 关闭默认自启动
 
 ## [0.4.3-<font color=red>Alpha</font>] - 2025-3-8
