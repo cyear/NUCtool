@@ -79,7 +79,7 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn Error>> {
     let config_beta = config_dir.join("beta.config");
     if !config_beta.exists() {
         println!("beta.config 配置文件不存在");
-        fs::write(&config_beta, "1").map_err(|e| e.to_string())?;
+        fs::write(&config_beta, "0").map_err(|e| e.to_string())?;
     }
     if config_beta.exists() {
         let beta = fs::read_to_string(config_beta)
