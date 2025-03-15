@@ -1,0 +1,181 @@
+ * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      background: white;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 800px;
+      margin: auto;
+      height: 100vh;
+      padding: 20px;
+      overflow: auto;
+      background: transparent;
+      text-align: center;
+    }
+    h1, h3 {
+      color: #000;
+      margin-bottom: 10px;
+    }
+    /* 输入框统一为 250px，添加模糊效果 */
+    input[type="text"] {
+      width: 250px;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1em;
+      outline: none;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(5px);
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    /* 按钮统一为 250px，并居中显示 */
+    button {
+      width: 250px;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+      color: #fff;
+      font-size: 1em;
+      display: block;
+      margin: 10px auto;
+    }
+    /* 应用 RGB 按钮默认为红色 */
+    .red-button {
+      background: red;
+    }
+    button {
+      background: red;
+    }
+    /* CPU/GPU 输入区域 */
+    .row {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .column {
+      width: 45%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    /* RGB 设置区整体布局 */
+    .rgb-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      align-items: flex-start;
+      margin-top: 20px;
+    }
+    .rgb-settings {
+      flex: 1;
+      text-align: left;
+    }
+    .rgb-toggle-container {
+      flex: 1;
+      text-align: right;
+    }
+    .rgb-input {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .rgb-input label {
+      width: 20px;
+      text-align: left;
+    }
+    .rgb-input input[type=range] {
+      flex: 1;
+      margin: 0 10px;
+      -webkit-appearance: none;
+      height: 8px;
+      border-radius: 5px;
+      backdrop-filter: blur(3px);
+    }
+    .rgb-input span {
+      width: 30px;
+      text-align: left;
+    }
+    /* RGB 滑条样式：不同颜色 */
+    #rgb_r::-webkit-slider-runnable-track {
+      background: rgba(255,0,0,0.5);
+    }
+    #rgb_g::-webkit-slider-runnable-track {
+      background: rgba(0,255,0,0.5);
+    }
+    #rgb_b::-webkit-slider-runnable-track {
+      background: rgba(0,0,255,0.5);
+    }
+    .rgb-input input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      border: 1px solid #999;
+      margin-top: -6px;
+    }
+    /* 禁用状态下滑条样式 */
+    input[type=range]:disabled::-webkit-slider-runnable-track {
+      background: #ccc !important;
+    }
+    input[type=range]:disabled::-webkit-slider-thumb {
+      background: #eee;
+    }
+    /* 彩色预览框 */
+    .color-preview {
+      width: 100px;
+      height: 100px;
+      margin: 10px auto;
+      border-radius: 10px;
+      background: rgb(0, 0, 0);
+      border: 2px solid #000;
+    }
+    /* 彩色模式开关样式 */
+    .toggle-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .toggle {
+      width: 50px;
+      height: 25px;
+      background: #777;
+      border-radius: 20px;
+      position: relative;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .toggle:before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: #fff;
+      border-radius: 50%;
+      top: 50%;
+      left: 5px;
+      transform: translateY(-50%);
+      transition: 0.3s;
+    }
+    .toggle.active {
+      background: #4CAF50;
+    }
+    .toggle.active:before {
+      left: 25px;
+    }

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fan Controller</title>
+  <link rel="stylesheet" href="assets/tdp.css">
+</head>
+<!--<body>-->
+
+<body style="background: rgb(255, 255, 255, 0.00);" oncontextmenu="return false;" onselectstart="return false;" ondragstart="return false;" >
+  <div class="container">
+    <h1>TDP 测试</h1>
+    <div class="row">
+      <div class="column">
+        <h3>CPU/L1:</h3>
+        <input type="text" id="cpu1" placeholder="TDP/W">
+        <h3>CPU/L2:</h3>
+        <input type="text" id="cpu2" placeholder="TDP/W">
+      </div>
+      <div class="column">
+        <h3>GPU/L1 (仅限 Arc GPU):</h3>
+        <input type="text" id="gpu1" placeholder="TDP/W">
+        <h3>GPU/L2 (仅限 Arc GPU):</h3>
+        <input type="text" id="gpu2" placeholder="TDP/W">
+      </div>
+    </div>
+    <h3>温度墙偏移量:</h3>
+    <input type="text" id="tcc" placeholder="TCC/℃">
+    <button id="a">获取TDP</button>
+    <button id="b">应用更改</button>
+
+    <h3>RGB 颜色选择</h3>
+    <div class="rgb-container">
+      <!-- 左侧：RGB 滑动设置 -->
+      <div class="rgb-settings">
+        <div class="rgb-input">
+          <label for="rgb_r">R</label>
+          <input type="range" id="rgb_r" min="0" max="50" value="0">
+          <span id="r_val">0</span>
+        </div>
+        <div class="rgb-input">
+          <label for="rgb_g">G</label>
+          <input type="range" id="rgb_g" min="0" max="50" value="0">
+          <span id="g_val">0</span>
+        </div>
+        <div class="rgb-input">
+          <label for="rgb_b">B</label>
+          <input type="range" id="rgb_b" min="0" max="50" value="0">
+          <span id="b_val">0</span>
+        </div>
+        <button id="rgb_button" class="red-button">应用 RGB</button>
+      </div>
+      <!-- 右侧：彩色模式开关及颜色预览 -->
+      <div class="rgb-toggle-container">
+        <div class="color-preview" id="colorPreview"></div>
+        <div class="toggle-container">
+          <div class="toggle" id="rgb_toggle"></div>
+          <span>彩色模式</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/tdp.js" type="module"></script>
+</body>
+</html>

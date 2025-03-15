@@ -1,0 +1,47 @@
+[package]
+name = "NUCtool"
+version = "0.1.0"
+description = "NUC Fan Control"
+authors = ["cyear"]
+edition = "2021"
+
+
+[build-dependencies]
+tauri-build = { version = "2.0.1", features = [] }
+
+[dependencies]
+tauri = { version = "2.3.1", features = ["tray-icon"] }
+serde_json = "1.0.128"
+tauri-plugin-fs = "2.0.1"
+tauri-plugin-shell = "2.0.1"
+tauri-plugin-notification = "2"
+tauri-plugin-dialog = "2"
+colored = "3.0.0"
+dirs = "6.0.0"
+serde = { version = "1.0.210", features = ["derive"] }
+lazy_static = "1.5.0"
+tauri-plugin-devtools = "2.0.0"
+nix = "0.29.0"
+
+[target.'cfg(windows)'.dependencies]
+notify-rust = "4.11.3"
+powershell_script = "1.1.0"
+window-vibrancy = "0.5.2"
+# tokio = { version = "1.40.0", features = ["full"] }
+anyhow = "1.0.89"
+windows = { version = "0.58.0", features = ["Win32", "Win32_System", "Win32_System_Wmi", "Win32_System_Com", "Win32_Security"] }
+wmi = "0.15.0"
+[features]
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+codegen-units = 1 # Allows LLVM to perform better optimization.
+lto = true # Enables link-time-optimizations.
+opt-level = "s" # Prioritizes small binary size. Use `3` if you prefer speed.
+panic = "abort" # Higher performance by disabling panic handlers.
+strip = true # Ensures debug symbols are removed.
+debug-assertions = false
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-autostart = "2"
+tauri-plugin-updater = "2"

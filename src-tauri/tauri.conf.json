@@ -1,0 +1,47 @@
+{
+  "build": {
+    "frontendDist": "../src"
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "resources": [
+    ],
+    "icon": [
+      "icons/icon.png",
+      "icons/icon.ico"
+    ],
+    "publisher": "冫氵丶面包",
+    "copyright": "@cyear 2024",
+    "shortDescription": "NUCtool",
+    "createUpdaterArtifacts": true,
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      },
+      "wix": {
+        "language": "zh-CN"
+      }
+    },
+    "linux": {
+      "appimage": {
+      }
+    }
+  },
+  "productName": "NUCtool",
+  "mainBinaryName": "NUCtool",
+  "version": "0.4.4",
+  "identifier": "com.nuc.x15.fan.cyear.app",
+  "plugins": {
+    "updater": {
+      "active": true,
+      "dialog": true,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQ2NkVFN0Y3NDRCNkFBQzAKUldUQXFyWkU5K2R1UnVvL0twcHBKY1dQUlZvWDlWZmxRNVdiUHJITVUwYlRWK3FXbHUrY0s4bVAK",
+      "endpoints": ["https://cyear.github.io/NUCtool/latest.json"],
+      "windows": {
+        "installMode": "passive",
+        "installerArgs": []
+      }
+    }
+  }
+}
