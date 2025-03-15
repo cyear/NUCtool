@@ -16,15 +16,21 @@ use crate::plug::{
 
 async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
     let up: Update;
-    match app.updater()?.check().await {
-        Ok(Some(update)) => {
-            up = update;
-        }
+    match app.updater() {
+        Ok(a) => match a.check().await {
+            Ok(Some(update)) => {
+                up = update;
+            }
+            Err(e) => {
+                println!("update check failed: {:#?}", e);
+                return Ok(());
+            }
+            _ => return Ok(())
+        },
         Err(e) => {
-            println!("update check failed: {:#?}", e);
+            println!("Updater Error: {:#?}", e);
             return Ok(());
         }
-        _ => return Ok(()),
     }
     println!("update found: {:#?}", up.body);
     app.dialog()
@@ -69,7 +75,12 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn Error>> {
     }
     let handle = app.handle().clone();
     tauri::async_runtime::spawn(async move {
-        update(handle).await.expect("update failed");
+        match update(handle).await {
+            Ok(_) => {},
+            Err(e) => {
+                println!("update error: {:#?}", e);
+            }
+        }
     });
     // 自启动
     let autostart_manager = app.autolaunch();

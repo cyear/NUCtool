@@ -327,7 +327,7 @@ impl ApiFan {
             0
         )
     }
-    pub fn set_tdp(&self, t: Tdp) -> bool {
+    pub fn set_tdp(&self, t: TDP) -> bool {
         set_sys(&self.cpu_pl1, t.cpu1 * 1000)
             && set_sys(&self.cpu_pl2, t.cpu2 * 1000)
             && set_sys(&self.gpu_pl1, t.gpu1 * 1000)

@@ -13,7 +13,7 @@
     ],
     "publisher": "冫氵丶面包",
     "copyright": "@cyear 2024",
-    "shortDescription": "NUC 风扇曲线控制",
+    "shortDescription": "NUCtool",
     "createUpdaterArtifacts": true,
     "windows": {
       "webviewInstallMode": {
@@ -30,7 +30,7 @@
   },
   "productName": "NUCtool",
   "mainBinaryName": "NUCtool",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "identifier": "com.nuc.x15.fan.cyear.app",
   "plugins": {
     "updater": {
