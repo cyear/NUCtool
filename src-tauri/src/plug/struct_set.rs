@@ -1,3 +1,4 @@
+use std::fmt::Formatter;
 #[cfg(unix)]
 use std::path::PathBuf;
 use lazy_static::lazy_static;
@@ -64,13 +65,13 @@ lazy_static! {
     pub static ref DRIVER_PATH: PathBuf = find_hwmon_with_name();
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct FanPoint {
     pub temperature: i32,
     pub speed: i32,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct FanData {
     pub left_fan: Vec<FanPoint>,
     pub right_fan: Vec<FanPoint>,
@@ -102,6 +103,14 @@ pub struct RGB {
 
 pub struct FanControlState {
     pub is_running: Arc<Mutex<bool>>,
+}
+
+impl std::fmt::Debug for FanControlState {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("FanControlState")
+            .field("is_running", &self.is_running)
+            .finish()
+    }
 }
 
 #[cfg(windows)]

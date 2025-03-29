@@ -110,7 +110,6 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn Error>> {
     let _tray = TrayIconBuilder::new()
         .menu(&menu)
         .show_menu_on_left_click(false)
-        // .title("NUCtool")
         .icon(app.default_window_icon().unwrap().clone())
         .on_menu_event(move |app, event| match event.id().as_ref() {
             "h" => {
@@ -149,7 +148,7 @@ pub fn init(app: &mut App) -> Result<(), Box<dyn Error>> {
               button_state: MouseButtonState::Up,
               ..
             } => {
-              println!("left click pressed and released");
+              println!("左击显示主界面");
               let app = tray.app_handle();
               if let Some(window) = app.get_webview_window("main") {
                 let _ = window.show();

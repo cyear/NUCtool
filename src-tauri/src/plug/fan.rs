@@ -5,6 +5,7 @@ use std::{
 };
 use tauri::{Emitter, State, Window};
 use colored::Colorize;
+use tracing::{error, info, instrument};
 
 use crate::plug::{
     struct_set::{
@@ -21,12 +22,12 @@ use crate::plug::{
 
 pub fn fan_init() {
     ApiFan::init().set_fan_control();
-    println!("{}", "风扇初始化成功".green());
+    info!("{}", "风扇初始化成功".green());
 }
 
 pub fn fan_reset() {
     ApiFan::init().set_fan_auto();
-    println!("{}", "风扇状态重置".red());
+    info!("{}", "风扇状态重置".red());
 }
 
 
@@ -39,7 +40,7 @@ pub fn fan_set(left: i64, right: i64, driver: &ApiFan) {
     if l >= 254 { l = 255 }
     #[cfg(unix)]
     if r >= 254 { r = 255 }
-    println!("FAN_L: {}% / FAN_R: {}% OUT: {} / {} {}", left, right, l, r, driver.set_fan(l, r));
+    info!("FAN_L: {}% / FAN_R: {}% OUT: {} / {} {}", left, right, l, r, driver.set_fan(l, r));
 }
 
 /// 计算风扇百分比速度
@@ -51,7 +52,7 @@ pub fn fan_set(left: i64, right: i64, driver: &ApiFan) {
 /// temp_now - 当前温度
 /// ```
 pub fn speed_handle(temp_old: i64, speed_old: i64, temp: i64, speed: i64, temp_now: i64) -> i64 {
-    println!("temp_old: {:?}, speed_old: {:?}, temp: {:?}, speed: {:?}, temp_now: {:?}",
+    info!("temp_old: {:?}, speed_old: {:?}, temp: {:?}, speed: {:?}, temp_now: {:?}",
              temp_old, speed_old, temp, speed, temp_now);
     speed_old + ((speed - speed_old) * (temp_now - temp_old) / (temp - temp_old))
 }
@@ -64,11 +65,12 @@ pub fn cpu_temp(
 ) {
     let cpu_out = driver.get_cpu_temp();
     let gpu_out = driver.get_gpu_temp();
-    println!("CPU Temp: {:?}, GPU Temp: {:?}, cacheL: {:?}, cacheR: {:?}", 
-             &cpu_out, &gpu_out, &fan_cache[0], &fan_cache[1]);
+    let mode = driver.get_fan_mode();
+    info!("CPU Temp: {:?}, GPU Temp: {:?}, cacheL: {:?}, cacheR: {:?}, mode: {:?}",
+             &cpu_out, &gpu_out, &fan_cache[0], &fan_cache[1], &mode);
     // 跳过满转风扇重复写入
     if (cpu_out > 95 || gpu_out > 95) && fan_cache[0] + fan_cache[1] == 200 {
-        println!("{}", "风扇跳过满转重复写入".red());
+        info!("{}", "风扇跳过满转重复写入".red());
         thread::sleep(Duration::from_secs(4));
         return;
     }
@@ -78,15 +80,14 @@ pub fn cpu_temp(
         thread::sleep(Duration::from_secs(4));
         return;
     } else if cpu_out < 0 || gpu_out < 0 {
-        println!("温度读取异常, cpu: {:?}, gpu: {:?}", cpu_out, gpu_out);
+        error!("温度读取异常, cpu: {:?}, gpu: {:?}", cpu_out, gpu_out);
         return;
     }
-    if driver.get_fan_mode() == 2 {
-        print!("风扇异常自动恢复: ");
+    if mode == 2 && ((cpu_out < 75 && gpu_out < 75) || (cpu_out > 99 && gpu_out < 99)) {
         thread::sleep(Duration::from_secs_f64(1.5));
         driver.set_fan_auto();
         thread::sleep(Duration::from_secs_f64(2.5));
-        println!("{}", driver.set_fan_control());
+        error!("{}: {}", "风扇异常自动恢复", driver.set_fan_control());
         return;
     }
     let (mut temp_old_l, mut speed_old_l) = (0i64, 0i64);
@@ -120,7 +121,7 @@ pub fn cpu_temp(
             }
         }
         if fan_cache[0] == handle_left && fan_cache[1] == handle_right {
-            println!("{}", "风扇速度未变化".green());
+            info!("{}", "风扇速度未变化".green());
             thread::sleep(Duration::from_secs(3));
             return;
         }
@@ -130,10 +131,11 @@ pub fn cpu_temp(
     }
 }
 
+#[instrument]
 #[tauri::command]
 pub async fn get_fan_speeds(window: Window) {
     thread::spawn(move || {
-        println!("{}", "推送风扇信息".green());
+        info!("推送风扇信息");
         let driver = ApiFan::init();
         loop {
             thread::sleep(Duration::from_secs_f64(2.5));
@@ -141,24 +143,26 @@ pub async fn get_fan_speeds(window: Window) {
                 Ok(visible) => !visible,
                 Err(_) => false
             } {
-                // println!("{}", "取消风扇推送".green());
                 continue;
             }
+            let speed = driver.get_fan_speeds();
+            info!("speed: {:?}", speed);
             window
                 .emit(
                     "get-fan-speeds",
-                    driver.get_fan_speeds()
+                    speed
                 )
                 .unwrap();
         }
     });
 }
 
+#[instrument]
 #[tauri::command]
 pub fn start_fan_control(fan_data: serde_json::Value, state: State<FanControlState>) {
     let is_running = Arc::clone(&state.is_running);
     if *is_running.lock().unwrap() {
-        println!("Fan control is already running.");
+        error!("Fan control is already running.");
         return;
     }
     // fan_init();
@@ -166,12 +170,13 @@ pub fn start_fan_control(fan_data: serde_json::Value, state: State<FanControlSta
     *is_running.lock().unwrap() = true;
     thread::spawn(move || {
         let driver = ApiFan::init();
+        driver.set_fan_control();
         let mut fan_cache = [0; 2];
         while *is_running.lock().unwrap() {
-            println!("---------------------------------------------------------------");
+            info!("---------------------------------------------------------------");
             cpu_temp(&fan_data.get("left_fan"), &fan_data.get("right_fan"), &driver, &mut fan_cache);
         }
-        println!("---------------------------------------------------------------");
+        info!("---------------------------------------------------------------");
     });
 }
 
@@ -183,5 +188,5 @@ pub fn stop_fan_control(state: State<FanControlState>) {
         thread::sleep(Duration::from_secs(2));
         fan_reset();
     });
-    println!("{}", "Fan control stopped.".green());
+    info!("{}", "Fan control stopped.".green());
 }
