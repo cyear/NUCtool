@@ -8,6 +8,7 @@ use std::sync::{
 };
 use std::thread;
 use std::time::Duration;
+use tracing::{info, error};
 #[cfg(windows)]
 use crate::win_plug::wmi::{
     wmi_init, wmi_set, get_model
@@ -177,7 +178,7 @@ impl ApiFan {
     /// 1 - control, 2 - auto
     pub fn get_fan_mode(&self) -> i64 {
         let out = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_FAN_MODE);
-        println!("MODE: {}", out);
+        info!("MODE: {}", out);
         if out <= 0 { return 1 } // 异常不管了
         if out == 27664 || out == 27648 { 2 } else { 1 }
     }
@@ -236,7 +237,7 @@ impl ApiFan {
             34 => 2,
             36 => 2,
             _ => {
-                println!("COLOR AC ERROR: {}", out);
+                error!("COLOR AC ERROR: {}", out);
                 0
             },
         }
@@ -247,7 +248,7 @@ impl ApiFan {
             10 => 1,
             64 => 2,
             _ => { 
-                println!("COLOR DC ERROR: {}", out);
+                error!("COLOR DC ERROR: {}", out);
                 0
             },
         }

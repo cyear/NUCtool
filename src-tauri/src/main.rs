@@ -54,12 +54,10 @@ fn main() -> Result<()> {
     let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
     // 输出到控制台中
     let formatting_layer = fmt::layer().pretty().with_writer(std::io::stderr);
-
     // 输出到文件中
-    // let file_appender = rolling::hourly("logs", "NUCtool.DEBUG.log");
     let file_appender = RollingFileAppender::builder()
         .max_log_files(60)
-        .rotation(Rotation::MINUTELY)
+        .rotation(Rotation::HOURLY)
         .filename_prefix("NUCtool.LOG")
         .filename_suffix("log")
         .build("target/LOG/")?;
@@ -71,7 +69,6 @@ fn main() -> Result<()> {
     // 注册
     Registry::default()
         .with(env_filter)
-        // ErrorLayer 可以让 color-eyre 获取到 span 的信息
         .with(ErrorLayer::default())
         .with(formatting_layer)
         .with(file_layer)

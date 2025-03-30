@@ -165,12 +165,14 @@ pub fn start_fan_control(fan_data: serde_json::Value, state: State<FanControlSta
         error!("Fan control is already running.");
         return;
     }
-    // fan_init();
-    // 启动新的控制线程
     *is_running.lock().unwrap() = true;
     thread::spawn(move || {
         let driver = ApiFan::init();
-        driver.set_fan_control();
+        while driver.get_fan_mode() == 2 {
+            driver.set_fan_control();
+            error!("尝试控制风扇...");
+            thread::sleep(Duration::from_secs(3));
+        }
         let mut fan_cache = [0; 2];
         while *is_running.lock().unwrap() {
             info!("---------------------------------------------------------------");
