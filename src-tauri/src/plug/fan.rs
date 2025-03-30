@@ -12,13 +12,7 @@ use crate::plug::{
         FanControlState, ApiFan
     },
 };
-
-/**
-* @Author: cyear
-* @Create time: 2025-02-16
-* @Description: 风扇控制
-* @Version: 0.4.0
-**/
+use crate::plug::struct_set::TIME;
 
 pub fn fan_init() {
     ApiFan::init().set_fan_control();
@@ -61,33 +55,25 @@ pub fn cpu_temp(
     left: &Option<&serde_json::Value>, 
     right: &Option<&serde_json::Value>, 
     driver: &ApiFan,
-    fan_cache: &mut [i64; 2]
 ) {
     let cpu_out = driver.get_cpu_temp();
     let gpu_out = driver.get_gpu_temp();
     let mode = driver.get_fan_mode();
-    info!("CPU Temp: {:?}, GPU Temp: {:?}, cacheL: {:?}, cacheR: {:?}, mode: {:?}",
-             &cpu_out, &gpu_out, &fan_cache[0], &fan_cache[1], &mode);
-    // 跳过满转风扇重复写入
-    if (cpu_out > 95 || gpu_out > 95) && fan_cache[0] + fan_cache[1] == 200 {
-        info!("{}", "风扇跳过满转重复写入".red());
-        thread::sleep(Duration::from_secs(4));
+    info!("CPU Temp: {:?}, GPU Temp: {:?}, mode: {:?}",
+             &cpu_out, &gpu_out, &mode);
+    if mode == 2 {
+        thread::sleep(Duration::from_secs_f64(1.5 * TIME as f64));
+        driver.set_fan_auto();
+        thread::sleep(Duration::from_secs_f64(2.5 * TIME as f64));
+        error!("{}: {}", "风扇异常自动恢复", driver.set_fan_control());
         return;
     }
     if cpu_out > 95 || gpu_out > 95 {
         fan_set(100, 100, driver);
-        (fan_cache[0], fan_cache[1]) = (100, 100);
-        thread::sleep(Duration::from_secs(4));
+        thread::sleep(Duration::from_secs( 4 * TIME as u64));
         return;
     } else if cpu_out < 0 || gpu_out < 0 {
         error!("温度读取异常, cpu: {:?}, gpu: {:?}", cpu_out, gpu_out);
-        return;
-    }
-    if mode == 2 && ((cpu_out < 75 && gpu_out < 75) || (cpu_out > 99 && gpu_out < 99)) {
-        thread::sleep(Duration::from_secs_f64(1.5));
-        driver.set_fan_auto();
-        thread::sleep(Duration::from_secs_f64(2.5));
-        error!("{}: {}", "风扇异常自动恢复", driver.set_fan_control());
         return;
     }
     let (mut temp_old_l, mut speed_old_l) = (0i64, 0i64);
@@ -120,14 +106,8 @@ pub fn cpu_temp(
                 speed_old_r = speed_right;
             }
         }
-        if fan_cache[0] == handle_left && fan_cache[1] == handle_right {
-            info!("{}", "风扇速度未变化".green());
-            thread::sleep(Duration::from_secs(3));
-            return;
-        }
         fan_set(handle_left, handle_right, driver);
-        (fan_cache[0], fan_cache[1]) = (handle_left, handle_right);
-        thread::sleep(Duration::from_secs(3));
+        thread::sleep(Duration::from_secs(3 * TIME as u64));
     }
 }
 
@@ -138,7 +118,7 @@ pub async fn get_fan_speeds(window: Window) {
         info!("推送风扇信息");
         let driver = ApiFan::init();
         loop {
-            thread::sleep(Duration::from_secs_f64(2.5));
+            thread::sleep(Duration::from_secs_f64(2.5 * TIME as f64));
             if match window.is_visible() {
                 Ok(visible) => !visible,
                 Err(_) => false
@@ -146,7 +126,11 @@ pub async fn get_fan_speeds(window: Window) {
                 continue;
             }
             let speed = driver.get_fan_speeds();
-            info!("speed: {:?}", speed);
+            if speed.left_fan_speed < 0 || speed.right_fan_speed < 0 || speed.left_temp < 0 || speed.right_temp < 0 {
+                error!("speed: {:?}", speed);
+            } else { 
+                info!("speed: {:?}", speed);
+            }
             window
                 .emit(
                     "get-fan-speeds",
@@ -171,12 +155,11 @@ pub fn start_fan_control(fan_data: serde_json::Value, state: State<FanControlSta
         while driver.get_fan_mode() == 2 {
             driver.set_fan_control();
             error!("尝试控制风扇...");
-            thread::sleep(Duration::from_secs(3));
+            thread::sleep(Duration::from_secs(3 * TIME as u64));
         }
-        let mut fan_cache = [0; 2];
         while *is_running.lock().unwrap() {
             info!("---------------------------------------------------------------");
-            cpu_temp(&fan_data.get("left_fan"), &fan_data.get("right_fan"), &driver, &mut fan_cache);
+            cpu_temp(&fan_data.get("left_fan"), &fan_data.get("right_fan"), &driver);
         }
         info!("---------------------------------------------------------------");
     });
@@ -187,7 +170,7 @@ pub fn stop_fan_control(state: State<FanControlState>) {
     let mut is_running = state.is_running.lock().unwrap();
     *is_running = false; // 停止风扇控制
     thread::spawn(move || {
-        thread::sleep(Duration::from_secs(2));
+        thread::sleep(Duration::from_secs(2 * TIME as u64));
         fan_reset();
     });
     info!("{}", "Fan control stopped.".green());

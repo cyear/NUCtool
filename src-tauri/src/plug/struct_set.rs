@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use std::sync::{
-    {Arc, Mutex},
+    {Arc, Mutex}
 };
 use std::thread;
 use std::time::Duration;
@@ -25,6 +25,8 @@ use crate::{
     linux_plug::sysfs::{get_sys, set_sys, get_kernel_version, get_model_id},
     plug::config::find_hwmon_with_name
 };
+
+pub static TIME: f64 = 1.5;
 
 pub static R_TDP_GPU1: &str = "0x000001000000072d";
 pub static R_TDP_GPU2: &str = "0x000001000000072e";
