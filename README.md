@@ -13,7 +13,9 @@
 
 > Intel NUC X15 系列工具用于 LAPAC71H, LAPKC71F 等机型
 
+> [!NOTE]
 > NUCtool v1.0-Beta 正在进行中...(更改调用方法)
+>
 > 交流群以及及时反馈: https://discord.gg/8geBWer34C
 
 > [!NOTE]
