@@ -1,12 +1,14 @@
+use std::fmt::Formatter;
 #[cfg(unix)]
 use std::path::PathBuf;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use std::sync::{
-    {Arc, Mutex},
+    {Arc, Mutex}
 };
 use std::thread;
 use std::time::Duration;
+use tracing::{info, error};
 #[cfg(windows)]
 use crate::win_plug::wmi::{
     wmi_init, wmi_set, get_model
@@ -23,6 +25,8 @@ use crate::{
     linux_plug::sysfs::{get_sys, set_sys, get_kernel_version, get_model_id},
     plug::config::find_hwmon_with_name
 };
+
+pub static TIME: f64 = 1.5;
 
 pub static R_TDP_GPU1: &str = "0x000001000000072d";
 pub static R_TDP_GPU2: &str = "0x000001000000072e";
@@ -64,13 +68,13 @@ lazy_static! {
     pub static ref DRIVER_PATH: PathBuf = find_hwmon_with_name();
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct FanPoint {
     pub temperature: i32,
     pub speed: i32,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct FanData {
     pub left_fan: Vec<FanPoint>,
     pub right_fan: Vec<FanPoint>,
@@ -102,6 +106,14 @@ pub struct RGB {
 
 pub struct FanControlState {
     pub is_running: Arc<Mutex<bool>>,
+}
+
+impl std::fmt::Debug for FanControlState {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("FanControlState")
+            .field("is_running", &self.is_running)
+            .finish()
+    }
 }
 
 #[cfg(windows)]
@@ -168,7 +180,7 @@ impl ApiFan {
     /// 1 - control, 2 - auto
     pub fn get_fan_mode(&self) -> i64 {
         let out = wmi_set(&self.in_cls, &self.svc, &self.obj_path, &self.method_name, R_FAN_MODE);
-        println!("MODE: {}", out);
+        info!("MODE: {}", out);
         if out <= 0 { return 1 } // 异常不管了
         if out == 27664 || out == 27648 { 2 } else { 1 }
     }
@@ -227,7 +239,7 @@ impl ApiFan {
             34 => 2,
             36 => 2,
             _ => {
-                println!("COLOR AC ERROR: {}", out);
+                error!("COLOR AC ERROR: {}", out);
                 0
             },
         }
@@ -238,7 +250,7 @@ impl ApiFan {
             10 => 1,
             64 => 2,
             _ => { 
-                println!("COLOR DC ERROR: {}", out);
+                error!("COLOR DC ERROR: {}", out);
                 0
             },
         }

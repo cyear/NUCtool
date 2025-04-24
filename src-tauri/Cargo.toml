@@ -22,6 +22,11 @@ serde = { version = "1.0.210", features = ["derive"] }
 lazy_static = "1.5.0"
 tauri-plugin-devtools = "2.0.0"
 nix = "0.29.0"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["json"] }
+tracing-appender = "0.2.3"
+tracing-error = "0.2.1"
+color-eyre = "0.6.3"
 
 [target.'cfg(windows)'.dependencies]
 notify-rust = "4.11.3"
