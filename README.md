@@ -14,9 +14,13 @@
 > Intel NUC X15 系列工具用于 LAPAC71H, LAPKC71F 等机型
 
 > [!NOTE]
-> NUCtool v1.0-Beta 正在进行中...(更改调用方法)
+> NUCtool v1.0.0-Beta
+>
+> 仅支持 Windows
 >
 > 交流群以及及时反馈: https://discord.gg/8geBWer34C
+>
+> 推荐的QQ交流群(非本人,可@三上溜溜球): 631852189 / 928140470
 
 > [!NOTE]
 > 随缘更新, 如果觉得有用请给个⭐
@@ -25,13 +29,6 @@
 >
 > [详细更新说明](./assets/NUCtoolChange.md)
 >
-> 这里有话说了:
-> 
-> 你: 主播主播有没有比这个还好用的软件
->
-> 主播: 兄弟有的有的, 这种软件还有两种
->
-> [机械革命控制台 windows](http://mechrevo.com/)/[tuxedo-control-center Linux](https://github.com/tuxedocomputers/tuxedo-control-center)
 
 > [!WARNING]
 > 有损坏硬件风险, 使用此程序即认为接受风险, 出现问题概不负责
@@ -40,56 +37,9 @@
 >
 > 反馈前请看 [必要说明](assets/分析.md)
 
-| Windows/Linux 支持 |   LAPAC71H    |  LAPKC71F   |
-|:------------:|:-------------:|:-----------:|
-|   风扇控制    |      ✓ ✓      |     ✓ ☐     |
-|   异常恢复    |      ✓ ✓      |     ✓ ☐     |
-|    CPU L1    |      ✓ ✓      |     ☐ ☐     |
-|    CPU L2    |      ✓ ✓      |     ☐ ☐     |
-|    GPU L1    |      ✓ ✓      |     ✕ ✕     |
-|    GPU L2    |      ✓ ✓      |     ✕ ✕     |
-|   GPU MAX    |    100 85     |     ✕ ✕     |
-|    温度墙     |      ✓ ?      |     ☐ ?     |
-|  键盘彩色LED  |      ✓ ?       |     ☐ ?      |
-| 键盘自定义LED |      * ?      |     * ?     |
-|   自动更新    |      ✓ ✓      |     ✓ ✓     |
-|   开机自启    |      ✓ ☐      |     ✓ ☐     |
 
-`✓`: 支持 `✕`: 不支持 
+具体说明以及代码待更新
 
-`☐`: 未测试 `*`: 等待更新 
-
-`?`: 也许支持但没必要支持
-
-> [!WARNING]
-> 有损坏硬件风险, 使用此程序即认为接受风险, 出现问题概不负责
->
-> 平台支持
->
-> 1. Windows 11 / Windows 10(依赖webview2)
-> 2. Linux(依赖make)
->
-> Windows 使用教程(支持功能以实际为准)
-> 1. 首次使用需`调整风扇曲线`并点击`保存配置`
-> 2. 配置路径: `%AppData%\com.nuc.x15.fan.cyear.app`
->
-> Linux 使用教程(支持功能以实际为准)
-> 1. 内核要求>=6.13(或>=6.10)
-> 2. 请看下方 Linux 必要步骤，使用同Windows(2-3)
-
-> [!CAUTION]
-> Linux 必要步骤
-> ```shell
-> # 内核版本>=6.13 执行
-> git clone https://github.com/cyear/uniwill-laptop --branch kernel-6.13
-> # 内核版本>=6.10 执行
-> git clone https://github.com/cyear/uniwill-laptop
-> # 以下均可执行
-> cd uniwill-laptop
-> # 编译安装加载
-> sudo sh u.sh
-> # 如出现严重问题，请立刻断电或者卸载模块(请不要改为开机自动加载)
-> ```
 
 #### Star History
 
