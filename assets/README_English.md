@@ -12,16 +12,19 @@
 > [!CAUTION]
 > This document may be out of date, please check the latest Chinese document.
 > 
-> This document was last updated on: Mar. 4, 2025.
+> This document was last updated on: Jul. 26, 2026.
 
 # NUCtool
 
-> Intel NUC X15 series tool for models like LAPAC71H, LAPKC71F, etc.
+> Intel NUC X15 series tool for models like LAPAC71H, LAPKC71F, etc. (Windows only)
+
+> [!NOTE]
+> Since v0.5.0 this project is Windows-only. Linux users please use
+> [tuxedo-control-center](https://github.com/tuxedocomputers/tuxedo-control-center)
+> or a historical release.
 
 > [!NOTE]
 > Updates are not guaranteed. If you find it useful, please give a ⭐.
->
-> [English Document](./README_English.md)
 >
 > [Detailed Update Notes](./NUCtoolChange.md)
 
@@ -32,56 +35,46 @@
 >
 > Before submitting feedback, please read [Essential Information](./分析.md).
 
-| Windows/Linux Support |   LAPAC71H   |   LAPKC71F   |
+| Windows Support |   LAPAC71H   |   LAPKC71F   |
 |:----------------:|:------------:|:------------:|
-|   Fan Control    |      ✓ ✓      |    ✓ ☐     |
-|   Recovery Mode  |      ✓ ✓      |    ✓ ☐     |
-|    CPU L1       |      ✓ ✓      |    ☐ ☐     |
-|    CPU L2       |      ✓ ✓      |    ☐ ☐     |
-|    GPU L1       |      ✓ ✓      |    ✕ ✕     |
-|    GPU L2       |      ✓ ✓      |    ✕ ✕     |
-|   GPU MAX       |     100 85     |   ✕ ✕     |
-|   Thermal Limit |      ✓ ?      |    ☐ ?     |
-|   RGB Keyboard  |      * ?       |    * ?     |
-|   Custom LED    |      * ?       |    * ?     |
-|   Auto Update   |      ✓ ✓       |    ✓ ✓    |
-|   Auto Start    |      ✓ ☐      |    ✓ ☐     |
+|   Fan Control    |      ✓       |      ✓      |
+|   Recovery Mode  |      ✓       |      ✓      |
+|    CPU L1        |      ✓       |      ☐      |
+|    CPU L2        |      ✓       |      ☐      |
+|    GPU L1        |      ✓       |      ✕      |
+|    GPU L2        |      ✓       |      ✕      |
+|   GPU MAX        |     100      |      ✕      |
+|   Thermal Limit  |      ✓       |      ☐      |
+|   RGB Keyboard   |      ✓       |      ☐      |
+|   Custom LED     |      *       |      *      |
+|   Auto Update    |      ✓       |      ✓      |
+|   Auto Start     |      ✓       |      ✓      |
 
 `✓`: Supported `✕`: Not Supported 
 
 `☐`: Not Tested `*`: Pending Update 
 
-`?`: Possibly Supported but Unnecessary
-
 > [!WARNING]
-> There is a risk of hardware damage. By using this program, you accept the risk. Any issues arising are at your own responsibility.
->
 > Platform Support:
 >
 > 1. Windows 11 / Windows 10 (Requires WebView2)
-> 2. Linux (Requires Make)
+> 2. Administrator privileges required (the app requests UAC elevation automatically)
 >
-> Windows Usage Guide (Features depend on actual implementation):
+> Usage Guide (Features depend on actual implementation):
 > 1. On first use, you need to **adjust the fan curve** and click **Save Configuration**.
 > 2. Configuration path: `%AppData%\com.nuc.x15.fan.cyear.app`
->
-> Linux Usage Guide (Features depend on actual implementation):
-> 1. Kernel requirement: `>=6.13` (or `>=6.10`)
-> 2. See **Linux Essential Steps** below, usage is similar to Windows (Steps 2-3).
+> 3. Auto start on boot: set the content of `beta.config` in the configuration directory to `1`.
 
-> [!CAUTION]
-> **Linux Essential Steps**
-> ```shell
-> # If kernel version >=6.13, run:
-> git clone https://github.com/cyear/uniwill-laptop --branch kernel-6.13
-> # If kernel version >=6.10, run:
-> git clone https://github.com/cyear/uniwill-laptop
-> # The following steps apply to all:
-> cd uniwill-laptop
-> # Compile, install, and load module:
-> sudo sh u.sh
-> # If a serious issue occurs, immediately power off or uninstall the module (do not set it to auto-load at startup).
-> ```
+#### Development
+
+```shell
+# Requirements: Rust stable + Node.js
+npm install
+# Run in dev mode
+npm run tauri dev
+# Build
+npm run tauri build
+```
 
 #### Star History
 

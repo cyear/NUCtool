@@ -1,62 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fan Controller</title>
-    <link rel="stylesheet" href="b.css">
+    <title>NUCtool</title>
+    <link rel="stylesheet" href="assets/app.css">
     <script src="assets/chart.js"></script>
     <script src="assets/chartjs-plugin-dragdata.js"></script>
-    <style>
-        #startStopButton {
-            width: 150px;
-            height: 50px;
-            font-size: 20px;
-            background-color: rgb(255, 182, 193, 0.3);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-        /*#startStopButton.stopped {*/
-        /*    background-color: red;*/
-        /*}*/
-        #saveConfigButton {
-            width: 150px;
-            height: 50px;
-            font-size: 20px;
-            background-color: rgb(99, 180, 240, 0.3);
-            color: white;
-            border: none;
-            border-radius: 10px;
-        }
-        #loadConfigButton {
-            width: 150px;
-            height: 50px;
-            font-size: 20px;
-            background-color: rgb(99, 180, 240, 0.3);
-            color: white;
-            border: none;
-            border-radius: 10px;
-          }
-    </style>
 </head>
-<body style="background: rgb(255, 255, 255, 0.00);" oncontextmenu="return false;" onselectstart="return false;" ondragstart="return false;" >
-    <div style="display: flex;flex-wrap: wrap;">
-        <div style="width: 50%;">
-            <canvas id="leftFanCurve"></canvas>
-            <canvas id="rightFanCurve"></canvas>
-        </div>
-        <div style="width: 50%;margin: auto;">
-            <canvas id="left_fan_speed"></canvas> <!-- 左风扇实时转速 -->
-            <canvas id="right_fan_speed"></canvas> <!-- 右风扇实时转速 -->
-        </div>
-        <div class="container">
-            <button id="startStopButton" class="btn"><a>Start</a></button>
-            <button id="loadConfigButton" class="btn"><a>加载配置</a></button>
-            <button id="saveConfigButton" class="btn"><a>保存配置</a></button>
-        </div>
-    </div>
+<body>
+    <main class="page">
+        <header class="page-head">
+            <div>
+                <h1>NUCtool</h1>
+                <span class="sub">风扇曲线控制</span>
+            </div>
+            <div class="status-pill" id="statusPill">
+                <span class="dot"></span>
+                <span id="statusText">未运行</span>
+            </div>
+        </header>
+
+        <section class="charts">
+            <div class="card">
+                <div class="card-title">
+                    <span class="swatch" style="background: var(--cpu)"></span>
+                    CPU 风扇曲线
+                    <span class="hint">拖动节点调整</span>
+                </div>
+                <div class="chart-box"><canvas id="leftFanCurve"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-title">实时转速 <span class="hint">RPM</span></div>
+                <div class="chart-box"><canvas id="rpmChart"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-title">
+                    <span class="swatch" style="background: var(--gpu)"></span>
+                    GPU 风扇曲线
+                    <span class="hint">拖动节点调整</span>
+                </div>
+                <div class="chart-box"><canvas id="rightFanCurve"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-title">实时温度 <span class="hint">°C</span></div>
+                <div class="chart-box"><canvas id="tempChart"></canvas></div>
+            </div>
+        </section>
+
+        <footer class="actions">
+            <button id="startStopButton" class="btn btn-primary">启动控制</button>
+            <span class="spacer"></span>
+            <button id="loadConfigButton" class="btn">加载配置</button>
+            <button id="saveConfigButton" class="btn">保存配置</button>
+        </footer>
+    </main>
 
     <script src="main.js" type="module"></script>
 </body>

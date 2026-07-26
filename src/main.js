@@ -1,250 +1,234 @@
+// NUCtool 主界面 — 风扇曲线控制
+const invoke = window.__TAURI__.core.invoke;
 const { listen } = window.__TAURI__.event;
 
-// 左风扇曲线
-const leftFanCtx = document.getElementById('leftFanCurve').getContext('2d');
-const leftFanCurve = new Chart(leftFanCtx, {
-    type: 'line',
-    data: {
-        labels: Array.from({length: 15}, (_, i) => (i + 30) + Math.round(i * 4)),  // 30 - 95度
-        datasets: [{
-            label: 'CPU风扇速度',
-            data: Array(66).fill(50),  // 默认风扇速度
-            borderColor: 'blue',
-            fill: false
-        }]
-    },
-    options: {
-        scales: {
-            x: {title: {display: true, text: '温度 (°C)'}},
-            y: {title: {display: true, text: '风扇速度 (%)'}, min: 0, max: 100}
-        },
-        plugins: {
-            dragData: {
-                round: 0,
-                onDrag: function (e, datasetIndex, index, value) {
-                    console.log(`Left Fan - Temperature: ${leftFanCurve.data.labels[index]}, Speed: ${value}%`);
-                }
-            },
-        },
-        animations: {
-            tension: {
-                duration: 1000,
-                easing: 'linear',
-                from: 1,
-                to: 0,
-                loop: false
-            }
-        },
-        cubicInterpolationMode: 'monotone'
-    }
-});
+document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-// 右风扇曲线
-const rightFanCtx = document.getElementById('rightFanCurve').getContext('2d');
-const rightFanCurve = new Chart(rightFanCtx, {
-    type: 'line',
-    data: {
-        labels: Array.from({length: 15}, (_, i) => (i + 30) + Math.round(i * 4)),
-        datasets: [{
-            label: 'GPU风扇速度',
-            data: Array(66).fill(50),
-            borderColor: 'green',
-            fill: false
-        }]
-    },
-    options: {
-        scales: {
-            x: {title: {display: true, text: '温度 (°C)'}},
-            y: {title: {display: true, text: '风扇速度 (%)'}, min: 0, max: 100}
-        },
-        plugins: {
-            dragData: {
-                round: 0,
-                onDrag: function (e, datasetIndex, index, value) {
-                    console.log(`Right Fan - Temperature: ${rightFanCurve.data.labels[index]}, Speed: ${value}%`);
-                }
-            }
-        },
-        animations: {
-            tension: {
-                duration: 1000,
-                easing: 'easeInBounce',
-                from: 1,
-                to: 0,
-                loop: false
-            }
-        },
-        cubicInterpolationMode: 'monotone'
-    }
-});
+/* ---- 设计令牌(与 app.css 保持一致) ---- */
+const COLOR_CPU = '#3987e5';
+const COLOR_GPU = '#d95926';
+const INK_MUTED = '#898781';
+const GRID = 'rgba(255, 255, 255, 0.08)';
 
-const leftFanSpeedCtx = document.getElementById('left_fan_speed').getContext('2d');
-const rightFanSpeedCtx = document.getElementById('right_fan_speed').getContext('2d');
+/* ---- Chart.js 全局默认: 暗色、克制的网格与文字 ---- */
+Chart.defaults.color = INK_MUTED;
+Chart.defaults.borderColor = GRID;
+Chart.defaults.font.family = '"Segoe UI", "Microsoft YaHei", system-ui, sans-serif';
+Chart.defaults.font.size = 11;
+Chart.defaults.animation = false;
+Chart.defaults.plugins.legend.labels.boxWidth = 8;
+Chart.defaults.plugins.legend.labels.boxHeight = 8;
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
 
-// 初始化风扇实时转速图表
-function initSpeedCharts() {
-    const leftFanSpeedChart = new Chart(leftFanSpeedCtx, {
+/* 温度刻度: 30-100°C, 步进 5, 共 15 个节点 */
+const CURVE_TEMPS = Array.from({ length: 15 }, (_, i) => 30 + i * 5);
+/* 实时窗口: 21 个采样点, 约 2.5s 一个 */
+const WINDOW_LEN = 21;
+
+/* ---- 可拖动的风扇曲线图 ---- */
+function createCurveChart(canvasId, color) {
+    return new Chart(document.getElementById(canvasId), {
         type: 'line',
         data: {
-            labels: Array.from({length: 21}, (_, i) => i * 3),
+            labels: CURVE_TEMPS,
             datasets: [{
-                label: 'CPU风扇实时转速',
-                data: Array(21).fill(0),
-                borderColor: 'blue',
-                fill: false
-            }, {
-                label: 'GPU风扇实时转速',
-                data: Array(21).fill(0),
-                borderColor: 'green',
-                fill: false
+                data: Array(CURVE_TEMPS.length).fill(50),
+                borderColor: color,
+                borderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointBackgroundColor: color,
+                fill: false,
             }]
         },
         options: {
-            scales: {
-                x: {title: {display: true, text: '时间 (秒)'}},
-                y: {title: {display: true, text: '转速 (RPM)'}, min: 0, max: 6000}
+            maintainAspectRatio: false,
+            cubicInterpolationMode: 'monotone',
+            plugins: {
+                legend: { display: false }, // 单一系列: 标题即图例
+                tooltip: {
+                    displayColors: false,
+                    callbacks: {
+                        title: (items) => `${items[0].label} °C`,
+                        label: (item) => `${item.formattedValue} %`,
+                    }
+                },
+                dragData: {
+                    round: 0,
+                    dragX: false,
+                    onDragStart: () => true,
+                },
             },
-            pointStyle: false,
-            cubicInterpolationMode: 'monotone'
-        },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { maxRotation: 0, callback: (v, i) => (i % 2 === 0 ? `${CURVE_TEMPS[i]}°` : '') },
+                },
+                y: {
+                    min: 0, max: 100,
+                    grid: { color: GRID },
+                    border: { display: false },
+                    ticks: { stepSize: 25, callback: (v) => `${v}%` },
+                }
+            },
+        }
     });
+}
 
-    const rightFanSpeedChart = new Chart(rightFanSpeedCtx, {
+/* ---- 实时滚动图(转速 / 温度) ---- */
+function createLiveChart(canvasId, { max, cpuLabel, gpuLabel }) {
+    return new Chart(document.getElementById(canvasId), {
         type: 'line',
         data: {
-            labels: Array.from({length: 21}, (_, i) => i * 3),
-            datasets: [{
-                label: 'CPU实时温度',
-                data: Array(21).fill(0),
-                borderColor: 'blue',
-                fill: false
-            }, {
-                label: 'GPU实时温度',
-                data: Array(21).fill(0),
-                borderColor: 'green',
-                fill: false
-            }]
+            labels: Array.from({ length: WINDOW_LEN }, (_, i) =>
+                Math.round((WINDOW_LEN - 1 - i) * 2.5)),
+            datasets: [
+                { label: cpuLabel, data: Array(WINDOW_LEN).fill(null), borderColor: COLOR_CPU, borderWidth: 2, pointRadius: 0, fill: false },
+                { label: gpuLabel, data: Array(WINDOW_LEN).fill(null), borderColor: COLOR_GPU, borderWidth: 2, pointRadius: 0, fill: false },
+            ]
         },
         options: {
-            scales: {
-                x: {title: {display: true, text: '时间 (秒)'}},
-                y: {title: {display: true, text: '温度 (℃)'}, min: 0, max: 100}
+            maintainAspectRatio: false,
+            cubicInterpolationMode: 'monotone',
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { position: 'top', align: 'end' },
             },
-            pointStyle: false,
-            cubicInterpolationMode: 'monotone'
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { maxRotation: 0, callback: (v, i) => (i % 4 === 0 ? `-${Math.round((WINDOW_LEN - 1 - i) * 2.5)}s` : '') },
+                },
+                y: {
+                    min: 0, max,
+                    grid: { color: GRID },
+                    border: { display: false },
+                    ticks: { maxTicksLimit: 5 },
+                }
+            },
         }
     });
-
-    return {leftFanSpeedChart, rightFanSpeedChart};
 }
 
-// 更新风扇实时转速数据
-function updateFanSpeeds(leftFanSpeedChart, rightFanSpeedChart, left_fan_speed, right_fan_speed, left_temp, right_temp) {
-    if (left_fan_speed < 0 || right_fan_speed < 0 || left_fan_speed > 7000 || right_fan_speed > 7000 || left_temp < 0 || right_temp < 0 || left_temp > 100 || right_temp > 100) {
-        return;
-    }
-    leftFanSpeedChart.data.datasets[0].data.push(left_fan_speed);
-    leftFanSpeedChart.data.datasets[0].data.shift(); // 移除最早的数据
-    leftFanSpeedChart.data.datasets[1].data.push(right_fan_speed);
-    leftFanSpeedChart.data.datasets[1].data.shift();
-    rightFanSpeedChart.data.datasets[0].data.push(left_temp);
-    rightFanSpeedChart.data.datasets[0].data.shift();
-    rightFanSpeedChart.data.datasets[1].data.push(right_temp);
-    rightFanSpeedChart.data.datasets[1].data.shift();
-    // console.log(`Left Fan - Speed: ${leftFanSpeedChart.data.datasets[0].data}, Right Fan - Speed: ${rightFanSpeedChart.data.datasets[0].data}`);
-    leftFanSpeedChart.update();
-    rightFanSpeedChart.update();
+const leftFanCurve = createCurveChart('leftFanCurve', COLOR_CPU);
+const rightFanCurve = createCurveChart('rightFanCurve', COLOR_GPU);
+const rpmChart = createLiveChart('rpmChart', { max: 6000, cpuLabel: 'CPU 风扇', gpuLabel: 'GPU 风扇' });
+const tempChart = createLiveChart('tempChart', { max: 100, cpuLabel: 'CPU', gpuLabel: 'GPU' });
+
+/* ---- 实时数据推送 ---- */
+function pushSample(chart, a, b) {
+    chart.data.datasets[0].data.push(a);
+    chart.data.datasets[0].data.shift();
+    chart.data.datasets[1].data.push(b);
+    chart.data.datasets[1].data.shift();
+    chart.update('none');
 }
 
-async function loadConfigData() {
-    const fanData = await window.__TAURI__.core.invoke('load_fan_config');
-    if (fanData) {
-        // 更新左风扇曲线数据
-        leftFanCurve.data.datasets[0].data = fanData.left_fan.map(point => point.speed);
-        leftFanCurve.update();
-
-        // 更新右风扇曲线数据
-        rightFanCurve.data.datasets[0].data = fanData.right_fan.map(point => point.speed);
-        rightFanCurve.update();
-    } else {
-        console.log('未找到配置文件或读取失败');
-    }
+function onFanSpeeds({ left_fan_speed, right_fan_speed, left_temp, right_temp }) {
+    // 过滤异常值(读取失败为负数)
+    if (left_fan_speed < 0 || right_fan_speed < 0 || left_fan_speed > 7000 || right_fan_speed > 7000) return;
+    if (left_temp < 0 || right_temp < 0 || left_temp > 100 || right_temp > 100) return;
+    pushSample(rpmChart, left_fan_speed, right_fan_speed);
+    pushSample(tempChart, left_temp, right_temp);
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-    // const { leftFanCurve, rightFanCurve } = await initFanCurves();
-    const {leftFanSpeedChart, rightFanSpeedChart} = initSpeedCharts();
-
-    const startStopButton = document.getElementById('startStopButton');
-    const saveConfigButton = document.getElementById('saveConfigButton');
-    let isRunning = false;
-    // await loadConfigData();
-    // 定时更新风扇转速
-
-    // setInterval(async () => {
-    //     // const speeds = await window.__TAURI__.core.invoke('get_fan_speeds');
-    //     // updateFanSpeeds(leftFanSpeedChart, rightFanSpeedChart, speeds.left_fan_speed, speeds.right_fan_speed, speeds.left_temp, speeds.right_temp);
-    // }, 2500);
-    async function listen_to_greet() {
-      await listen('get-fan-speeds', (speeds) => {
-        // event.payload 才是实际的结构体
-        console.log(speeds.payload);
-        updateFanSpeeds(leftFanSpeedChart, rightFanSpeedChart, speeds.payload.left_fan_speed, speeds.payload.right_fan_speed, speeds.payload.left_temp, speeds.payload.right_temp);
-      });
-    }
-    await window.__TAURI__.core.invoke('get_fan_speeds');
-    await listen_to_greet();
-    // 按钮点击事件
-    startStopButton.addEventListener('click', () => {
-        isRunning = !isRunning;
-        if (isRunning) {
-            startStopButton.querySelector('a').textContent = 'Stop';
-            startStopButton.style.backgroundColor = 'rgb(255, 0, 0, 0.3)';
-            startStopButton.classList.remove('stopped');
-
-            // 获取数据并传递给 Rust
-            const fanData = getFanCurveData();
-            window.__TAURI__.core.invoke('start_fan_control', {fanData});
-        } else {
-            startStopButton.querySelector('a').textContent = 'Start';
-            startStopButton.style.backgroundColor = 'rgb(255, 182, 193, 0.3)';
-            startStopButton.classList.add('stopped');
-
-            // 停止风扇控制
-            window.__TAURI__.core.invoke('stop_fan_control');
-        }
-    });
-    // 加载配置按钮
-    const loadConfigButton = document.getElementById('loadConfigButton');
-    loadConfigButton.addEventListener('click', async () => {
-        await loadConfigData();
-    });
-    // 保存配置按钮
-    saveConfigButton.addEventListener('click', () => {
-        const fanData = getFanCurveData();
-        window.__TAURI__.core.invoke('save_fan_config', {fanData});
-    });
-
-    const autostartEnable = await window.__TAURI__.core.invoke('plugin:autostart|is_enabled');
-    console.log(autostartEnable);
-    if(autostartEnable) {
-        console.log("自动运行");
-        // loadConfigData();
-        loadConfigButton.click();
-        startStopButton.click();
-    }
-
-});
-
-// 获取所有点信息并传递给 Rust
+/* ---- 曲线数据 <-> 后端 ---- */
 function getFanCurveData() {
-    const leftFanData = leftFanCurve.data.labels.map((temp, index) => {
-        return {temperature: temp, speed: leftFanCurve.data.datasets[0].data[index]};
-    });
-
-    const rightFanData = rightFanCurve.data.labels.map((temp, index) => {
-        return {temperature: temp, speed: rightFanCurve.data.datasets[0].data[index]};
-    });
-
-    return {left_fan: leftFanData, right_fan: rightFanData};
+    const pick = (chart) => chart.data.labels.map((temp, i) => ({
+        temperature: temp,
+        speed: chart.data.datasets[0].data[i],
+    }));
+    return { left_fan: pick(leftFanCurve), right_fan: pick(rightFanCurve) };
 }
+
+function applyCurve(chart, points) {
+    // 后端配置以温度为键对齐到当前刻度, 兼容旧配置文件
+    const byTemp = new Map(points.map((p) => [Math.round(p.temperature), p.speed]));
+    chart.data.datasets[0].data = chart.data.labels.map(
+        (t, i) => byTemp.get(t) ?? chart.data.datasets[0].data[i]
+    );
+    chart.update();
+}
+
+async function loadConfig() {
+    try {
+        const fanData = await invoke('load_fan_config');
+        applyCurve(leftFanCurve, fanData.left_fan);
+        applyCurve(rightFanCurve, fanData.right_fan);
+        return true;
+    } catch (e) {
+        console.warn('加载配置失败:', e);
+        return false;
+    }
+}
+
+/* ---- 控制状态 ---- */
+const startStopButton = document.getElementById('startStopButton');
+const loadConfigButton = document.getElementById('loadConfigButton');
+const saveConfigButton = document.getElementById('saveConfigButton');
+const statusPill = document.getElementById('statusPill');
+const statusText = document.getElementById('statusText');
+
+let isRunning = false;
+
+function renderRunState() {
+    startStopButton.textContent = isRunning ? '停止控制' : '启动控制';
+    startStopButton.classList.toggle('btn-danger', isRunning);
+    startStopButton.classList.toggle('btn-primary', !isRunning);
+    statusPill.classList.toggle('on', isRunning);
+    statusText.textContent = isRunning ? '控制运行中' : '未运行';
+}
+
+async function startControl() {
+    try {
+        await invoke('start_fan_control', { fanData: getFanCurveData() });
+        isRunning = true;
+    } catch (e) {
+        console.warn('启动风扇控制失败:', e);
+    }
+    renderRunState();
+}
+
+async function stopControl() {
+    try {
+        await invoke('stop_fan_control');
+        isRunning = false;
+    } catch (e) {
+        console.warn('停止风扇控制失败:', e);
+    }
+    renderRunState();
+}
+
+startStopButton.addEventListener('click', () => (isRunning ? stopControl() : startControl()));
+loadConfigButton.addEventListener('click', loadConfig);
+
+saveConfigButton.addEventListener('click', async () => {
+    try {
+        await invoke('save_fan_config', { fanData: getFanCurveData() });
+        saveConfigButton.textContent = '已保存 ✓';
+        setTimeout(() => (saveConfigButton.textContent = '保存配置'), 1200);
+    } catch (e) {
+        console.warn('保存配置失败:', e);
+    }
+});
+
+/* ---- 初始化 ---- */
+(async () => {
+    await listen('get-fan-speeds', (event) => onFanSpeeds(event.payload));
+    invoke('get_fan_speeds'); // 让后端开始推送(后端保证只启动一个推送线程)
+
+    // 开机自启动场景: 自动加载配置并开始控制
+    try {
+        const autostartEnabled = await invoke('plugin:autostart|is_enabled');
+        if (autostartEnabled) {
+            console.log('自启动模式: 自动加载配置并启动控制');
+            // 旧版此处直接连点两个按钮, 配置尚未加载完就开始控制; 现在等待加载完成
+            if (await loadConfig()) {
+                await startControl();
+            }
+        }
+    } catch (e) {
+        console.warn('自启动检查失败:', e);
+    }
+})();

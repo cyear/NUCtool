@@ -1,59 +1,51 @@
-#[cfg(all(test, windows))]
-use crate::win_plug::{
-    wmi::wmi_security,
-};
-#[cfg(test)]
-use std::{
-    thread::sleep,
-    time::Duration
-};
-#[cfg(test)]
-use crate::plug::struct_set::ApiFan;
+//! 硬件在环测试(需要 NUC X15 真机, 建议 `cargo test -- --test-threads=1`)
+//!
+//! 纯逻辑单元测试见 `fan_control.rs` 与 `hw/registers.rs` 内的 `#[cfg(test)]` 模块。
+
+use std::{thread::sleep, time::Duration};
+
+use crate::hw::hw;
 
 #[test]
-fn test_api_fan() {
-    println!("请随时准备好你的NUC控制台基准模式，出现异常请打开基准模式");
-    wmi_security();
-    let api = ApiFan::init();
-    api.set_fan_auto();
-    sleep(Duration::from_secs(1));
-    assert_eq!(api.get_fan_mode(), 2);
+fn fan_control_cycle() {
+    println!("请随时准备好你的NUC控制台基准模式, 出现异常请打开基准模式");
+    let hw = hw();
 
-    api.set_fan_control();
+    assert!(hw.fan_auto_blocking());
     sleep(Duration::from_secs(1));
-    sleep(Duration::from_secs(1));
-    assert_eq!(api.get_fan_mode(), 1);
+    assert_eq!(hw.fan_mode(), 2);
 
-    api.set_fan(0, 0);
+    assert!(hw.fan_manual());
     sleep(Duration::from_secs(2));
-    assert_eq!(api.get_fan_l(), 0);
-    assert_eq!(api.get_fan_r(), 0);
+    assert_eq!(hw.fan_mode(), 1);
 
-    #[cfg(windows)]
-    api.set_fan(200, 200);
-    #[cfg(unix)]
-    api.set_fan(255, 255);
-    sleep(Duration::from_secs(1));
-    assert_ne!(api.get_fan_l(), 0);
-    assert_ne!(api.get_fan_r(), 0);
+    assert!(hw.set_fan(0, 0));
+    sleep(Duration::from_secs(2));
+    let s = hw.fan_speeds();
+    assert_eq!(s.left_fan_speed, 0);
+    assert_eq!(s.right_fan_speed, 0);
 
-    api.set_fan_auto();
+    assert!(hw.set_fan(200, 200));
+    sleep(Duration::from_secs(2));
+    let s = hw.fan_speeds();
+    assert_ne!(s.left_fan_speed, 0);
+    assert_ne!(s.right_fan_speed, 0);
+
+    assert!(hw.fan_auto_blocking());
     sleep(Duration::from_secs(1));
-    assert_eq!(api.get_fan_mode(), 2);
+    assert_eq!(hw.fan_mode(), 2);
 }
 
 #[test]
-#[cfg(windows)]
-fn led_color() {
-    println!("请查看你的LED");
-    wmi_security();
-    let api = ApiFan::init();
-    api.set_ac_led_color_y();
+fn led_color_cycle() {
+    println!("请查看你的键盘 LED");
+    let hw = hw();
+
+    assert!(hw.set_led_ac(true));
     sleep(Duration::from_secs(3));
-    assert_eq!(api.get_ac_led_color(), 2);
-    
-    api.set_ac_led_color_n();
+    assert_eq!(hw.led_ac_state(), 2);
+
+    assert!(hw.set_led_ac(false));
     sleep(Duration::from_secs(3));
-    assert_eq!(api.get_ac_led_color(), 1);
-    
+    assert_eq!(hw.led_ac_state(), 1);
 }

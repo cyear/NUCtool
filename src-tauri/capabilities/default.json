@@ -1,0 +1,11 @@
+{
+  "$schema": "gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "NUCtool 窗口默认权限",
+  "platforms": ["windows"],
+  "windows": ["main", "tdp"],
+  "permissions": [
+    "core:default",
+    "autostart:default"
+  ]
+}
