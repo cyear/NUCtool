@@ -27,61 +27,8 @@
 >
 > [详细更新说明](./assets/NUCtoolChange.md)
 >
-> 这里有话说了:
-> 
-> 你: 主播主播有没有比这个还好用的软件
->
-> 主播: 兄弟有的有的, 这种软件还有两种
->
-> [机械革命控制台 windows](http://mechrevo.com/)/[tuxedo-control-center Linux](https://github.com/tuxedocomputers/tuxedo-control-center)
 
-> [!WARNING]
-> 有损坏硬件风险, 使用此程序即认为接受风险, 出现问题概不负责
->
-> 本程序可能有严重缺陷, 请在保障安全情况下使用此程序
->
-> 反馈前请看 [必要说明](assets/分析.md)
-
-| Windows 支持  |   LAPAC71H    |  LAPKC71F   |
-|:------------:|:-------------:|:-----------:|
-|   风扇控制    |       ✓       |      ✓      |
-|   异常恢复    |       ✓       |      ✓      |
-|    CPU L1    |       ✓       |      ☐      |
-|    CPU L2    |       ✓       |      ☐      |
-|    GPU L1    |       ✓       |      ✕      |
-|    GPU L2    |       ✓       |      ✕      |
-|   GPU MAX    |      100      |      ✕      |
-|    温度墙     |       ✓       |      ☐      |
-|  键盘彩色LED  |       ✓       |      ☐      |
-| 键盘自定义LED |       *       |      *      |
-|   自动更新    |       ✓       |      ✓      |
-|   开机自启    |       ✓       |      ✓      |
-
-`✓`: 支持 `✕`: 不支持 
-
-`☐`: 未测试 `*`: 等待更新 
-
-> [!WARNING]
-> 平台支持
->
-> 1. Windows 11 / Windows 10(依赖 webview2)
-> 2. 需要管理员权限运行(程序会自动请求 UAC 提权)
->
-> 使用教程(支持功能以实际为准)
-> 1. 首次使用需`调整风扇曲线`并点击`保存配置`
-> 2. 配置路径: `%AppData%\com.nuc.x15.fan.cyear.app`
-> 3. 开机自启: 将配置目录下 `beta.config` 内容改为 `1`
-
-#### 开发
-
-```shell
-# 依赖: Rust stable + Node.js
-npm install
-# 调试运行
-npm run tauri dev
-# 构建
-npm run tauri build
-```
+#### AI有风险使用需谨慎
 
 #### Star History
 
