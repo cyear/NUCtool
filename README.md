@@ -16,6 +16,10 @@
 > [!NOTE]
 >
 > 交流群: https://discord.gg/8geBWer34C
+>
+> 第三方插件
+> 
+> 可以体验一下哦~ [FanControl.NUCtool](https://github.com/cyear/FanControl.NUCtool)
 
 > [!NOTE]
 > 随缘更新, 如果觉得有用请给个⭐
