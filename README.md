@@ -19,9 +19,6 @@
 >
 > 随缘更新, 如果觉得有用请给个⭐
 >
-> [English Document](./assets/README_English.md)
->
-> [详细更新说明](./assets/NUCtoolChange.md)
 >
 
 ```markdown
@@ -51,20 +48,12 @@
 本声明的最终解释权及修改权归 NUCtool 项目团队所有。
 ```
 
-## ⚠️ **警告：** 若您无法接受上述条款，或不确定操作后果，请**立即停止使用**并删除本软件
+## 警告：若您无法接受上述条款，或不确定操作后果，请**立即停止使用**并删除本软件
 
 > [!WARNING]
-> 有损坏硬件风险, 使用此程序即认为接受风险, 出现问题概不负责
->
 > 本程序可能有严重缺陷, 请在保障安全情况下使用此程序
-
-
-> [!WARNING]
-> 有损坏硬件风险, 使用此程序即认为接受风险, 出现问题概不负责
 >
-> 平台支持
->
-> Windows 11
+> 平台支持：Windows 11
 
 ## Star History
 
@@ -76,8 +65,8 @@
  </picture>
 </a>
 
-#### Thank
+## Thank
 
 > 致谢 [Carey Evans(Rust)](https://users.rust-lang.org/u/carey/summary) 大佬
-> 
+>
 > 致谢 [Wer-Wolf(uniwill-laptop)](https://github.com/Wer-Wolf/uniwill-laptop) 大佬
