@@ -119,9 +119,15 @@
 > # 如出现严重问题，请立刻断电或者卸载模块(请不要改为开机自动加载)
 > ```
 
-#### Star History
+## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=cyear/NUCtool&type=Timeline)](https://star-history.com/#cyear/NUCtool&Timeline)
+<a href="https://www.star-history.com/?repos=cyear%2Fnuctool&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=cyear/nuctool&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=cyear/nuctool&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=cyear/nuctool&type=date&legend=top-left" />
+ </picture>
+</a>
 
 #### Thank
 
