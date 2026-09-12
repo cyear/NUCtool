@@ -2,12 +2,10 @@
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "nuctool",
   "version": "0.1.0",
-  "identifier": "com.nuctool.x15.cyear.app",
+  "identifier": "com.nuctool.cyear.app",
   "build": {
-    "beforeDevCommand": "trunk serve",
-    "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "trunk build",
-    "frontendDist": "../dist"
+    "frontendDist": "../src",
+    "removeUnusedCommands": true
   },
   "app": {
     "withGlobalTauri": true,

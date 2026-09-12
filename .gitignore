@@ -6,14 +6,29 @@
 .idea/
 .vscode/
 src-tauri/gen
-NUCtool/.idea/
-NUCtool/.vscode/
-NUCtool/debug/
-NUCtool/target/
-NUCtool/node_modules/
-NUCtool/src-tauri/target/
-NUCtool/gen/schemas
-NUCtool/src-tauri/gen
+.idea/
+.vscode/
+debug/
+target/
+node_modules/
+src-tauri/target/
+src-tauri/gen
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log
+dist
+dist-ssr
+*.local
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 # ==================== 日志 & 临时文件 ====================
 *.log
 logs/
@@ -25,12 +40,5 @@ temp/
 # ==================== 环境变量 & 密钥 ====================
 .env
 .env.*
-!.env.example
 *.pem
 *.key
-# ==================== Trunk / 前端构建产物 ====================
-NUCtool/dist/
-dist/
-.trunk/
-*.wasm
-pkg/

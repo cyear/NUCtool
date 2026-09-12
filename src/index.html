@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NUCtool</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+      <div class="logo">NUCtool</div>
+      <nav>
+        <button class="nav-btn active" data-page="monitor">性能监控</button>
+        <button class="nav-btn" data-page="fan">风扇控制</button>
+        <button class="nav-btn" data-page="power">功耗设置</button>
+        <button class="nav-btn" data-page="settings">设置</button>
+      </nav>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="content">
+      <!-- ========== 性能监控页 ========== -->
+      <section id="page-monitor" class="page active">
+        <header>
+          <h1>性能监控</h1>
+          <div class="status" id="status">连接中...</div>
+        </header>
+
+        <div class="cards">
+          <div class="card">
+            <div class="label">CPU 温度</div>
+            <div class="value" id="cpu-temp">--</div>
+            <div class="unit">°C</div>
+          </div>
+          <div class="card">
+            <div class="label">GPU 温度</div>
+            <div class="value" id="gpu-temp">--</div>
+            <div class="unit">°C</div>
+          </div>
+          <div class="card">
+            <div class="label">左风扇转速</div>
+            <div class="value" id="fan1-rpm">--</div>
+            <div class="unit">RPM</div>
+          </div>
+          <div class="card">
+            <div class="label">右风扇转速</div>
+            <div class="value" id="fan2-rpm">--</div>
+            <div class="unit">RPM</div>
+          </div>
+        </div>
+      </section>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
