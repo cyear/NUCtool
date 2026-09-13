@@ -27,12 +27,13 @@
 在使用 NUCtool（以下简称“本软件”）之前，请您仔细阅读以下条款。**一旦您下载、使用或运行本软件，即表示您已充分理解并同意本声明的全部内容。**
 
 ## 1. 风险性质说明
-本软件旨在提供对英特尔 NUC笔记本设备的硬件监控、功耗解锁（PL1/PL2）、风扇转速调控及底层等功能。此类操作**涉及对硬件固件（BIOS/EC）及系统内核的直接交互**，与普通应用程序有本质区别。
+本软件旨在提供对英特尔 NUC笔记本设备的硬件监控、功耗解锁（PL1/PL2）、风扇转速调控及底层等功能。
+此类操作**涉及对硬件固件（BIOS/EC）及系统内核的直接交互**，与普通应用程序有本质区别。
 
 ## 2. 硬件与数据风险
 您明确知晓并自愿承担以下潜在风险：
 
-- **物理损伤**：不恰当的功耗配置或风扇停转策略可能导致 CPU、主板供电模块（VRM）或周边元器件**过热、烧毁或寿命缩减**。
+- **物理损伤**：不恰当的功耗配置或风扇停转策略可能导致CPU、主板供电模块（VRM）或周边元器件**过热、烧毁或寿命缩减**。
 - **系统稳定性**：错误的设置可能引发**频繁蓝屏、死机、无法开机（Brick）** 或存储设备（SSD）数据损毁。
 - **保修失效**：使用本软件进行操作，**可能导致设备丧失官方保修资格**（具体以厂商政策为准）。
 
@@ -54,6 +55,30 @@
 > 本程序可能有严重缺陷, 请在保障安全情况下使用此程序
 >
 > 平台支持：Windows 11
+>
+> 安装要求：UniwillService、UWACPIDriver、WebView2
+>
+> PS：如果你的`Intel(R) NUC Software Studio for Gaming Laptops`可以正常使用就是符合全部要求
+>
+> WebView 2 已安装在 Windows 10（从版本 1803 起）及更高版本的 Windows 上。
+>
+> 关机前请主动停止并退出程序！！！
+
+## 机型支持情况
+
+| 功能 | LAPAC71H | LAPKC71F |
+| :---: | :---: | :---: |
+| 风扇控制 | ✅ 支持 | ❌ 未测试 |
+| 功耗控制 | ❌ 不支持 | ❌ 不支持 |
+| CPU PL1 | ❌ 不支持 | ❌ 不支持 |
+| CPU PL4 | ❌ 不支持 | ❌ 不支持 |
+| GPU PL1 | ❌ 不支持 | ❌ 不支持 |
+| GPU PL4 | ❌ 不支持 | ❌ 不支持 |
+| 键盘灯控制 | ❌ 不支持 | ❌ 不支持 |
+| 模式切换 | ❌ 不支持 | ❌ 不支持 |
+| 显示切换 | ❌ 不支持 | ❌ 不支持 |
+
+> **注意：** 当前仅 `LAPAC71H` 支持风扇控制功能。其他功能暂未实现或硬件/固件不支持。
 
 ## Star History
 
@@ -70,3 +95,5 @@
 > 致谢 [Carey Evans(Rust)](https://users.rust-lang.org/u/carey/summary) 大佬
 >
 > 致谢 [Wer-Wolf(uniwill-laptop)](https://github.com/Wer-Wolf/uniwill-laptop) 大佬
+>
+> Logo 来自 [veryicon](https://www.veryicon.com/icons/culture/antique-objects/antique-objects-chinese-style-fan-folding-fan.html?p=2&use_xbridge3=true&loader_name=forest&need_sec_link=1&sec_link_scene=im&theme=light)

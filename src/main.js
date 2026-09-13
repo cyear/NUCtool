@@ -1,6 +1,54 @@
 const { invoke } = window.__TAURI__.core;
 const { listen } = window.__TAURI__.event;
 
+// ==============================================
+// 禁止右键菜单
+document.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+});
+
+// 禁止选中文字
+document.addEventListener("selectstart", (e) => {
+  e.preventDefault();
+});
+
+// 禁止拖拽
+document.addEventListener("dragstart", (e) => {
+  e.preventDefault();
+});
+
+// 禁止常见开发者工具快捷键
+document.addEventListener("keydown", (e) => {
+  // F12
+  if (e.key === "F12") {
+    e.preventDefault();
+    e.stopPropagation();
+    return;
+  }
+
+  // Ctrl + Shift + I
+  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "i") {
+    e.preventDefault();
+    e.stopPropagation();
+    return;
+  }
+
+  // Ctrl + Shift + J
+  if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "j") {
+    e.preventDefault();
+    e.stopPropagation();
+    return;
+  }
+
+  // Ctrl + U
+  if (e.ctrlKey && e.key.toLowerCase() === "u") {
+    e.preventDefault();
+    e.stopPropagation();
+    return;
+  }
+});
+// ==============================================
+
 // ========== 更新监控数据 ==========
 function updateUI(data) {
   document.getElementById("cpu-temp").textContent = data.cpu_temp ?? "--";
@@ -36,3 +84,330 @@ async function startListen() {
 }
 
 startListen();
+
+
+
+/* =========================================================
+   页面切换
+   ========================================================= */
+
+document.querySelectorAll(".nav-btn").forEach((button) => {
+  button.addEventListener("click", () => {
+    const page = button.dataset.page;
+
+    document.querySelectorAll(".nav-btn")
+      .forEach((btn) => btn.classList.remove("active"));
+
+    document.querySelectorAll(".page")
+      .forEach((el) => el.classList.remove("active"));
+
+    button.classList.add("active");
+    document.getElementById(`page-${page}`)?.classList.add("active");
+  });
+});
+
+
+/* =========================================================
+   Chart.js
+   ========================================================= */
+
+const COLOR_CPU = "#3987e5";
+const COLOR_GPU = "#d95926";
+
+const GRID = "rgba(255, 255, 255, 0.08)";
+
+Chart.defaults.color = "#898781";
+Chart.defaults.borderColor = GRID;
+Chart.defaults.font.family =
+  '"Segoe UI", "Microsoft YaHei", system-ui, sans-serif';
+Chart.defaults.font.size = 11;
+Chart.defaults.animation = false;
+
+
+/* 温度节点：30°C ~ 100°C，每 5°C 一个节点 */
+const CURVE_TEMPS =
+  Array.from({ length: 15 }, (_, i) => 30 + i * 5);
+
+
+/* =========================================================
+   创建风扇曲线
+   ========================================================= */
+
+function createCurveChart(id, color) {
+  return new Chart(document.getElementById(id), {
+    type: "line",
+
+    data: {
+      labels: CURVE_TEMPS,
+
+      datasets: [{
+        data: Array(CURVE_TEMPS.length).fill(50),
+
+        borderColor: color,
+        borderWidth: 2,
+
+        pointRadius: 4,
+        pointHoverRadius: 6,
+
+        pointBackgroundColor: color,
+
+        fill: false,
+      }],
+    },
+
+    options: {
+      maintainAspectRatio: false,
+
+      cubicInterpolationMode: "monotone",
+
+      plugins: {
+        legend: {
+          display: false,
+        },
+
+        tooltip: {
+          displayColors: false,
+
+          callbacks: {
+            title: (items) =>
+              `${items[0].label} °C`,
+
+            label: (item) =>
+              `${item.formattedValue} %`,
+          },
+        },
+
+        // 允许拖动曲线节点
+        dragData: {
+          round: 0,
+          dragX: false,
+        },
+      },
+
+      scales: {
+        x: {
+          grid: {
+            display: false,
+          },
+
+          ticks: {
+            maxRotation: 0,
+
+            callback: (value, index) =>
+              index % 2 === 0
+                ? `${CURVE_TEMPS[index]}°`
+                : "",
+          },
+        },
+
+        y: {
+          min: 0,
+          max: 100,
+
+          grid: {
+            color: GRID,
+          },
+
+          border: {
+            display: false,
+          },
+
+          ticks: {
+            stepSize: 25,
+            callback: (value) => `${value}%`,
+          },
+        },
+      },
+    },
+  });
+}
+
+
+const leftFanCurve =
+  createCurveChart("leftFanCurve", COLOR_CPU);
+
+const rightFanCurve =
+  createCurveChart("rightFanCurve", COLOR_GPU);
+
+
+/* =========================================================
+   曲线数据
+   ========================================================= */
+
+function getFanCurveData() {
+  const getCurve = (chart) =>
+    chart.data.labels.map((temperature, index) => ({
+      temperature,
+      speed: chart.data.datasets[0].data[index],
+    }));
+
+  return {
+    left_fan: getCurve(leftFanCurve),
+    right_fan: getCurve(rightFanCurve),
+  };
+}
+
+
+/* 将后端配置应用到曲线 */
+function applyCurve(chart, points) {
+  if (!Array.isArray(points)) return;
+
+  const map = new Map(
+    points.map((point) => [
+      Math.round(point.temperature),
+      point.speed,
+    ])
+  );
+
+  chart.data.datasets[0].data =
+    chart.data.labels.map((temperature, index) =>
+      map.get(temperature) ??
+      chart.data.datasets[0].data[index]
+    );
+
+  chart.update();
+}
+
+
+/* =========================================================
+   配置
+   ========================================================= */
+
+async function loadConfig() {
+  try {
+    const data = await invoke("load_fan_config");
+
+    applyCurve(leftFanCurve, data.left_fan);
+    applyCurve(rightFanCurve, data.right_fan);
+
+    return true;
+  } catch (error) {
+    console.error("加载配置失败:", error);
+    return false;
+  }
+}
+
+
+async function saveConfig() {
+  try {
+    await invoke("save_fan_config", {
+      fanData: getFanCurveData(),
+    });
+
+    saveConfigButton.textContent = "已保存 ✓";
+
+    setTimeout(() => {
+      saveConfigButton.textContent = "保存配置";
+    }, 1200);
+
+  } catch (error) {
+    console.error("保存配置失败:", error);
+  }
+}
+
+
+/* =========================================================
+   风扇控制
+   ========================================================= */
+
+const startStopButton =
+  document.getElementById("startStopButton");
+
+const loadConfigButton =
+  document.getElementById("loadConfigButton");
+
+const saveConfigButton =
+  document.getElementById("saveConfigButton");
+
+const fanStatus =
+  document.getElementById("fan-status");
+
+
+let isRunning = false;
+
+
+function updateControlState() {
+  startStopButton.textContent =
+    isRunning ? "停止控制" : "启动控制";
+
+  startStopButton.classList.toggle(
+    "primary",
+    !isRunning
+  );
+
+  startStopButton.classList.toggle(
+    "danger",
+    isRunning
+  );
+
+  fanStatus.textContent =
+    isRunning
+      ? "控制运行中"
+      : "未运行";
+
+  fanStatus.className =
+    isRunning
+      ? "status ok"
+      : "status";
+}
+
+
+async function startControl() {
+  try {
+    await invoke("start_fan_control", {
+      fanData: getFanCurveData(),
+    });
+
+    isRunning = true;
+    updateControlState();
+
+  } catch (error) {
+    console.error("启动风扇控制失败:", error);
+  }
+}
+
+
+async function stopControl() {
+  try {
+    await invoke("stop_fan_control");
+
+    isRunning = false;
+    updateControlState();
+
+  } catch (error) {
+    console.error("停止风扇控制失败:", error);
+  }
+}
+
+
+/* =========================================================
+   按钮
+   ========================================================= */
+
+startStopButton.addEventListener("click", () => {
+  isRunning
+    ? stopControl()
+    : startControl();
+});
+
+loadConfigButton.addEventListener(
+  "click",
+  loadConfig
+);
+
+saveConfigButton.addEventListener(
+  "click",
+  saveConfig
+);
+
+
+/* =========================================================
+   初始化
+   ========================================================= */
+
+async function init() {
+  await loadConfig();
+  updateControlState();
+}
+
+init();

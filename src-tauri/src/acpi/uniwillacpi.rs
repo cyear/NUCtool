@@ -1,5 +1,5 @@
-use std::ffi::OsStr;
 use std::io;
+use std::ffi::OsStr;
 use std::os::windows::ffi::OsStrExt;
 
 use windows::core::PCWSTR;
@@ -47,15 +47,31 @@ const EC_MAIN_FAN_RPM_2: u16 = 0x0465;
 const EC_SECOND_FAN_RPM_1: u16 = 0x046C;
 const EC_SECOND_FAN_RPM_2: u16 = 0x046D;
 
+// Windows Flip 1
+const EC_WINDOWS_MODE: u16 = 0x767;
+
+// FAN MODE
+const EC_FAN_MODE: u16 = 0x751;
+
+// FanModeByte as u8
+#[repr(u8)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FanModeByte {
+    NormalMode = 0x00,
+    FanBoostMode = 0x40,
+    AutoMode = 0x10,
+    Fuck = 0x50,
+}
+
 // ============================================================
 // Uniwill EC interface
 // ============================================================
 
-pub struct UniwillEc {
+pub struct UniwillAcpiEc {
     handle: HANDLE,
 }
 
-impl UniwillEc {
+impl UniwillAcpiEc {
     /// 打开 \\.\ACPIDriver
     pub fn open() -> io::Result<Self> {
         let path: Vec<u16> = OsStr::new(DEVICE_PATH)
@@ -90,8 +106,6 @@ impl UniwillEc {
 
     /// 读取一个 EC 8-bit 寄存器
     pub fn read_u8(&self, addr: u16) -> io::Result<u8> {
-        // UniwillService:
-        //
         // int[] { addr }
         // inBufferSize = 4
         //
@@ -115,16 +129,12 @@ impl UniwillEc {
         }
         .map_err(|_| io::Error::last_os_error())?;
 
-        // UniwillService 的 byte Read:
-        //
         // Data = Convert.ToByte(outBuffer & 0xFF)
         Ok((output & 0xFF) as u8)
     }
 
     /// 写入一个 EC 8-bit 寄存器
     pub fn write_u8(&self, addr: u16, value: u8) -> io::Result<()> {
-        // UniwillService:
-        //
         // int[] { addr, data }
         // inBufferSize = 8
         let input = [
@@ -155,7 +165,7 @@ impl UniwillEc {
 
     /// 读取两个 EC 字节并按照大端序组合成 u16。
     ///
-    /// Uniwill Linux 驱动使用 __be16 + be16_to_cpu()，
+    /// __be16 + be16_to_cpu()，
     /// 因此 0x0464/0x0465 应按：
     ///
     ///   value = byte1 << 8 | byte2
@@ -167,12 +177,12 @@ impl UniwillEc {
         Ok(u16::from_be_bytes([high, low]))
     }
 
-    /// 读取主风扇原始转速寄存器
+    /// 读取主风扇
     pub fn main_fan_raw(&self) -> io::Result<u16> {
         self.read_be16(EC_MAIN_FAN_RPM_1, EC_MAIN_FAN_RPM_2)
     }
 
-    /// 读取副风扇原始转速寄存器
+    /// 读取副风扇
     pub fn second_fan_raw(&self) -> io::Result<u16> {
         self.read_be16(
             EC_SECOND_FAN_RPM_1,
@@ -191,8 +201,6 @@ impl UniwillEc {
     }
 
     /// Fan1 RPM
-    ///
-    /// 对当前 Uniwill EC，RPM 寄存器本身就是 BE16 RPM。
     pub fn fan1_rpm(&self) -> io::Result<u16> {
         self.main_fan_raw()
     }
@@ -217,9 +225,22 @@ impl UniwillEc {
 
         Ok((high, low))
     }
+
+    /// 读取 Fan Mode
+    pub fn fan_read_mode(&self) -> io::Result<u8> {
+        self.read_u8(EC_FAN_MODE)
+    }
+    
+    /// 写入 Fan Mode
+    pub fn fan_write_mode(&self, mode: FanModeByte) -> io::Result<()> {
+        self.write_u8(EC_FAN_MODE,mode as u8)
+    }
+
+
+
 }
 
-impl Drop for UniwillEc {
+impl Drop for UniwillAcpiEc {
     fn drop(&mut self) {
         unsafe {
             let _ = CloseHandle(self.handle);
