@@ -9,7 +9,7 @@ const WMI_METHOD: &str = "GetSetULong";
 pub struct UniwillWmiEc {
     wmi: WMIConnection,
     instance_path: String,
-    active: bool,
+    // active: bool,
 }
 
 impl UniwillWmiEc {
@@ -35,12 +35,12 @@ impl UniwillWmiEc {
         let instance_path =
             object.path()?;
 
-        let active: bool =
+        let _active: bool =
             object
                 .get_property("Active")?
                 .try_into()?;
 
-        let instance_name: String =
+        let _instance_name: String =
             object
                 .get_property("InstanceName")?
                 .try_into()?;
@@ -63,17 +63,17 @@ impl UniwillWmiEc {
         Ok(Self {
             wmi,
             instance_path,
-            active,
+            // active,
         })
     }
 
-    pub fn instance_path(&self) -> &str {
-        &self.instance_path
-    }
+    // pub fn instance_path(&self) -> &str {
+    //     &self.instance_path
+    // }
 
-    pub fn active(&self) -> bool {
-        self.active
-    }
+    // pub fn active(&self) -> bool {
+    //     self.active
+    // }
 
     pub fn get_set(
         &self,
@@ -125,71 +125,71 @@ impl UniwillWmiEc {
         Ok(return_value)
     }
 
-    /// 读取 EC byte。
-    pub fn read_u8(
-        &self,
-        address: u16,
-    ) -> Result<u8, Box<dyn Error>> {
-        let data =
-            ((0x0100u64) << 32)
-            | address as u64;
+    // /// 读取 EC byte。
+    // pub fn read_u8(
+    //     &self,
+    //     address: u16,
+    // ) -> Result<u8, Box<dyn Error>> {
+    //     let data =
+    //         ((0x0100u64) << 32)
+    //         | address as u64;
 
-        let result =
-            self.get_set(data)?;
+    //     let result =
+    //         self.get_set(data)?;
 
-        Ok(
-            (result & 0xFF)
-                as u8
-        )
-    }
+    //     Ok(
+    //         (result & 0xFF)
+    //             as u8
+    //     )
+    // }
 
-    /// 写入 EC byte。
-    pub fn write_u8(
-        &self,
-        address: u16,
-        value: u8,
-    ) -> Result<(), Box<dyn Error>> {
-        let data =
-            ((value as u64) << 16)
-            | address as u64;
+    // /// 写入 EC byte。
+    // pub fn write_u8(
+    //     &self,
+    //     address: u16,
+    //     value: u8,
+    // ) -> Result<(), Box<dyn Error>> {
+    //     let data =
+    //         ((value as u64) << 16)
+    //         | address as u64;
 
-        self.get_set(data)?;
+    //     self.get_set(data)?;
 
-        Ok(())
-    }
+    //     Ok(())
+    // }
 
-    /// 连续读取。
-    pub fn read_many(
-        &self,
-        addresses: &[u16],
-    ) -> Result<Vec<(u16, u8)>, Box<dyn Error>> {
-        let mut result =
-            Vec::with_capacity(
-                addresses.len()
-            );
+    // /// 连续读取。
+    // pub fn read_many(
+    //     &self,
+    //     addresses: &[u16],
+    // ) -> Result<Vec<(u16, u8)>, Box<dyn Error>> {
+    //     let mut result =
+    //         Vec::with_capacity(
+    //             addresses.len()
+    //         );
 
-        for &address in addresses {
-            result.push((
-                address,
-                self.read_u8(address)?,
-            ));
-        }
+    //     for &address in addresses {
+    //         result.push((
+    //             address,
+    //             self.read_u8(address)?,
+    //         ));
+    //     }
 
-        Ok(result)
-    }
+    //     Ok(result)
+    // }
 
-    /// 连续写入。
-    pub fn write_many(
-        &self,
-        values: &[(u16, u8)],
-    ) -> Result<(), Box<dyn Error>> {
-        for &(address, value) in values {
-            self.write_u8(
-                address,
-                value
-            )?;
-        }
+    // /// 连续写入。
+    // pub fn write_many(
+    //     &self,
+    //     values: &[(u16, u8)],
+    // ) -> Result<(), Box<dyn Error>> {
+    //     for &(address, value) in values {
+    //         self.write_u8(
+    //             address,
+    //             value
+    //         )?;
+    //     }
 
-        Ok(())
-    }
+    //     Ok(())
+    // }
 }

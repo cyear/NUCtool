@@ -121,7 +121,7 @@ async fn start_fan_control(
         // WMI
         let get_set = |data: u64| {
             match wmi.get_set(data) {
-                Ok(ret) => {
+                Ok(_) => {
                     // println!("Return = 0x{:08X}", ret);
                     // println!("EC Data = 0x{:02X}", ret & 0xFF);
                     // Debug
@@ -141,6 +141,7 @@ async fn start_fan_control(
             // ========================================
             // 1. 读取温度
             // ========================================
+
             let cpu_temp = ec.cpu_temperature().unwrap_or(0);
             let gpu_temp = ec.gpu_temperature().unwrap_or(0);
 
@@ -258,6 +259,7 @@ fn stop_fan_control_inner(
 }
 
 pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+
     // =========================
     // 托盘菜单
     // =========================
@@ -413,12 +415,3 @@ pub fn run() {
             }
         })
 }
-
-// #[cfg_attr(mobile, tauri::mobile_entry_point)]
-// pub fn run() {
-//     tauri::Builder::default()
-//         .plugin(tauri_plugin_opener::init())
-//         .invoke_handler(tauri::generate_handler![greet])
-//         .run(tauri::generate_context!())
-//         .expect("error while running tauri application");
-// }

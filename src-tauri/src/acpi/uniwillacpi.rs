@@ -48,7 +48,7 @@ const EC_SECOND_FAN_RPM_1: u16 = 0x046C;
 const EC_SECOND_FAN_RPM_2: u16 = 0x046D;
 
 // Windows Flip 1
-const EC_WINDOWS_MODE: u16 = 0x767;
+// const EC_WINDOWS_MODE: u16 = 0x767;
 
 // FAN MODE
 const EC_FAN_MODE: u16 = 0x751;
@@ -57,16 +57,15 @@ const EC_FAN_MODE: u16 = 0x751;
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FanModeByte {
-    NormalMode = 0x00,
+    // NormalMode = 0x00,
     FanBoostMode = 0x40,
     AutoMode = 0x10,
-    Fuck = 0x50,
+    // Fuck = 0x50,
 }
 
 // ============================================================
 // Uniwill EC interface
 // ============================================================
-
 pub struct UniwillAcpiEc {
     handle: HANDLE,
 }
@@ -210,21 +209,21 @@ impl UniwillAcpiEc {
         self.second_fan_raw()
     }
 
-    /// 读取 Fan1 两个原始字节
-    pub fn fan1_raw_bytes(&self) -> io::Result<(u8, u8)> {
-        let high = self.read_u8(EC_MAIN_FAN_RPM_1)?;
-        let low = self.read_u8(EC_MAIN_FAN_RPM_2)?;
+    // /// 读取 Fan1 两个原始字节
+    // pub fn fan1_raw_bytes(&self) -> io::Result<(u8, u8)> {
+    //     let high = self.read_u8(EC_MAIN_FAN_RPM_1)?;
+    //     let low = self.read_u8(EC_MAIN_FAN_RPM_2)?;
 
-        Ok((high, low))
-    }
+    //     Ok((high, low))
+    // }
 
-    /// 读取 Fan2 两个原始字节
-    pub fn fan2_raw_bytes(&self) -> io::Result<(u8, u8)> {
-        let high = self.read_u8(EC_SECOND_FAN_RPM_1)?;
-        let low = self.read_u8(EC_SECOND_FAN_RPM_2)?;
+    // /// 读取 Fan2 两个原始字节
+    // pub fn fan2_raw_bytes(&self) -> io::Result<(u8, u8)> {
+    //     let high = self.read_u8(EC_SECOND_FAN_RPM_1)?;
+    //     let low = self.read_u8(EC_SECOND_FAN_RPM_2)?;
 
-        Ok((high, low))
-    }
+    //     Ok((high, low))
+    // }
 
     /// 读取 Fan Mode
     pub fn fan_read_mode(&self) -> io::Result<u8> {
@@ -235,8 +234,6 @@ impl UniwillAcpiEc {
     pub fn fan_write_mode(&self, mode: FanModeByte) -> io::Result<()> {
         self.write_u8(EC_FAN_MODE,mode as u8)
     }
-
-
 
 }
 

@@ -1,17 +1,9 @@
 use crate::config::FanPoint;
 use std::sync::{
-    atomic::{AtomicBool, Ordering},
+    atomic::AtomicBool,
     Arc, Mutex,
 };
-use std::thread::{self, JoinHandle};
-use std::time::Duration;
-use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct FanData {
-    pub left_fan: Vec<FanPoint>,
-    pub right_fan: Vec<FanPoint>,
-}
+use std::thread::JoinHandle;
 
 pub struct FanControlState {
     pub running: Arc<AtomicBool>,
@@ -28,7 +20,7 @@ impl FanControlState {
 }
 pub fn calculate_speed(points: &Vec<FanPoint>, temperature: u8) -> u8 {
     if points.is_empty() {
-        return 0;
+        return 100;
     }
 
     let mut points = points.to_vec();
