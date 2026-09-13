@@ -147,13 +147,15 @@ async fn start_fan_control(
             // ========================================
             // 2. 根据曲线计算风扇转速
             // ========================================
+            // &fan_data.left_fan M
+            // &fan_data.right_fan S
 
-            // CPU 风扇 主
-            let left_speed =
+            // CPU 风扇 主 => 右
+            let right_speed =
                 calculate_speed(&fan_data.left_fan, cpu_temp);
             
-            // GPU 风扇 分
-            let right_speed =
+            // GPU 风扇 分 => 左
+            let left_speed =
                 calculate_speed(&fan_data.right_fan, gpu_temp);
             
             // ========================================
@@ -176,10 +178,10 @@ async fn start_fan_control(
             // 4. 写入 WMI
             // ========================================
 
-            // 左风扇
+            // 左风扇 分
             get_set(((left_speed as u64 * 2) << 16) | 0x0000000000001809);
 
-            // 右风扇
+            // 右风扇 主
             get_set(((right_speed as u64 * 2) << 16) | 0x0000000000001804);
             
             // ========================================
