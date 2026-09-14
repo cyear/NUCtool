@@ -6,6 +6,11 @@ const WMI_NAMESPACE: &str = r"ROOT\WMI";
 const WMI_CLASS: &str = "AcpiTest_MULong";
 const WMI_METHOD: &str = "GetSetULong";
 
+
+// ============================================================
+// Uniwill WMI interface
+// ============================================================
+
 pub struct UniwillWmiEc {
     wmi: WMIConnection,
     instance_path: String,

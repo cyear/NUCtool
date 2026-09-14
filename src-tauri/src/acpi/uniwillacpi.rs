@@ -50,6 +50,24 @@ const EC_SECOND_FAN_RPM_2: u16 = 0x046D;
 // Windows Flip 1
 // const EC_WINDOWS_MODE: u16 = 0x767;
 
+// CPU PL1 (W)
+const EC_CPU_PL1: u16 = 0x0783;
+
+// CPU PL2 (W)
+const EC_CPU_PL2: u16 = 0x0784;
+
+// CPU PL4 (W)
+const EC_CPU_PL4: u16 = 0x0785;
+
+// GPU PL1 (W)
+const EC_GPU_PL1: u16 = 0x072d;
+
+// GPU PL2 (W)
+const EC_GPU_PL2: u16 = 0x072e;
+
+// Custom Charge Limit
+const EC_CUSTOM_CHARGELIMIT: u16 = 0x07B9;
+
 // FAN MODE
 const EC_FAN_MODE: u16 = 0x751;
 
@@ -66,6 +84,7 @@ pub enum FanModeByte {
 // ============================================================
 // Uniwill EC interface
 // ============================================================
+
 pub struct UniwillAcpiEc {
     handle: HANDLE,
 }
