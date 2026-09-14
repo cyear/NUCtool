@@ -44,6 +44,11 @@
           <span class="nav-text">性能监控</span>
         </button>
 
+        <button class="nav-btn" data-page="tuning" type="button">
+          <span class="nav-icon">✦</span>
+          <span class="nav-text">性能调优</span>
+        </button>
+
         <button class="nav-btn" data-page="fan" type="button">
           <span class="nav-icon">✽</span>
           <span class="nav-text">风扇控制</span>
@@ -206,6 +211,121 @@
 
       </section>
 
+      <!-- ===================================================
+          性能调优
+          =================================================== -->
+
+      <section id="page-tuning" class="page">
+
+        <header class="page-header">
+
+          <div class="page-heading">
+            <h1>性能调优</h1>
+
+            <p class="page-subtitle">
+              选择系统性能模式
+            </p>
+          </div>
+
+        </header>
+
+
+        <div class="tuning-card">
+
+          <div class="tuning-header">
+            <div>
+              <div class="tuning-title">
+                性能模式
+              </div>
+
+              <div class="tuning-description">
+                选择适合当前使用场景的性能配置，默认显示的模式仅为显示，请以选择后为准
+              </div>
+            </div>
+          </div>
+
+
+          <div class="tuning-options">
+
+            <button
+              class="tuning-btn"
+              data-mode="power-saving"
+              type="button"
+            >
+              <span class="tuning-btn-title">
+                省电模式
+              </span>
+
+              <span class="tuning-btn-description">
+                降低功耗，延长续航
+              </span>
+            </button>
+
+
+            <button
+              class="tuning-btn active"
+              data-mode="balanced"
+              type="button"
+            >
+              <span class="tuning-btn-title">
+                平衡模式
+              </span>
+
+              <span class="tuning-btn-description">
+                平衡性能与功耗
+              </span>
+            </button>
+
+
+            <button
+              class="tuning-btn"
+              data-mode="performance"
+              type="button"
+            >
+              <span class="tuning-btn-title">
+                性能模式
+              </span>
+
+              <span class="tuning-btn-description">
+                提供更高的性能
+              </span>
+            </button>
+
+
+            <button
+              class="tuning-btn"
+              data-mode="benchmark-on"
+              type="button"
+            >
+              <span class="tuning-btn-title">
+                基准模式
+              </span>
+
+              <span class="tuning-btn-description">
+                更强大的性能
+              </span>
+            </button>
+
+
+            <!-- <button
+              class="tuning-btn"
+              data-mode="benchmark-off"
+              type="button"
+            >
+              <span class="tuning-btn-title">
+                基准模式 OFF
+              </span>
+
+              <span class="tuning-btn-description">
+                简简单单
+              </span>
+            </button> -->
+
+          </div>
+
+        </div>
+
+      </section>
 
       <!-- ===================================================
            风扇控制

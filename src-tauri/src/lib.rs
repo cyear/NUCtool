@@ -3,7 +3,7 @@ mod acpi;
 mod config;
 mod fan_control;
 use win::privilege_escalation;
-use acpi::{UniwillAcpiEc, UniwillWmiEc, UniwillWcfEc};
+use acpi::{UniwillAcpiEc, UniwillWmiEc, UniwillWcfEc, FnKeyhook};
 use config::FanData;
 use fan_control::{FanControlState, calculate_speed};
 use serde::Serialize;
@@ -19,6 +19,21 @@ use tauri::{
         MouseButtonState,
         TrayIconBuilder,
         TrayIconEvent,
+    },
+};
+use windows::{
+    Win32::{
+        Foundation::{
+            HINSTANCE,
+        },
+        UI::WindowsAndMessaging::{
+            DispatchMessageW,
+            GetMessageW,
+            SetWindowsHookExW,
+            UnhookWindowsHookEx,
+            MSG,
+            WH_KEYBOARD_LL,
+        },
     },
 };
 
@@ -221,6 +236,53 @@ async fn stop_fan_control(
     stop_fan_control_inner(&state)
 }
 
+#[tauri::command]
+async fn set_performance_mode(mode: String) {
+    let wcf = match UniwillWcfEc::new() {
+        Ok(wcf) => wcf,
+        Err(e) => {
+            eprintln!("加载 NUCtool DLL 失败: {}", e);
+                None
+            }.expect("加载 NUCtool DLL 失败")
+    };
+    let ret = wcf.connect();
+    println!("connect: {}", ret);
+    match mode.as_str() {
+        "power-saving" => {
+            println!("省电模式");
+            println!("benchmark_off apply_profile: {}", wcf.apply_benchmark_mode(0));
+            println!("quiet apply_profile: {}", wcf.apply_profile(3));
+        }
+
+        "balanced" => {
+            println!("平衡模式");
+            println!("benchmark_off apply_profile: {}", wcf.apply_benchmark_mode(0));
+            println!("balanced apply_profile: {}", wcf.apply_profile(2));
+        }
+
+        "performance" => {
+            println!("性能模式");
+            println!("benchmark_off apply_profile: {}", wcf.apply_benchmark_mode(0));
+            println!("performance apply_profile: {}", wcf.apply_profile(1));
+        }
+
+        "benchmark-on" => {
+            println!("基准模式");
+            println!("benchmark_on apply_profile: {}", wcf.apply_benchmark_mode(1));
+        }
+
+        // "benchmark-off" => {
+        //     println!("基准模式 OFF");
+        //     println!("benchmark_off apply_profile: {}", wcf.apply_benchmark_mode(0));
+        // }
+
+        _ => {
+            eprintln!("未知性能模式: {}", mode);
+            return;
+        }
+    }
+}
+
 fn stop_fan_control_inner(
     state: &FanControlState,
 ) -> Result<(), String> {
@@ -298,16 +360,6 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
     const TRAY_ICON: tauri::image::Image<'_> = include_image!("icons/32x32.png");
 
-    let wcf = match UniwillWcfEc::new() {
-        Ok(wcf) => wcf,
-        Err(e) => {
-            eprintln!("加载 NUCtool DLL 失败: {}", e);
-            None
-        }.expect("加载 NUCtool DLL 失败")
-    };
-    let ret = wcf.connect();
-    println!("connect: {}", ret);
-
     // =========================
     // 创建托盘
     // =========================
@@ -319,6 +371,16 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
         // 托盘菜单
         .on_menu_event(move |app, event| {
+            let wcf = match UniwillWcfEc::new() {
+                Ok(wcf) => wcf,
+                Err(e) => {
+                    eprintln!("加载 NUCtool DLL 失败: {}", e);
+                    None
+                }.expect("加载 NUCtool DLL 失败")
+            };
+            let ret = wcf.connect();
+            println!("connect: {}", ret);
+
             match event.id().as_ref() {
                 "show" => {
                     if let Some(window) =
@@ -400,11 +462,75 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+fn fnhook() {
+
+    unsafe {
+
+        // ==================================
+        // 安装低级键盘 Hook
+        // ==================================
+
+        let hook = SetWindowsHookExW(
+            WH_KEYBOARD_LL,
+            Some(FnKeyhook),
+            Some(HINSTANCE::default()),
+            0,
+        ).expect("Fn Key Hook Error");
+
+        println!("======================================");
+        println!("       NUCtool Fn 快捷键监听");
+        println!("======================================");
+        println!();
+        println!("监听：");
+        println!("  Fn + 1");
+        println!("  Fn + 2");
+        println!("  Fn + 3");
+        println!("  Fn + 4");
+        println!("  Fn + 5");
+        println!("  Fn + 6");
+        println!("  Fn + 7");
+        println!("  Fn + 8");
+        println!("  Fn + 9");
+        println!();
+        println!("等待按键...");
+        println!("======================================");
+
+        // ==================================
+        // 消息循环
+        // ==================================
+
+        let mut msg = MSG::default();
+
+        while GetMessageW(
+            &mut msg,
+            None,
+            0,
+            0,
+        )
+        .into()
+        {
+            DispatchMessageW(&msg);
+        }
+
+        // ==================================
+        // 卸载 Hook
+        // ==================================
+
+        UnhookWindowsHookEx(hook).expect("卸载失败");
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     
     // 管理员权限！！！
     privilege_escalation();
+    // Fn Hook
+    thread::spawn(|| {
+        loop {
+            fnhook();
+        }
+    });
 
     let app = tauri::Builder::default()
         .manage(AppState {
@@ -416,7 +542,8 @@ pub fn run() {
             load_fan_config,
             save_fan_config,
             start_fan_control,
-            stop_fan_control
+            stop_fan_control,
+            set_performance_mode
         ])
         .setup(setup)     
         .build(tauri::generate_context!())

@@ -400,6 +400,33 @@ saveConfigButton.addEventListener(
   saveConfig
 );
 
+// =====================================================
+// 性能调优
+// =====================================================
+
+const tuningButtons = document.querySelectorAll(".tuning-btn");
+
+tuningButtons.forEach((button) => {
+
+  button.addEventListener("click", async () => {
+
+    const mode = button.dataset.mode;
+
+    // 更新选中状态
+    tuningButtons.forEach((btn) => {
+      btn.classList.remove("active");
+    });
+
+    button.classList.add("active");
+
+    console.log("模式:", mode);
+    await invoke("set_performance_mode", {
+      mode: mode
+    });
+
+  });
+
+});
 
 /* =========================================================
    初始化

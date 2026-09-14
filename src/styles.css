@@ -864,3 +864,141 @@ body {
     font-size: 28px;
   }
 }
+
+
+/* =====================================================
+   性能调优
+   ===================================================== */
+
+.tuning-card {
+  background: var(--card-bg, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 14px;
+  padding: 24px;
+}
+
+
+.tuning-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+
+.tuning-title {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+
+.tuning-description {
+  margin-top: 5px;
+  font-size: 13px;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+}
+
+
+/* 模式按钮区域 */
+
+.tuning-options {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+
+.tuning-btn {
+  min-height: 92px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+
+  padding: 16px;
+
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  color: inherit;
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+
+.tuning-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+
+.tuning-btn:active {
+  transform: translateY(0);
+}
+
+
+/* 当前选中的模式 */
+
+.tuning-btn.active {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+
+.tuning-btn-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+
+.tuning-btn-description {
+  margin-top: 7px;
+
+  font-size: 12px;
+  line-height: 1.4;
+
+  color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+}
+
+
+/* =====================================================
+   性能调优响应式
+   ===================================================== */
+
+@media (max-width: 1100px) {
+
+  .tuning-options {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+}
+
+
+@media (max-width: 700px) {
+
+  .tuning-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  .tuning-options {
+    grid-template-columns: 1fr;
+  }
+
+}
