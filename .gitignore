@@ -1,0 +1,45 @@
+# ==================== Rust / Cargo ====================
+/target/
+**/target/
+**/*.rs.bk
+*.pdb
+.idea/
+.vscode/
+src-tauri/gen
+.idea/
+.vscode/
+debug/
+target/
+node_modules/
+src-tauri/target/
+src-tauri/gen
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log
+dist
+dist-ssr
+*.local
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# ==================== 日志 & 临时文件 ====================
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.bak
+*.cache
+wcfdll
+# ==================== 环境变量 & 密钥 ====================
+.env
+.env.*
+*.pem
+*.key
