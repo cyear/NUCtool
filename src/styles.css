@@ -1002,3 +1002,211 @@ body {
   }
 
 }
+
+
+/* =====================================================
+   功耗设置
+   ===================================================== */
+
+.tdp-card {
+  background: var(--card-bg, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 14px;
+  padding: 24px;
+}
+
+
+.tdp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+
+.tdp-title {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+
+.tdp-description {
+  margin-top: 5px;
+  font-size: 13px;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+}
+
+
+/* 功耗分类 */
+
+.tdp-section {
+  margin-top: 24px;
+}
+
+
+.tdp-section:first-of-type {
+  margin-top: 0;
+}
+
+
+.tdp-section-title {
+  margin-bottom: 12px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  color: var(--text-secondary, rgba(255, 255, 255, 0.65));
+}
+
+
+/* 功耗项目 */
+
+.tdp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+
+.tdp-item {
+  padding: 16px;
+
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+}
+
+
+.tdp-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 12px;
+}
+
+
+.tdp-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+.tdp-current {
+  font-size: 11px;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.4));
+}
+
+
+/* 输入区域 */
+
+.tdp-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+.tdp-input {
+  width: 0;
+  flex: 1;
+
+  min-width: 0;
+  height: 36px;
+
+  padding: 0 10px;
+
+  box-sizing: border-box;
+
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+
+  background: rgba(255, 255, 255, 0.04);
+
+  color: inherit;
+  font-size: 13px;
+
+  outline: none;
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+
+.tdp-input:focus {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+
+.tdp-input::placeholder {
+  color: var(--text-secondary, rgba(255, 255, 255, 0.35));
+}
+
+
+.tdp-unit {
+  font-size: 12px;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+}
+
+
+.tdp-set-btn {
+  height: 36px;
+
+  padding: 0 12px;
+
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+
+  background: rgba(255, 255, 255, 0.04);
+
+  color: inherit;
+  font-size: 12px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+
+.tdp-set-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+
+.tdp-set-btn:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+
+/* =====================================================
+   功耗设置响应式
+   ===================================================== */
+
+@media (max-width: 1000px) {
+
+  .tdp-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .tdp-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .tdp-grid {
+    grid-template-columns: 1fr;
+  }
+
+}

@@ -223,7 +223,7 @@
             <h1>性能调优</h1>
 
             <p class="page-subtitle">
-              选择系统性能模式
+              对设备性能释放进行调整
             </p>
           </div>
 
@@ -235,7 +235,7 @@
           <div class="tuning-header">
             <div>
               <div class="tuning-title">
-                性能模式
+                模式切换
               </div>
 
               <div class="tuning-description">
@@ -463,15 +463,200 @@
 
         </header>
 
-
-        <div class="empty-card">
-          <div class="empty-title">
-            功耗设置
+        <div class="tdp-card">
+        
+          <div class="tdp-header">
+        
+            <div>
+              <div class="tdp-title">
+                功耗限制
+              </div>
+        
+              <div class="tdp-description">
+                调整处理器与显卡的功耗限制
+              </div>
+            </div>
+        
+            <button id="tdpRefreshButton" class="action-btn" type="button">
+              读取配置
+            </button>
+        
           </div>
-
-          <div class="empty-description">
-            功耗控制功能将在这里显示。
+        
+        
+          <div class="tdp-section">
+        
+            <div class="tdp-section-title">
+              CPU
+            </div>
+        
+            <div class="tdp-grid">
+        
+              <!-- CPU PL1 -->
+              <div class="tdp-item">
+        
+                <div class="tdp-item-header">
+                  <span class="tdp-label">
+                    PL1
+                  </span>
+        
+                  <span class="tdp-current">
+                    当前值
+                  </span>
+                </div>
+        
+                <div class="tdp-input-row">
+        
+                  <input id="cpu-pl1" class="tdp-input" type="number" min="0" step="1" placeholder="--" />
+        
+                  <span class="tdp-unit">
+                    W
+                  </span>
+        
+                  <button class="tdp-set-btn" data-tdp="cpu-pl1" type="button">
+                    写入
+                  </button>
+        
+                </div>
+        
+              </div>
+        
+        
+              <!-- CPU PL2 -->
+              <div class="tdp-item">
+        
+                <div class="tdp-item-header">
+                  <span class="tdp-label">
+                    PL2
+                  </span>
+        
+                  <span class="tdp-current">
+                    当前值
+                  </span>
+                </div>
+        
+                <div class="tdp-input-row">
+        
+                  <input id="cpu-pl2" class="tdp-input" type="number" min="0" step="1" placeholder="--" />
+        
+                  <span class="tdp-unit">
+                    W
+                  </span>
+        
+                  <button class="tdp-set-btn" data-tdp="cpu-pl2" type="button">
+                    写入
+                  </button>
+        
+                </div>
+        
+              </div>
+        
+        
+              <!-- CPU PL4 -->
+              <div class="tdp-item">
+        
+                <div class="tdp-item-header">
+                  <span class="tdp-label">
+                    PL4
+                  </span>
+        
+                  <span class="tdp-current">
+                    当前值
+                  </span>
+                </div>
+        
+                <div class="tdp-input-row">
+        
+                  <input id="cpu-pl4" class="tdp-input" type="number" min="0" step="1" placeholder="--" />
+        
+                  <span class="tdp-unit">
+                    W
+                  </span>
+        
+                  <button class="tdp-set-btn" data-tdp="cpu-pl4" type="button">
+                    写入
+                  </button>
+        
+                </div>
+        
+              </div>
+        
+            </div>
+        
           </div>
+        
+        
+          <div class="tdp-section">
+        
+            <div class="tdp-section-title">
+              GPU(Intel ARC)
+            </div>
+        
+            <div class="tdp-grid">
+        
+              <!-- GPU PL1 -->
+              <div class="tdp-item">
+        
+                <div class="tdp-item-header">
+                  <span class="tdp-label">
+                    PL1
+                  </span>
+        
+                  <span class="tdp-current">
+                    当前值
+                  </span>
+                </div>
+        
+                <div class="tdp-input-row">
+        
+                  <input id="gpu-pl1" class="tdp-input" type="number" min="0" step="1" placeholder="--" />
+        
+                  <span class="tdp-unit">
+                    W
+                  </span>
+        
+                  <button class="tdp-set-btn" data-tdp="gpu-pl1" type="button">
+                    写入
+                  </button>
+        
+                </div>
+        
+              </div>
+        
+        
+              <!-- GPU PL2 -->
+              <div class="tdp-item">
+        
+                <div class="tdp-item-header">
+                  <span class="tdp-label">
+                    PL2
+                  </span>
+        
+                  <span class="tdp-current">
+                    当前值
+                  </span>
+                </div>
+        
+                <div class="tdp-input-row">
+        
+                  <input id="gpu-pl2" class="tdp-input" type="number" min="0" step="1" placeholder="--" />
+        
+                  <span class="tdp-unit">
+                    W
+                  </span>
+        
+                  <button class="tdp-set-btn" data-tdp="gpu-pl2" type="button">
+                    写入
+                  </button>
+        
+                </div>
+        
+              </div>
+        
+            </div>
+        
+          </div>
+        
         </div>
 
       </section>

@@ -254,6 +254,57 @@ impl UniwillAcpiEc {
         self.write_u8(EC_FAN_MODE,mode as u8)
     }
 
+    /// 读取 CPU PL1
+    pub fn cpu_read_pl1(&self) -> io::Result<u8> {
+        self.read_u8(EC_CPU_PL1)
+    }
+
+    /// 写入 CPU PL1
+    pub fn cpu_write_pl1(&self, w: u8) -> io::Result<()> {
+        self.write_u8(EC_CPU_PL1, w)
+    }
+
+    /// 读取 CPU PL2
+    pub fn cpu_read_pl2(&self) -> io::Result<u8> {
+        self.read_u8(EC_CPU_PL2)
+    }
+
+    /// 写入 CPU PL2
+    pub fn cpu_write_pl2(&self, w: u8) -> io::Result<()> {
+        self.write_u8(EC_CPU_PL2, w)
+    }
+
+    /// 读取 CPU PL4
+    pub fn cpu_read_pl4(&self) -> io::Result<u8> {
+        self.read_u8(EC_CPU_PL4)
+    }
+
+    /// 写入 CPU PL4
+    pub fn cpu_write_pl4(&self, w: u8) -> io::Result<()> {
+        self.write_u8(EC_CPU_PL4, w)
+    }
+
+    /// 读取 GPU PL1
+    pub fn gpu_read_pl1(&self) -> io::Result<u8> {
+        self.read_u8(EC_GPU_PL1)
+    }
+
+    /// 写入 GPU PL1
+    pub fn gpu_write_pl1(&self, w: u8) -> io::Result<()> {
+        self.write_u8(EC_GPU_PL1, w)
+    }
+
+    /// 读取 GPU PL2
+    pub fn gpu_read_pl2(&self) -> io::Result<u8> {
+        self.read_u8(EC_GPU_PL2)
+    }
+
+    /// 写入 GPU PL2
+    pub fn gpu_write_pl2(&self, w: u8) -> io::Result<()> {
+        self.write_u8(EC_GPU_PL2, w)
+    }
+
+
 }
 
 impl Drop for UniwillAcpiEc {

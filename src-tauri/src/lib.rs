@@ -45,6 +45,19 @@ struct SensorData {
     fan2_rpm: u16,
 }
 
+// =====================================================
+// TDP 数据
+// =====================================================
+
+#[derive(Debug, Serialize)]
+pub struct TdpConfig {
+    pub cpu_pl1: u8,
+    pub cpu_pl2: u8,
+    pub cpu_pl4: u8,
+    pub gpu_pl1: u8,
+    pub gpu_pl2: u8,
+}
+
 struct AppState {
     running: Arc<AtomicBool>,
 }
@@ -281,6 +294,147 @@ async fn set_performance_mode(mode: String) {
             return;
         }
     }
+}
+
+// =====================================================
+// 读取 TDP
+// =====================================================
+
+#[tauri::command]
+async fn get_tdp() -> Result<TdpConfig, String> {
+
+    // EC init
+    let ec = match UniwillAcpiEc::open() {
+        Ok(ec) => ec,
+        Err(e) => {
+            eprintln!("打开 ACPIDriver 失败: {}", e);
+            None
+        }.expect("EC init Error")
+    };
+
+
+    // =================================================
+    // CPU
+    // =================================================
+
+    let cpu_pl1 = {
+        ec.cpu_read_pl1().expect("Error")
+    };
+
+    let cpu_pl2 = {
+        ec.cpu_read_pl2().expect("Error")
+    };
+
+    let cpu_pl4 = {
+        ec.cpu_read_pl4().expect("Error")
+    };
+
+
+    // =================================================
+    // GPU
+    // =================================================
+
+    let gpu_pl1 = {
+        ec.gpu_read_pl1().expect("Error")
+    };
+
+    let gpu_pl2 = {
+        ec.gpu_read_pl2().expect("Error")
+    };
+
+
+    println!(
+        "TDP 读取: CPU PL1={}W PL2={}W PL4={}W, GPU PL1={}W PL2={}W",
+        cpu_pl1,
+        cpu_pl2,
+        cpu_pl4,
+        gpu_pl1,
+        gpu_pl2
+    );
+
+
+    Ok(TdpConfig {
+        cpu_pl1,
+        cpu_pl2,
+        cpu_pl4,
+        gpu_pl1,
+        gpu_pl2,
+    })
+}
+
+
+// =====================================================
+// 写入 TDP
+// =====================================================
+
+#[tauri::command]
+async fn set_tdp(
+    tdp_type: String,
+    value: u8,
+) -> Result<(), String> {
+
+    // EC init
+    let ec = match UniwillAcpiEc::open() {
+        Ok(ec) => ec,
+        Err(e) => {
+            eprintln!("打开 ACPIDriver 失败: {}", e);
+            None
+        }.expect("EC init Error")
+    };
+
+    match tdp_type.as_str() {
+
+        // =============================================
+        // CPU
+        // =============================================
+
+        "cpu-pl1" => {
+            ec.cpu_write_pl1(value).expect("Error");
+            println!("写入 CPU PL1: {} W", value);
+        }
+
+
+        "cpu-pl2" => {
+            ec.cpu_write_pl2(value).expect("Error");
+            println!("写入 CPU PL2: {} W", value);
+        }
+
+
+        "cpu-pl4" => {
+            ec.cpu_write_pl4(value).expect("Error");
+            println!("写入 CPU PL4: {} W", value);
+        }
+
+
+        // =============================================
+        // GPU
+        // =============================================
+
+        "gpu-pl1" => {
+            ec.gpu_write_pl1(value).expect("Error");
+            println!("写入 GPU PL1: {} W", value);
+        }
+
+
+        "gpu-pl2" => {
+            ec.gpu_write_pl2(value).expect("Error");
+            println!("写入 GPU PL2: {} W", value);
+        }
+
+        // =============================================
+        // 未知类型
+        // =============================================
+
+        _ => {
+
+            return Err(
+                format!("未知的 TDP 类型: {}", tdp_type)
+            );
+        }
+    }
+
+
+    Ok(())
 }
 
 fn stop_fan_control_inner(
@@ -543,7 +697,9 @@ pub fn run() {
             save_fan_config,
             start_fan_control,
             stop_fan_control,
-            set_performance_mode
+            set_performance_mode,
+            get_tdp,
+            set_tdp
         ])
         .setup(setup)     
         .build(tauri::generate_context!())

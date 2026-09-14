@@ -428,6 +428,112 @@ tuningButtons.forEach((button) => {
 
 });
 
+
+// =====================================================
+// 功耗设置
+// =====================================================
+
+const tdpRefreshButton = document.getElementById("tdpRefreshButton");
+const tdpSetButtons = document.querySelectorAll(".tdp-set-btn");
+
+
+// -----------------------------------------------------
+// 读取功耗配置
+// -----------------------------------------------------
+
+async function loadTdp() {
+
+  try {
+
+    const tdp = await invoke("get_tdp");
+
+    console.log("TDP:", tdp);
+
+    document.getElementById("cpu-pl1").value = tdp.cpu_pl1;
+    document.getElementById("cpu-pl2").value = tdp.cpu_pl2;
+    document.getElementById("cpu-pl4").value = tdp.cpu_pl4;
+
+    document.getElementById("gpu-pl1").value = tdp.gpu_pl1;
+    document.getElementById("gpu-pl2").value = tdp.gpu_pl2;
+
+  } catch (error) {
+
+    console.error("读取功耗配置失败:", error);
+
+  }
+
+}
+
+
+// -----------------------------------------------------
+// 写入功耗
+// -----------------------------------------------------
+
+async function setTdp(type) {
+
+  const input = document.getElementById(type);
+
+  if (!input) {
+    return;
+  }
+
+  const value = Number(input.value);
+
+  if (!Number.isFinite(value) || value < 0) {
+
+    console.error("无效的功耗值:", value);
+
+    return;
+  }
+
+
+  try {
+    
+    await invoke("set_tdp", {
+        tdpType: type,
+        value: value
+    });
+    console.log(`设置 ${type}: ${value} W`);
+
+  } catch (error) {
+
+    console.error(`设置 ${type} 失败:`, error);
+
+  }
+
+}
+
+
+// -----------------------------------------------------
+// 读取按钮
+// -----------------------------------------------------
+
+if (tdpRefreshButton) {
+
+  tdpRefreshButton.addEventListener("click", () => {
+    loadTdp();
+  });
+
+}
+
+
+// -----------------------------------------------------
+// 写入按钮
+// -----------------------------------------------------
+
+tdpSetButtons.forEach((button) => {
+
+  button.addEventListener("click", () => {
+
+    const type = button.dataset.tdp;
+
+    setTdp(type);
+
+  });
+
+});
+
+
 /* =========================================================
    初始化
    ========================================================= */
