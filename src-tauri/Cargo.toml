@@ -30,6 +30,7 @@ windows = { version = "0.62.2", features = [
 wmi = "0.18"
 dirs = "7.0.0"
 powershell_script = "1.1.0"
+libloading = "0.8"
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
 [profile.release]

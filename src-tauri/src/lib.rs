@@ -3,7 +3,7 @@ mod acpi;
 mod config;
 mod fan_control;
 use win::privilege_escalation;
-use acpi::{UniwillAcpiEc, UniwillWmiEc};
+use acpi::{UniwillAcpiEc, UniwillWmiEc, UniwillWcfEc};
 use config::FanData;
 use fan_control::{FanControlState, calculate_speed};
 use serde::Serialize;
@@ -267,16 +267,46 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let show = MenuItemBuilder::with_id("show", "显示窗口")
         .build(app)?;
 
+    let performance = MenuItemBuilder::with_id("performance", "性能模式")
+        .build(app)?;
+
+    let balanced = MenuItemBuilder::with_id("balanced", "平衡模式")
+        .build(app)?;
+
+    let quiet = MenuItemBuilder::with_id("quiet", "省电模式")
+        .build(app)?;
+
     let quit = MenuItemBuilder::with_id("quit", "退出")
+        .build(app)?;
+
+    let benchmark_on = MenuItemBuilder::with_id("benchmark_on", "Benchmark ON")
+        .build(app)?;
+
+    let benchmark_off = MenuItemBuilder::with_id("benchmark_off", "Benchmark OFF")
         .build(app)?;
 
     let menu = MenuBuilder::new(app)
         .item(&show)
+        .item(&benchmark_on)
+        .item(&benchmark_off)
+        .item(&performance)
+        .item(&balanced)
+        .item(&quiet)
         .separator()
         .item(&quit)
         .build()?;
 
     const TRAY_ICON: tauri::image::Image<'_> = include_image!("icons/32x32.png");
+
+    let wcf = match UniwillWcfEc::new() {
+        Ok(wcf) => wcf,
+        Err(e) => {
+            eprintln!("加载 NUCtool DLL 失败: {}", e);
+            None
+        }.expect("加载 NUCtool DLL 失败")
+    };
+    let ret = wcf.connect();
+    println!("connect: {}", ret);
 
     // =========================
     // 创建托盘
@@ -288,7 +318,7 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         .tooltip("NUCtool")
 
         // 托盘菜单
-        .on_menu_event(|app, event| {
+        .on_menu_event(move |app, event| {
             match event.id().as_ref() {
                 "show" => {
                     if let Some(window) =
@@ -297,12 +327,25 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
                         let _ = window.show();
                         let _ = window.set_focus();
                     }
-                }
-
+                },
+                "benchmark_on" => {
+                    println!("benchmark_on apply_profile: {}", wcf.apply_benchmark_mode(1));
+                },
+                "benchmark_off" => {
+                    println!("benchmark_off apply_profile: {}", wcf.apply_benchmark_mode(0));
+                },
+                "performance" => {
+                    println!("performance apply_profile: {}", wcf.apply_profile(1));
+                },
+                "balanced" => {
+                    println!("balanced apply_profile: {}", wcf.apply_profile(2));
+                },
+                "quiet" => {
+                    println!("quiet apply_profile: {}", wcf.apply_profile(3));
+                },
                 "quit" => {
                     app.exit(0);
                 }
-
                 _ => {}
             }
         })
@@ -362,7 +405,7 @@ pub fn run() {
     
     // 管理员权限！！！
     privilege_escalation();
-    
+
     let app = tauri::Builder::default()
         .manage(AppState {
             running: Arc::new(AtomicBool::new(false)),
@@ -375,28 +418,7 @@ pub fn run() {
             start_fan_control,
             stop_fan_control
         ])
-        .setup(setup)
-        // .setup(|app| {
-        //     setup(app)?;
-
-        //     #[cfg(target_os = "windows")]
-        //     {
-        //         let window = app
-        //             .get_webview_window("main")
-        //             .ok_or("找不到 main 窗口")?;
-
-        //         let state = app
-        //             .try_state::<FanControlState>()
-        //             .ok_or("找不到 FanControlState")?;
-
-        //         windows_shutdown::install(
-        //             &window,
-        //             state.inner(),
-        //         )?;
-        //     }
-
-        //     Ok(())
-        // })        
+        .setup(setup)     
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
     
