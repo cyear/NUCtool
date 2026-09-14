@@ -477,6 +477,20 @@ fn stop_fan_control_inner(
 pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
     // =========================
+    // 启动最小化
+    // =========================
+
+    let args: Vec<String> = std::env::args().collect();
+    let hide = args.iter().any(|arg| arg == "--hide");
+    let window = app.get_webview_window("main").unwrap();
+    if hide {
+        window.hide()?;
+    } else {
+        window.show()?;
+        window.set_focus()?;
+    } 
+
+    // =========================
     // 托盘菜单
     // =========================
 
@@ -685,7 +699,7 @@ pub fn run() {
             fnhook();
         }
     });
-
+    
     let app = tauri::Builder::default()
         .manage(AppState {
             running: Arc::new(AtomicBool::new(false)),

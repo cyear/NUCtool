@@ -82,6 +82,14 @@
 
 > **注意：** 当前仅 `LAPAC71H` 支持风扇控制功能。其他功能暂未实现或硬件/固件不支持。
 
+## 说明
+
+- Fn + 1 => 性能模式
+- Fn + 2 => 平衡模式
+- Fn + 3 => 省电模式
+- Fn + 4 => 基准模式
+- `--hide` 启动只保留托盘
+
 ## Star History
 
 <a href="https://www.star-history.com/?repos=cyear%2Fnuctool&type=date&legend=top-left">
