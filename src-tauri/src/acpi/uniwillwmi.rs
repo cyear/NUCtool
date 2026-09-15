@@ -6,7 +6,6 @@ const WMI_NAMESPACE: &str = r"ROOT\WMI";
 const WMI_CLASS: &str = "AcpiTest_MULong";
 const WMI_METHOD: &str = "GetSetULong";
 
-
 // ============================================================
 // Uniwill WMI interface
 // ============================================================
@@ -20,35 +19,19 @@ pub struct UniwillWmiEc {
 impl UniwillWmiEc {
     /// 创建 WMI EC 连接。
     pub fn new() -> Result<Self, Box<dyn Error>> {
-        let wmi =
-            WMIConnection::with_namespace_path(
-                WMI_NAMESPACE
-            )?;
+        let wmi = WMIConnection::with_namespace_path(WMI_NAMESPACE)?;
 
-        let mut objects =
-            wmi.exec_query(
-                "SELECT * FROM AcpiTest_MULong"
-            )?;
+        let mut objects = wmi.exec_query("SELECT * FROM AcpiTest_MULong")?;
 
-        let object =
-            objects
-                .next()
-                .ok_or(
-                    "AcpiTest_MULong instance not found"
-                )??;
+        let object = objects
+            .next()
+            .ok_or("AcpiTest_MULong instance not found")??;
 
-        let instance_path =
-            object.path()?;
+        let instance_path = object.path()?;
 
-        let _active: bool =
-            object
-                .get_property("Active")?
-                .try_into()?;
+        let _active: bool = object.get_property("Active")?.try_into()?;
 
-        let _instance_name: String =
-            object
-                .get_property("InstanceName")?
-                .try_into()?;
+        let _instance_name: String = object.get_property("InstanceName")?.try_into()?;
 
         // println!(
         //     "WMI Instance: {}",
@@ -80,52 +63,31 @@ impl UniwillWmiEc {
     //     self.active
     // }
 
-    pub fn get_set(
-        &self,
-        data: u64,
-    ) -> Result<u32, Box<dyn Error>> {
+    pub fn get_set(&self, data: u64) -> Result<u32, Box<dyn Error>> {
         // 获取 class definition
-        let class =
-            self.wmi.get_object(
-                WMI_CLASS
-            )?;
+        let class = self.wmi.get_object(WMI_CLASS)?;
 
         // 获取 GetSetULong 输入参数定义
-        let input_class =
-            class
-                .get_method(WMI_METHOD)?
-                .ok_or(
-                    "GetSetULong input signature not found"
-                )?;
+        let input_class = class
+            .get_method(WMI_METHOD)?
+            .ok_or("GetSetULong input signature not found")?;
 
         // 创建输入参数实例
-        let input =
-            input_class.spawn_instance()?;
+        let input = input_class.spawn_instance()?;
 
         // uint64 Data
-        input.put_property(
-            "Data",
-            Variant::UI8(data),
-        )?;
+        input.put_property("Data", Variant::UI8(data))?;
 
         // 调用具体 instance 的方法
-        let output =
-            self.wmi
-                .exec_method(
-                    &self.instance_path,
-                    WMI_METHOD,
-                    Some(&input),
-                )?
-                .ok_or(
-                    "GetSetULong returned no output"
-                )?;
+        let output = self
+            .wmi
+            .exec_method(&self.instance_path, WMI_METHOD, Some(&input))?
+            .ok_or("GetSetULong returned no output")?;
 
         // uint32 Return
-        let return_value =
-            output.get_property("Return")?;
+        let return_value = output.get_property("Return")?;
 
-        let return_value: u32 =
-            return_value.try_into()?;
+        let return_value: u32 = return_value.try_into()?;
 
         Ok(return_value)
     }

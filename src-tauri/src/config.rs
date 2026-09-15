@@ -1,5 +1,5 @@
-use std::{fs, path::PathBuf};
 use serde::{Deserialize, Serialize};
+use std::{fs, path::PathBuf};
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug)]
 pub struct FanPoint {

@@ -268,7 +268,6 @@ function applyCurve(chart, points) {
   chart.update();
 }
 
-
 /* =========================================================
    配置
    ========================================================= */
@@ -570,10 +569,10 @@ async function setTdp(type) {
 
 
   try {
-    
+
     await invoke("set_tdp", {
-        tdpType: type,
-        value: value
+      tdpType: type,
+      value: value
     });
     console.log(`设置 ${type}: ${value} W`);
 
@@ -614,6 +613,171 @@ tdpSetButtons.forEach((button) => {
   });
 
 });
+
+
+// =====================================================
+// 开机自启动
+// =====================================================
+
+const autostartToggle =
+  document.getElementById("autostart-toggle");
+
+const autostartStatus =
+  document.getElementById("autostart-status");
+
+const autostartDescription =
+  document.getElementById("autostart-description");
+
+
+/**
+ * 更新开机自启动 UI
+ */
+function updateAutostartUI(enabled) {
+
+  if (!autostartToggle || !autostartStatus) {
+    return;
+  }
+
+  autostartToggle.checked = enabled;
+
+  if (enabled) {
+
+    autostartStatus.textContent = "已启用";
+
+    autostartStatus.classList.remove(
+      "disabled",
+      "error"
+    );
+
+    autostartStatus.classList.add("enabled");
+
+    if (autostartDescription) {
+      autostartDescription.textContent =
+        "登录 Windows 后自动运行 NUCtool";
+    }
+
+  } else {
+
+    autostartStatus.textContent = "未启用";
+
+    autostartStatus.classList.remove(
+      "enabled",
+      "error"
+    );
+
+    autostartStatus.classList.add("disabled");
+
+    if (autostartDescription) {
+      autostartDescription.textContent =
+        "开机后不会自动运行 NUCtool";
+    }
+  }
+}
+
+
+/**
+ * 读取当前开机自启动状态
+ */
+async function loadAutostartState() {
+
+  if (!autostartToggle || !autostartStatus) {
+    return;
+  }
+
+  try {
+
+    autostartToggle.disabled = true;
+
+    autostartStatus.textContent = "检查中...";
+
+    const enabled =
+      await invoke("get_autostart");
+
+    updateAutostartUI(enabled);
+
+  } catch (error) {
+
+    console.error(
+      "读取开机自启动状态失败:",
+      error
+    );
+
+    autostartStatus.textContent = "读取失败";
+
+    autostartStatus.classList.remove(
+      "enabled",
+      "disabled"
+    );
+
+    autostartStatus.classList.add("error");
+
+    autostartToggle.checked = false;
+
+  } finally {
+
+    autostartToggle.disabled = false;
+  }
+}
+
+
+/**
+ * 设置开机自启动
+ */
+async function setAutostart(enabled) {
+
+  if (!autostartToggle) {
+    return;
+  }
+
+  try {
+
+    autostartToggle.disabled = true;
+
+    await invoke("set_autostart", {
+      enabled: enabled
+    });
+
+    updateAutostartUI(enabled);
+
+  } catch (error) {
+
+    console.error(
+      "设置开机自启动失败:",
+      error
+    );
+
+    // 操作失败，重新读取真实状态
+    await loadAutostartState();
+
+  } finally {
+
+    autostartToggle.disabled = false;
+  }
+}
+
+
+/**
+ * 开机自启动开关
+ */
+if (autostartToggle) {
+
+  autostartToggle.addEventListener(
+    "change",
+    async () => {
+
+      const enabled =
+        autostartToggle.checked;
+
+      await setAutostart(enabled);
+    }
+  );
+}
+
+
+/**
+ * 初始化
+ */
+loadAutostartState();
 
 
 /* =========================================================

@@ -79,8 +79,9 @@
 | 模式切换 | ✅ 支持 | ❌ 未测试 |
 | 显示切换 | ❌ 不支持 | ❌ 不支持 |
 | 快捷键 | ✅ 支持 | ❌ 未测试 |
+| 自启动 | ✅ 支持 | ❌ 未测试 |
 
-> **注意：** 当前仅 `LAPAC71H` 支持风扇控制功能。其他功能暂未实现或硬件/固件不支持。
+> **注意：** 当前仅 `LAPAC71H` 支持。其他功能暂未实现或硬件/固件不支持。
 
 ## 说明
 
@@ -90,6 +91,40 @@
 - Fn + 4 => 基准模式
 - `--hide` 启动只保留托盘
 - `--fan-control` 自动启动风扇控制
+
+---
+
+### 自启动建议使用任务计划
+
+#### 1.创建
+
+```PowerShell
+$action = New-ScheduledTaskAction `
+    -Execute 'C:\Program Files\NUCtool\nuctool.exe' `
+    -Argument '--hide --fan-control'
+
+$trigger = New-ScheduledTaskTrigger -AtLogOn
+
+$principal = New-ScheduledTaskPrincipal `
+    -UserId "$env:USERDOMAIN\$env:USERNAME" `
+    -LogonType Interactive `
+    -RunLevel Highest
+
+Register-ScheduledTask `
+    -TaskName 'NUCtool' `
+    -Action $action `
+    -Trigger $trigger `
+    -Principal $principal `
+    -Force
+```
+
+#### 2.删除
+
+```PowerShell
+Unregister-ScheduledTask -TaskName 'NUCtool' -Confirm:$false
+```
+
+---
 
 ## Star History
 

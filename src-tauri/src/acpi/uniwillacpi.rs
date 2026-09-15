@@ -1,17 +1,12 @@
-use std::io;
 use std::ffi::OsStr;
+use std::io;
 use std::os::windows::ffi::OsStrExt;
 
 use windows::core::PCWSTR;
 use windows::Win32::Foundation::{CloseHandle, HANDLE, INVALID_HANDLE_VALUE};
 use windows::Win32::Storage::FileSystem::{
-    CreateFileW,
-    FILE_ATTRIBUTE_NORMAL,
-    FILE_GENERIC_READ,
-    FILE_GENERIC_WRITE,
-    FILE_SHARE_READ,
-    FILE_SHARE_WRITE,
-    OPEN_EXISTING,
+    CreateFileW, FILE_ATTRIBUTE_NORMAL, FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_SHARE_READ,
+    FILE_SHARE_WRITE, OPEN_EXISTING,
 };
 use windows::Win32::System::IO::DeviceIoControl;
 
@@ -108,12 +103,7 @@ impl UniwillAcpiEc {
                 None,
             )
         }
-        .map_err(|e| {
-            io::Error::new(
-                io::ErrorKind::Other,
-                format!("CreateFileW failed: {e:?}"),
-            )
-        })?;
+        .map_err(|e| io::Error::new(io::ErrorKind::Other, format!("CreateFileW failed: {e:?}")))?;
 
         if handle == INVALID_HANDLE_VALUE {
             return Err(io::Error::last_os_error());
@@ -155,11 +145,7 @@ impl UniwillAcpiEc {
     pub fn write_u8(&self, addr: u16, value: u8) -> io::Result<()> {
         // int[] { addr, data }
         // inBufferSize = 8
-        let input = [
-            (addr as u32).to_le_bytes(),
-            (value as u32).to_le_bytes(),
-        ]
-        .concat();
+        let input = [(addr as u32).to_le_bytes(), (value as u32).to_le_bytes()].concat();
 
         let mut output: u32 = 0;
         let mut bytes_returned = 0u32;
@@ -202,10 +188,7 @@ impl UniwillAcpiEc {
 
     /// 读取副风扇
     pub fn second_fan_raw(&self) -> io::Result<u16> {
-        self.read_be16(
-            EC_SECOND_FAN_RPM_1,
-            EC_SECOND_FAN_RPM_2,
-        )
+        self.read_be16(EC_SECOND_FAN_RPM_1, EC_SECOND_FAN_RPM_2)
     }
 
     /// CPU 温度
@@ -248,10 +231,10 @@ impl UniwillAcpiEc {
     pub fn fan_read_mode(&self) -> io::Result<u8> {
         self.read_u8(EC_FAN_MODE)
     }
-    
+
     /// 写入 Fan Mode
     pub fn fan_write_mode(&self, mode: FanModeByte) -> io::Result<()> {
-        self.write_u8(EC_FAN_MODE,mode as u8)
+        self.write_u8(EC_FAN_MODE, mode as u8)
     }
 
     /// 读取 CPU PL1
@@ -303,8 +286,6 @@ impl UniwillAcpiEc {
     pub fn gpu_write_pl2(&self, w: u8) -> io::Result<()> {
         self.write_u8(EC_GPU_PL2, w)
     }
-
-
 }
 
 impl Drop for UniwillAcpiEc {

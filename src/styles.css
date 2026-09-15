@@ -1210,3 +1210,183 @@ body {
   }
 
 }
+
+
+/* ========================================================= 
+    设置 
+========================================================= */
+.settings-card {
+  width: 100%;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.settings-card:hover {
+  border-color: var(--border-hover);
+}
+
+
+.settings-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-height: 24px;
+  margin-bottom: 22px;
+}
+
+.settings-card-title {
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.settings-card-description {
+  margin-top: 5px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+
+.settings-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(15, 17, 21, 0.35);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.settings-status.enabled {
+  border-color: rgba(61, 214, 140, 0.2);
+  background: rgba(61, 214, 140, 0.06);
+  color: var(--success);
+}
+
+.settings-status.disabled {
+  color: var(--text-muted);
+}
+
+.settings-status.error {
+  border-color: rgba(255, 107, 107, 0.2);
+  background: rgba(255, 107, 107, 0.06);
+  color: var(--danger);
+}
+
+
+.settings-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.settings-option-info {
+  min-width: 0;
+  padding-right: 20px;
+}
+
+.settings-option-title {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.settings-option-description {
+  margin-top: 5px;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.settings-switch {
+  position: relative;
+  display: block;
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.settings-switch input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+/* Switch 背景 */
+.settings-slider {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #1a1f27;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
+}
+
+/* Switch 圆点 */
+.settings-slider::before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 2px;
+  top: 2px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+
+.settings-switch input:checked+.settings-slider {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+}
+
+.settings-switch input:checked+.settings-slider::before {
+  background: var(--accent);
+  transform: translateX(18px);
+}
+
+.settings-switch:hover .settings-slider {
+  border-color: var(--border-hover);
+}
+
+.settings-switch:hover input:checked+.settings-slider {
+  border-color: #41658f;
+}
+
+.settings-switch input:disabled+.settings-slider {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .settings-card {
+    padding: 20px;
+  }
+
+  .settings-card-header {
+    gap: 12px;
+  }
+
+  .settings-option {
+    min-height: 60px;
+  }
+
+  .settings-option-description {
+    max-width: 90%;
+  }
+}

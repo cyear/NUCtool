@@ -1,11 +1,11 @@
 use libloading::{Library, Symbol};
 use std::os::raw::c_int;
 
-type WcfConnectFn          = unsafe extern "system" fn() -> c_int;
-type WcfDisconnectFn       = unsafe extern "system" fn();
-type WcfIsConnectedFn      = unsafe extern "system" fn() -> c_int;
-type WcfApplyProfileFn     = unsafe extern "system" fn(index: c_int) -> c_int;
-type WcfSetPowerPlanFn     = unsafe extern "system" fn(mode: c_int) -> c_int;
+type WcfConnectFn = unsafe extern "system" fn() -> c_int;
+type WcfDisconnectFn = unsafe extern "system" fn();
+type WcfIsConnectedFn = unsafe extern "system" fn() -> c_int;
+type WcfApplyProfileFn = unsafe extern "system" fn(index: c_int) -> c_int;
+type WcfSetPowerPlanFn = unsafe extern "system" fn(mode: c_int) -> c_int;
 type WcfApplyBenchmarkModeFn = unsafe extern "system" fn(enable: c_int) -> c_int;
 type WcfDisablePassiveCoolingFn = unsafe extern "system" fn(disable: c_int) -> c_int;
 type WcfGetSupportedFeaturesCountFn = unsafe extern "system" fn() -> c_int;
@@ -30,7 +30,6 @@ pub struct UniwillWcfEc {
 }
 
 impl UniwillWcfEc {
-
     // ========================================================
     // 加载 DLL
     // ========================================================
@@ -40,13 +39,9 @@ impl UniwillWcfEc {
         let install_dir = exe_path.parent().unwrap();
         let dll_path = install_dir.join("NUCtool.dll");
 
-        let lib = unsafe {
-            Library::new(&dll_path)?
-        };
+        let lib = unsafe { Library::new(&dll_path)? };
         // Library 会被结构体持有，所以这里延长 Symbol 生命周期
-        let lib_ref: &'static Library = unsafe {
-            std::mem::transmute(&lib)
-        };
+        let lib_ref: &'static Library = unsafe { std::mem::transmute(&lib) };
 
         unsafe {
             Ok(Self {
@@ -59,8 +54,8 @@ impl UniwillWcfEc {
                 wcf_apply_benchmark_mode: lib_ref.get(b"wcf_apply_benchmark_mode")?,
                 wcf_disable_passive_cooling: lib_ref.get(b"wcf_disable_passive_cooling")?,
 
-                wcf_get_supported_features_count:
-                    lib_ref.get(b"wcf_get_supported_features_count")?,
+                wcf_get_supported_features_count: lib_ref
+                    .get(b"wcf_get_supported_features_count")?,
 
                 lib,
             })
@@ -72,9 +67,7 @@ impl UniwillWcfEc {
     // ========================================================
 
     pub fn connect(&self) -> i32 {
-        unsafe {
-            (self.wcf_connect)()
-        }
+        unsafe { (self.wcf_connect)() }
     }
 
     pub fn disconnect(&self) {
@@ -84,9 +77,7 @@ impl UniwillWcfEc {
     }
 
     pub fn is_connected(&self) -> bool {
-        unsafe {
-            (self.wcf_is_connected)() != 0
-        }
+        unsafe { (self.wcf_is_connected)() != 0 }
     }
 
     // ========================================================
@@ -94,9 +85,7 @@ impl UniwillWcfEc {
     // ========================================================
 
     pub fn apply_profile(&self, profile: i32) -> i32 {
-        unsafe {
-            (self.wcf_apply_profile)(profile)
-        }
+        unsafe { (self.wcf_apply_profile)(profile) }
     }
 
     // ========================================================
@@ -104,9 +93,7 @@ impl UniwillWcfEc {
     // ========================================================
 
     pub fn set_power_plan(&self, mode: i32) -> i32 {
-        unsafe {
-            (self.wcf_set_power_plan)(mode)
-        }
+        unsafe { (self.wcf_set_power_plan)(mode) }
     }
 
     // ========================================================
@@ -114,9 +101,7 @@ impl UniwillWcfEc {
     // ========================================================
 
     pub fn apply_benchmark_mode(&self, enable: i32) -> i32 {
-        unsafe {
-            (self.wcf_apply_benchmark_mode)(enable)
-        }
+        unsafe { (self.wcf_apply_benchmark_mode)(enable) }
     }
 
     // ========================================================
@@ -124,9 +109,7 @@ impl UniwillWcfEc {
     // ========================================================
 
     pub fn disable_passive_cooling(&self, enable: i32) -> i32 {
-        unsafe {
-            (self.wcf_disable_passive_cooling)(enable)
-        }
+        unsafe { (self.wcf_disable_passive_cooling)(enable) }
     }
 
     // ========================================================
@@ -134,8 +117,6 @@ impl UniwillWcfEc {
     // ========================================================
 
     pub fn get_supported_features_count(&self) -> i32 {
-        unsafe {
-            (self.wcf_get_supported_features_count)()
-        }
+        unsafe { (self.wcf_get_supported_features_count)() }
     }
 }
