@@ -55,6 +55,7 @@ function updateUI(data) {
   document.getElementById("gpu-temp").textContent = data.gpu_temp ?? "--";
   document.getElementById("fan1-rpm").textContent = data.fan1_rpm ?? "--";
   document.getElementById("fan2-rpm").textContent = data.fan2_rpm ?? "--";
+  document.getElementById("system_power").textContent = data.system_power ?? "--";
 
   // 风扇控制页同步显示当前转速
   document.getElementById("fan1-current").textContent = data.fan1_rpm ?? "--";
@@ -536,6 +537,8 @@ async function loadTdp() {
 
     document.getElementById("gpu-pl1").value = tdp.gpu_pl1;
     document.getElementById("gpu-pl2").value = tdp.gpu_pl2;
+    document.getElementById("battery_charglimit").value = tdp.battery_charglimit;
+    document.getElementById("psys_pl1").value = tdp.psys_pl1;
 
   } catch (error) {
 

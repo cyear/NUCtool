@@ -31,6 +31,7 @@ struct SensorData {
     gpu_temp: u8,
     fan1_rpm: u16,
     fan2_rpm: u16,
+    system_power: u8,
 }
 
 // =====================================================
@@ -44,6 +45,8 @@ pub struct TdpConfig {
     pub cpu_pl4: u8,
     pub gpu_pl1: u8,
     pub gpu_pl2: u8,
+    pub battery_charglimit: u8,
+    pub psys_pl1: u8
 }
 
 struct AppState {
@@ -76,6 +79,7 @@ fn start_sensor_loop(app: AppHandle, state: State<AppState>) {
                 gpu_temp: ec.gpu_temperature().unwrap_or(0),
                 fan1_rpm: ec.fan1_rpm().unwrap_or(0),
                 fan2_rpm: ec.fan2_rpm().unwrap_or(0),
+                system_power: ec.system_read_power().unwrap_or(0),
             };
 
             // 推送给前端
@@ -97,7 +101,6 @@ async fn save_fan_config(fan_data: FanData) -> Result<(), String> {
 }
 
 /// 控制状态
-
 #[tauri::command]
 fn get_fan_control_status(state: tauri::State<'_, FanControlState>) -> bool {
     state.running.load(Ordering::SeqCst)
@@ -162,6 +165,7 @@ fn start_fan_control_internal(
         let _ = app_handle.emit("fan-control-status", true);
 
         while running.load(Ordering::SeqCst) {
+
             // ========================================
             // 1. 读取温度
             // ========================================
@@ -249,6 +253,7 @@ async fn start_fan_control(
 }
 
 fn stop_fan_control_inner(app: &tauri::AppHandle, state: &FanControlState) -> Result<(), String> {
+
     // ========================================
     // 1. 检查是否正在运行
     // ========================================
@@ -334,8 +339,7 @@ async fn set_performance_mode(mode: String) {
                 wcf.apply_benchmark_mode(0)
             );
             println!("quiet apply_profile: {}", wcf.apply_profile(3));
-        }
-
+        },
         "balanced" => {
             println!("平衡模式");
             println!(
@@ -343,8 +347,7 @@ async fn set_performance_mode(mode: String) {
                 wcf.apply_benchmark_mode(0)
             );
             println!("balanced apply_profile: {}", wcf.apply_profile(2));
-        }
-
+        },
         "performance" => {
             println!("性能模式");
             println!(
@@ -352,16 +355,14 @@ async fn set_performance_mode(mode: String) {
                 wcf.apply_benchmark_mode(0)
             );
             println!("performance apply_profile: {}", wcf.apply_profile(1));
-        }
-
+        },
         "benchmark-on" => {
             println!("基准模式");
             println!(
                 "benchmark_on apply_profile: {}",
                 wcf.apply_benchmark_mode(1)
             );
-        }
-
+        },
         // "benchmark-off" => {
         //     println!("基准模式 OFF");
         //     println!("benchmark_off apply_profile: {}", wcf.apply_benchmark_mode(0));
@@ -393,23 +394,31 @@ async fn get_tdp() -> Result<TdpConfig, String> {
     // CPU
     // =================================================
 
-    let cpu_pl1 = { ec.cpu_read_pl1().expect("Error") };
+    let cpu_pl1 = ec.cpu_read_pl1().expect("Error");
 
-    let cpu_pl2 = { ec.cpu_read_pl2().expect("Error") };
+    let cpu_pl2 = ec.cpu_read_pl2().expect("Error");
 
-    let cpu_pl4 = { ec.cpu_read_pl4().expect("Error") };
+    let cpu_pl4 = ec.cpu_read_pl4().expect("Error");
 
     // =================================================
     // GPU
     // =================================================
 
-    let gpu_pl1 = { ec.gpu_read_pl1().expect("Error") };
+    let gpu_pl1 = ec.gpu_read_pl1().expect("Error");
 
-    let gpu_pl2 = { ec.gpu_read_pl2().expect("Error") };
+    let gpu_pl2 = ec.gpu_read_pl2().expect("Error");
+
+    // =================================================
+    // Battery
+    // =================================================
+
+    let battery_charglimit = ec.battery_read_charglimit().expect("Error");
+
+    let psys_pl1 = ec.psys_read_pl1().expect("Error");
 
     println!(
-        "TDP 读取: CPU PL1={}W PL2={}W PL4={}W, GPU PL1={}W PL2={}W",
-        cpu_pl1, cpu_pl2, cpu_pl4, gpu_pl1, gpu_pl2
+        "TDP 读取: CPU PL1={}W PL2={}W PL4={}W, GPU PL1={}W PL2={}W, Battery_Charging_limit={}%, PSYS_PL1={}W",
+        cpu_pl1, cpu_pl2, cpu_pl4, gpu_pl1, gpu_pl2, battery_charglimit, psys_pl1
     );
 
     Ok(TdpConfig {
@@ -418,6 +427,8 @@ async fn get_tdp() -> Result<TdpConfig, String> {
         cpu_pl4,
         gpu_pl1,
         gpu_pl2,
+        battery_charglimit,
+        psys_pl1,
     })
 }
 
@@ -438,9 +449,11 @@ async fn set_tdp(tdp_type: String, value: u8) -> Result<(), String> {
     };
 
     match tdp_type.as_str() {
+
         // =============================================
         // CPU
         // =============================================
+
         "cpu-pl1" => {
             ec.cpu_write_pl1(value).expect("Error");
             println!("写入 CPU PL1: {} W", value);
@@ -459,6 +472,7 @@ async fn set_tdp(tdp_type: String, value: u8) -> Result<(), String> {
         // =============================================
         // GPU
         // =============================================
+
         "gpu-pl1" => {
             ec.gpu_write_pl1(value).expect("Error");
             println!("写入 GPU PL1: {} W", value);
@@ -467,6 +481,20 @@ async fn set_tdp(tdp_type: String, value: u8) -> Result<(), String> {
         "gpu-pl2" => {
             ec.gpu_write_pl2(value).expect("Error");
             println!("写入 GPU PL2: {} W", value);
+        },
+
+        // =============================================
+        // Battery
+        // =============================================
+        
+        "battery_charglimit" => {
+            ec.battery_write_charglimit(value).expect("Error");
+            println!("写入Battery Charging limit： {}%", value);
+        },
+
+        "psys_pl1" => {
+            ec.psys_write_pl1(value).expect("Error");
+            println!("写入PSYS PL1： {} W", value);
         }
 
         // =============================================

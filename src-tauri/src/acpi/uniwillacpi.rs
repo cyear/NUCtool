@@ -60,11 +60,20 @@ const EC_GPU_PL1: u16 = 0x072d;
 // GPU PL2 (W)
 const EC_GPU_PL2: u16 = 0x072e;
 
+// PSYS PL1 BYTE1 (W)
+// const EC_PSYS_PL1_1: u16 = 0x0720;
+
+// PSYS PL1 BYTE2 (W)
+const EC_PSYS_PL1_2: u16 = 0x0721;
+
 // Custom Charge Limit
 const EC_CUSTOM_CHARGELIMIT: u16 = 0x07B9;
 
 // FAN MODE
-const EC_FAN_MODE: u16 = 0x751;
+const EC_FAN_MODE: u16 = 0x0751;
+
+// System Power (W) 疑似
+const EC_APC_WATT: u16 = 0x044C;
 
 // FanModeByte as u8
 #[repr(u8)]
@@ -286,6 +295,32 @@ impl UniwillAcpiEc {
     pub fn gpu_write_pl2(&self, w: u8) -> io::Result<()> {
         self.write_u8(EC_GPU_PL2, w)
     }
+
+    /// 读取 Battery Charging limit
+    pub fn battery_read_charglimit(&self)  -> io::Result<u8> {
+        self.read_u8(EC_CUSTOM_CHARGELIMIT)
+    }
+
+    /// 写入 Battery Charging limit
+    pub fn battery_write_charglimit(&self, w: u8)  -> io::Result<()> {
+        self.write_u8(EC_CUSTOM_CHARGELIMIT, w)
+    }
+
+    /// 读取 PSYS PL1
+    pub fn psys_read_pl1(&self)  -> io::Result<u8> {
+        self.read_u8(EC_PSYS_PL1_2)
+    }
+
+    /// 写入 PSYS PL1
+    pub fn psys_write_pl1(&self, w: u8)  -> io::Result<()> {
+        self.write_u8(EC_PSYS_PL1_2, w)
+    }
+
+    /// 读取 APC WATT
+    pub fn system_read_power(&self) -> io::Result<u8> {
+        self.read_u8(EC_APC_WATT)
+    }
+
 }
 
 impl Drop for UniwillAcpiEc {

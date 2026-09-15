@@ -428,6 +428,9 @@ body {
   background: #b456fc;
 }
 
+.metric-indicator.system_power {
+  background: #f74a64;
+}
 
 /* =========================================================
    指标数值
