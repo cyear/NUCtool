@@ -108,31 +108,45 @@ async fn save_fan_config(fan_data: FanData) -> Result<(), String> {
     config::save(&fan_data)
 }
 
-#[tauri::command]
-async fn start_fan_control(
-    fan_data: FanData,
-    state: tauri::State<'_, FanControlState>,
-) -> Result<(), String> {
+/// 控制状态
 
+#[tauri::command]
+fn get_fan_control_status(
+    state: tauri::State<'_, FanControlState>,
+) -> bool {
+    state.running.load(Ordering::SeqCst)
+}
+
+fn start_fan_control_internal(
+    app: &tauri::AppHandle,
+    fan_data: FanData,
+    state: &FanControlState,
+) -> Result<(), String> {
     // 防止重复启动
     if state.running.swap(true, Ordering::SeqCst) {
         return Err("风扇控制已经在运行".into());
     }
 
     let running = Arc::clone(&state.running);
-
+    let app_handle = app.clone();
+    // println!("Fan Data: {:#?}", fan_data);
     let handle = thread::spawn(move || {
+        println!("================================");
+        println!("风扇控制线程启动");
+        println!("================================");
 
-        println!("================================");
-        println!("风扇自动控制线程启动");
-        println!("================================");
-        
         // EC init
         let ec = match UniwillAcpiEc::open() {
             Ok(ec) => ec,
             Err(e) => {
                 eprintln!("打开 ACPIDriver 失败: {}", e);
                 running.store(false, Ordering::SeqCst);
+
+                let _ = app_handle.emit(
+                    "fan-control-status",
+                    false,
+                );
+
                 return;
             }
         };
@@ -143,27 +157,39 @@ async fn start_fan_control(
             Err(e) => {
                 eprintln!("打开 WMI 失败: {}", e);
                 running.store(false, Ordering::SeqCst);
+
+                let _ = app_handle.emit(
+                    "fan-control-status",
+                    false,
+                );
+
                 return;
             }
         };
-        // WMI
+
         let get_set = |data: u64| {
             match wmi.get_set(data) {
-                Ok(_) => {
-                    // println!("Return = 0x{:08X}", ret);
-                    // println!("EC Data = 0x{:02X}", ret & 0xFF);
-                    // Debug
-                }
+                Ok(_) => {}
                 Err(e) => {
                     eprintln!("GetSetULong failed: {e}");
                 }
             }
         };
+
         if let Err(e) =
-            ec.fan_write_mode(acpi::uniwillacpi::FanModeByte::FanBoostMode)
+            ec.fan_write_mode(
+                acpi::uniwillacpi::FanModeByte::FanBoostMode
+            )
         {
             eprintln!("切换FAN手动模式失败: {}", e);
         }
+
+        // 通知前端：已经启动
+        let _ = app_handle.emit(
+            "fan-control-status",
+            true,
+        );
+
         while running.load(Ordering::SeqCst) {
 
             // ========================================
@@ -191,11 +217,21 @@ async fn start_fan_control(
             // 3. 模式检查
             // ========================================
 
-            let fanm = ec.fan_read_mode().expect("读取MODE失败");    
+            let fanm = match ec.fan_read_mode() {
+                Ok(v) => v,
+                Err(e) => {
+                    eprintln!("读取MODE失败: {}", e);
+                    0
+                }
+            };
+
             if fanm == acpi::uniwillacpi::FanModeByte::AutoMode as u8 {
                 println!("当前是 Auto Mode");
+
                 if let Err(e) =
-                    ec.fan_write_mode(acpi::uniwillacpi::FanModeByte::FanBoostMode)
+                    ec.fan_write_mode(
+                        acpi::uniwillacpi::FanModeByte::FanBoostMode
+                    )
                 {
                     eprintln!("切换FAN手动模式失败: {}", e);
                 } else {
@@ -208,24 +244,30 @@ async fn start_fan_control(
             // ========================================
 
             // 左风扇 分
-            get_set(((left_speed as u64 * 2) << 16) | 0x0000000000001809);
+            get_set(
+                ((left_speed as u64 * 2) << 16)
+                    | 0x0000000000001809
+            );
 
             // 右风扇 主
-            get_set(((right_speed as u64 * 2) << 16) | 0x0000000000001804);
-            
+            get_set(
+                ((right_speed as u64 * 2) << 16)
+                    | 0x0000000000001804
+            );
+
             // ========================================
             // 5. 输出调试信息
             // ========================================
 
             println!(
-                "CPU {:.1}°C → Fan1 {}%  GPU {:.1}°C → Fan2 {}%  M: {}",
+                "CPU {}°C → Fan1 {}%  GPU {}°C → Fan2 {}%  M: {}",
                 cpu_temp,
-                left_speed,
-                gpu_temp,
                 right_speed,
+                gpu_temp,
+                left_speed,
                 fanm
             );
-
+            
             // ========================================
             // 6. 控制周期
             // ========================================
@@ -234,8 +276,12 @@ async fn start_fan_control(
         }
 
         println!("风扇自动控制线程退出");
-    });
 
+        let _ = app_handle.emit(
+            "fan-control-status",
+            false,
+        );
+    });
 
     *state.thread.lock().unwrap() = Some(handle);
 
@@ -243,10 +289,120 @@ async fn start_fan_control(
 }
 
 #[tauri::command]
-async fn stop_fan_control(
+async fn start_fan_control(
+    app: tauri::AppHandle,
+    fan_data: FanData,
     state: tauri::State<'_, FanControlState>,
 ) -> Result<(), String> {
-    stop_fan_control_inner(&state)
+    start_fan_control_internal(
+        &app,
+        fan_data,
+        &state,
+    )
+}
+
+fn stop_fan_control_inner(
+    app: &tauri::AppHandle,
+    state: &FanControlState,
+) -> Result<(), String> {
+
+    // ========================================
+    // 1. 检查是否正在运行
+    // ========================================
+
+    if !state.running.swap(false, Ordering::SeqCst) {
+        return Ok(());
+    }
+
+    println!("正在停止风扇控制...");
+
+    // ========================================
+    // 2. 等待控制线程退出
+    // ========================================
+
+    if let Some(handle) =
+        state.thread.lock().unwrap().take()
+    {
+        let _ = handle.join();
+    }
+
+    // ========================================
+    // 3. 打开 EC
+    // ========================================
+
+    let ec = match UniwillAcpiEc::open() {
+        Ok(ec) => ec,
+
+        Err(e) => {
+            eprintln!(
+                "打开 ACPIDriver 失败: {}",
+                e
+            );
+
+            let _ = app.emit(
+                "fan-control-status",
+                false,
+            );
+
+            return Err(
+                format!(
+                    "打开 ACPIDriver 失败: {}",
+                    e
+                )
+            );
+        }
+    };
+
+    // ========================================
+    // 4. 恢复自动风扇模式
+    // ========================================
+
+    if let Err(e) =
+        ec.fan_write_mode(
+            acpi::uniwillacpi::FanModeByte::AutoMode,
+        )
+    {
+        eprintln!(
+            "恢复自动风扇模式失败: {}",
+            e
+        );
+
+        let _ = app.emit(
+            "fan-control-status",
+            false,
+        );
+
+        return Err(
+            format!(
+                "恢复自动风扇模式失败: {}",
+                e
+            )
+        );
+    }
+
+    println!("风扇控制已停止");
+
+    // ========================================
+    // 5. 通知前端
+    // ========================================
+
+    let _ = app.emit(
+        "fan-control-status",
+        false,
+    );
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn stop_fan_control(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, FanControlState>,
+) -> Result<(), String> {
+    stop_fan_control_inner(
+        &app,
+        &state,
+    )
 }
 
 #[tauri::command]
@@ -437,64 +593,49 @@ async fn set_tdp(
     Ok(())
 }
 
-fn stop_fan_control_inner(
-    state: &FanControlState,
-) -> Result<(), String> {
-    // 先停止控制线程
-    if !state.running.swap(false, Ordering::SeqCst) {
-        return Ok(());
-    }
-
-    println!("正在停止风扇控制...");
-
-    // 等待控制线程退出
-    if let Some(handle) = state.thread.lock().unwrap().take() {
-        let _ = handle.join();
-    }
-
-    // EC init
-    let ec = match UniwillAcpiEc::open() {
-        Ok(ec) => ec,
-        Err(e) => {
-            eprintln!("打开 ACPIDriver 失败: {}", e);
-            return Err(format!("打开 ACPIDriver 失败: {}", e));
-        }
-    };
-
-    // 恢复自动风扇模式
-    if let Err(e) =
-        ec.fan_write_mode(acpi::uniwillacpi::FanModeByte::AutoMode)
-    {
-        eprintln!("恢复自动风扇模式失败: {}", e);
-        return Err(format!("恢复自动风扇模式失败: {}", e));
-    }
-
-    println!("风扇控制已停止");
-
-    Ok(())
-}
-
-pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+pub fn setup(
+    app: &mut tauri::App,
+) -> Result<(), Box<dyn std::error::Error>> {
 
     // =========================
     // 启动最小化
     // =========================
 
-    let args: Vec<String> = std::env::args().collect();
-    let hide = args.iter().any(|arg| arg == "--hide");
-    let window = app.get_webview_window("main").unwrap();
+    let args: Vec<String> =
+        std::env::args().collect();
+
+    let hide =
+        args.iter().any(|arg| arg == "--hide");
+
+    let window =
+        app.get_webview_window("main").unwrap();
+
     if hide {
+        println!("检测到 --hide，只保留托盘");
         window.hide()?;
     } else {
+        println!("未检测到 --hide，默认显示窗口");
         window.show()?;
         window.set_focus()?;
-    } 
+    }
 
     // =========================
     // 托盘菜单
     // =========================
 
     let show = MenuItemBuilder::with_id("show", "显示窗口")
+        .build(app)?;
+
+    let fancontrol_on = MenuItemBuilder::with_id("fancontrol_on", "开启风扇控制")
+        .build(app)?;
+
+    let fancontrol_off = MenuItemBuilder::with_id("fancontrol_off", "关闭风扇控制")
+        .build(app)?;
+
+    let benchmark_on = MenuItemBuilder::with_id("benchmark_on", "开启基准模式")
+        .build(app)?;
+
+    let benchmark_off = MenuItemBuilder::with_id("benchmark_off", "关闭基准模式")
         .build(app)?;
 
     let performance = MenuItemBuilder::with_id("performance", "性能模式")
@@ -509,14 +650,10 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let quit = MenuItemBuilder::with_id("quit", "退出")
         .build(app)?;
 
-    let benchmark_on = MenuItemBuilder::with_id("benchmark_on", "Benchmark ON")
-        .build(app)?;
-
-    let benchmark_off = MenuItemBuilder::with_id("benchmark_off", "Benchmark OFF")
-        .build(app)?;
-
     let menu = MenuBuilder::new(app)
         .item(&show)
+        .item(&fancontrol_on)
+        .item(&fancontrol_off)
         .item(&benchmark_on)
         .item(&benchmark_off)
         .item(&performance)
@@ -556,6 +693,56 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
                     {
                         let _ = window.show();
                         let _ = window.set_focus();
+                    }
+                },
+                "fancontrol_on" => {
+                    let state = app.state::<FanControlState>();
+                    if !state.running.load(Ordering::SeqCst) {
+                        println!("托盘启动风扇控制");
+                        let fan_data = match config::load() {
+                            Ok(data) => data,
+                            Err(e) => {
+                                eprintln!(
+                                    "auto_fan load config error: {}",
+                                    e
+                                );
+                                return;
+                            }
+                        };
+                        if let Err(e) =
+                            start_fan_control_internal(
+                                &app.app_handle(),
+                                fan_data,
+                                &state,
+                            )
+                        {
+                            eprintln!(
+                                "托盘启动风扇控制失败: {}",
+                                e
+                            );
+                        }
+                    } else {
+                        println!("托盘启动风扇控制：已经在运行 跳过");    
+                    }
+                    
+                },
+                "fancontrol_off" => {
+                    let state = app.state::<FanControlState>();
+                    if state.running.load(Ordering::SeqCst) {
+                        println!("托盘关闭风扇控制");
+                        if let Err(e) =
+                            stop_fan_control_inner(
+                                &app.app_handle(),
+                                state.inner()
+                            )
+                        {
+                            eprintln!(
+                                "托盘关闭风扇控制失败: {}",
+                                e
+                            );
+                        }
+                    } else {
+                        println!("托盘关闭风扇控制：已经关闭了 跳过")
                     }
                 },
                 "benchmark_on" => {
@@ -627,6 +814,53 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         });
     }
 
+    // =========================
+    // 风扇自启
+    // =========================
+
+    let auto_fan_control =
+        args.iter().any(|arg| {
+            arg == "--fan-control"
+        });
+
+    if auto_fan_control {
+        println!(
+            "检测到 --fan-control，自动启动风扇控制"
+        );
+
+        let fan_data = match config::load() {
+            Ok(data) => data,
+
+            Err(e) => {
+                eprintln!(
+                    "auto_fan load config error: {}",
+                    e
+                );
+                // 配置读取失败，不启动风扇控制
+                return Ok(());
+            }
+        };
+
+        let state =
+            app.state::<FanControlState>();
+
+        if let Err(e) =
+            start_fan_control_internal(
+                &app.handle(),
+                fan_data,
+                &state,
+            )
+        {
+            eprintln!(
+                "自动启动风扇控制失败: {}",
+                e
+            );
+        }
+    } else {
+        println!(
+            "未检测到 --fan-control，风扇控制默认关闭"
+        );
+    }
     Ok(())
 }
 
@@ -713,7 +947,8 @@ pub fn run() {
             stop_fan_control,
             set_performance_mode,
             get_tdp,
-            set_tdp
+            set_tdp,
+            get_fan_control_status
         ])
         .setup(setup)     
         .build(tauri::generate_context!())
@@ -726,7 +961,7 @@ pub fn run() {
                     app_handle.try_state::<FanControlState>()
                 {
                     if let Err(e) =
-                        stop_fan_control_inner(state.inner())
+                        stop_fan_control_inner(app_handle, state.inner())
                     {
                         eprintln!("退出时停止风扇控制失败: {}", e);
                     }

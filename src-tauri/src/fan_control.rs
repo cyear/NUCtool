@@ -18,24 +18,21 @@ impl FanControlState {
         }
     }
 }
-pub fn calculate_speed(points: &Vec<FanPoint>, temperature: u8) -> u8 {
+pub fn calculate_speed(
+    points: &Vec<FanPoint>,
+    temperature: u8,
+) -> u8 {
     if points.is_empty() {
         return 100;
     }
 
     let mut points = points.to_vec();
 
-    points.sort_by(|a, b| {
-        a.temperature
-            .partial_cmp(&b.temperature)
-            .unwrap()
-    });
+    points.sort_by_key(|p| p.temperature);
 
     // 低于最低温度
     if temperature <= points[0].temperature {
-        return points[0]
-            .speed
-            .clamp(0, 100);
+        return points[0].speed.clamp(0, 100);
     }
 
     // 高于最高温度
@@ -53,16 +50,30 @@ pub fn calculate_speed(points: &Vec<FanPoint>, temperature: u8) -> u8 {
         if temperature >= p1.temperature
             && temperature <= p2.temperature
         {
+            let temp_range =
+                (p2.temperature - p1.temperature) as f32;
+
+            let temp_offset =
+                (temperature - p1.temperature) as f32;
+
             let ratio =
-                (temperature - p1.temperature)
-                / (p2.temperature - p1.temperature);
+                temp_offset / temp_range;
+
+            let speed1 =
+                p1.speed as f32;
+
+            let speed2 =
+                p2.speed as f32;
 
             let speed =
-                p1.speed + (p2.speed - p1.speed) * ratio;
+                speed1
+                    + (speed2 - speed1) * ratio;
 
             return speed
-                .clamp(0, 100);
+                .round()
+                .clamp(0.0, 100.0) as u8;
         }
     }
+
     100
 }

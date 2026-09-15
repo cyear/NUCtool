@@ -89,6 +89,7 @@
 - Fn + 3 => 省电模式
 - Fn + 4 => 基准模式
 - `--hide` 启动只保留托盘
+- `--fan-control` 自动启动风扇控制
 
 ## Star History
 

@@ -322,13 +322,66 @@ const saveConfigButton =
 const fanStatus =
   document.getElementById("fan-status");
 
-
 let isRunning = false;
 
 
+// ==============================================
+// 监听 Rust 风扇控制状态
+// ==============================================
+
+async function initFanControlStatus() {
+  try {
+
+    // Rust 主动推送状态
+    await listen(
+      "fan-control-status",
+      (event) => {
+
+        isRunning =
+          Boolean(event.payload);
+
+        console.log(
+          "风扇控制状态:",
+          isRunning
+            ? "运行中"
+            : "已停止"
+        );
+
+        updateControlState();
+      }
+    );
+
+    // 页面加载后主动查询一次
+    const status =
+      await invoke(
+        "get_fan_control_status"
+      );
+
+    isRunning =
+      Boolean(status);
+
+    updateControlState();
+
+  } catch (error) {
+
+    console.error(
+      "初始化风扇控制状态失败:",
+      error
+    );
+  }
+}
+
+
+// ==============================================
+// 更新 UI
+// ==============================================
+
 function updateControlState() {
+
   startStopButton.textContent =
-    isRunning ? "停止控制" : "启动控制";
+    isRunning
+      ? "停止控制"
+      : "启动控制";
 
   startStopButton.classList.toggle(
     "primary",
@@ -352,43 +405,71 @@ function updateControlState() {
 }
 
 
-async function startControl() {
-  try {
-    await invoke("start_fan_control", {
-      fanData: getFanCurveData(),
-    });
+// ==============================================
+// 启动风扇控制
+// ==============================================
 
-    isRunning = true;
-    updateControlState();
+async function startControl() {
+
+  try {
+
+    await invoke(
+      "start_fan_control",
+      {
+        fanData:
+          getFanCurveData(),
+      }
+    );
 
   } catch (error) {
-    console.error("启动风扇控制失败:", error);
+
+    console.error(
+      "启动风扇控制失败:",
+      error
+    );
   }
 }
 
+
+// ==============================================
+// 停止风扇控制
+// ==============================================
 
 async function stopControl() {
-  try {
-    await invoke("stop_fan_control");
 
-    isRunning = false;
-    updateControlState();
+  try {
+
+    await invoke(
+      "stop_fan_control"
+    );
 
   } catch (error) {
-    console.error("停止风扇控制失败:", error);
+
+    console.error(
+      "停止风扇控制失败:",
+      error
+    );
   }
 }
 
 
-/* =========================================================
-   按钮
-   ========================================================= */
+// ==============================================
+// 按钮
+// ==============================================
 
-startStopButton.addEventListener("click", () => {
-  isRunning
-    ? stopControl()
-    : startControl();
-});
+startStopButton.addEventListener(
+  "click",
+  () => {
+
+    if (isRunning) {
+      stopControl();
+    } else {
+      startControl();
+    }
+
+  }
+);
+
 
 loadConfigButton.addEventListener(
   "click",
@@ -399,6 +480,7 @@ saveConfigButton.addEventListener(
   "click",
   saveConfig
 );
+
 
 // =====================================================
 // 性能调优
@@ -540,6 +622,10 @@ tdpSetButtons.forEach((button) => {
 
 async function init() {
   await loadConfig();
+
+  // 初始化风扇控制状态
+  await initFanControlStatus();
+
   updateControlState();
 }
 
