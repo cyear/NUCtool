@@ -1,63 +1,782 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fan Controller</title>
-    <link rel="stylesheet" href="b.css">
-    <script src="assets/chart.js"></script>
-    <script src="assets/chartjs-plugin-dragdata.js"></script>
-    <style>
-        #startStopButton {
-            width: 150px;
-            height: 50px;
-            font-size: 20px;
-            background-color: rgb(255, 182, 193, 0.3);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-        /*#startStopButton.stopped {*/
-        /*    background-color: red;*/
-        /*}*/
-        #saveConfigButton {
-            width: 150px;
-            height: 50px;
-            font-size: 20px;
-            background-color: rgb(99, 180, 240, 0.3);
-            color: white;
-            border: none;
-            border-radius: 10px;
-        }
-        #loadConfigButton {
-            width: 150px;
-            height: 50px;
-            font-size: 20px;
-            background-color: rgb(99, 180, 240, 0.3);
-            color: white;
-            border: none;
-            border-radius: 10px;
-          }
-    </style>
-</head>
-<body style="background: rgb(255, 255, 255, 0.00);" oncontextmenu="return false;" onselectstart="return false;" ondragstart="return false;" >
-    <div style="display: flex;flex-wrap: wrap;">
-        <div style="width: 50%;">
-            <canvas id="leftFanCurve"></canvas>
-            <canvas id="rightFanCurve"></canvas>
-        </div>
-        <div style="width: 50%;margin: auto;">
-            <canvas id="left_fan_speed"></canvas> <!-- 左风扇实时转速 -->
-            <canvas id="right_fan_speed"></canvas> <!-- 右风扇实时转速 -->
-        </div>
-        <div class="container">
-            <button id="startStopButton" class="btn"><a>Start</a></button>
-            <button id="loadConfigButton" class="btn"><a>加载配置</a></button>
-            <button id="saveConfigButton" class="btn"><a>保存配置</a></button>
-        </div>
-    </div>
+<html lang="zh-CN">
 
-    <script src="main.js" type="module"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>NUCtool</title>
+
+  <!-- 主样式 -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Chart.js -->
+  <script src="assets/chart.js"></script>
+
+  <!-- Chart.js 拖动插件 -->
+  <script src="assets/chartjs-plugin-dragdata.js"></script>
+</head>
+
+<body>
+  <div class="app-layout">
+
+    <!-- =====================================================
+         侧边栏
+         ===================================================== -->
+    <aside class="sidebar">
+
+      <!-- Logo -->
+      <div class="sidebar-header">
+        <div class="logo">
+          NUCtool
+        </div>
+
+        <div class="logo-subtitle">
+          System Control
+        </div>
+      </div>
+
+      <!-- 导航 -->
+      <nav class="sidebar-nav">
+
+        <button class="nav-btn active" data-page="monitor" type="button">
+          <span class="nav-icon">◉</span>
+          <span class="nav-text">性能监控</span>
+        </button>
+
+        <button class="nav-btn" data-page="tuning" type="button">
+          <span class="nav-icon">✦</span>
+          <span class="nav-text">性能调优</span>
+        </button>
+
+        <button class="nav-btn" data-page="fan" type="button">
+          <span class="nav-icon">✽</span>
+          <span class="nav-text">风扇控制</span>
+        </button>
+
+        <!-- <button class="nav-btn" data-page="power" type="button">
+          <span class="nav-icon">ϟ</span>
+          <span class="nav-text">- - - -</span>
+        </button> -->
+
+        <button class="nav-btn" data-page="settings" type="button">
+          <span class="nav-icon">⚙</span>
+          <span class="nav-text">设置</span>
+        </button>
+
+      </nav>
+
+      <!-- 侧边栏底部 -->
+      <div class="sidebar-footer">
+        <span class="sidebar-version">
+          NUCtool
+        </span>
+
+        <span class="sidebar-version">
+          v1.0.2
+        </span>
+      </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         主内容区域
+         ===================================================== -->
+    <main class="content">
+
+  
+      <!-- ===================================================
+           性能监控
+           =================================================== -->
+      <section id="page-monitor" class="page active">
+        <!-- 页面标题 -->
+        <header class="page-header">
+          <div class="page-heading">
+            <h1>性能监控</h1>
+            <p class="page-subtitle">
+              实时查看系统温度与风扇状态
+            </p>
+          </div>
+          <div class="status" id="status">
+            <span class="status-dot"></span>
+            <span class="status-text">连接中...</span>
+          </div>
+
+        </header>
+
+
+        <!-- 监控卡片 -->
+        <div class="cards">
+
+          <!-- CPU 温度 -->
+          <div class="metric-card">
+
+            <div class="metric-header">
+              <span class="metric-label">
+                CPU 温度
+              </span>
+
+              <span class="metric-indicator cpu"></span>
+            </div>
+
+            <div class="metric-value-row">
+              <span class="metric-value" id="cpu-temp">
+                --
+              </span>
+
+              <span class="metric-unit">
+                °C
+              </span>
+            </div>
+
+          </div>
+
+
+          <!-- GPU 温度 -->
+          <div class="metric-card">
+
+            <div class="metric-header">
+              <span class="metric-label">
+                GPU 温度
+              </span>
+
+              <span class="metric-indicator gpu"></span>
+            </div>
+
+            <div class="metric-value-row">
+              <span class="metric-value" id="gpu-temp">
+                --
+              </span>
+
+              <span class="metric-unit">
+                °C
+              </span>
+            </div>
+
+          </div>
+
+
+          <!-- Main 风扇 -->
+          <div class="metric-card">
+
+            <div class="metric-header">
+              <span class="metric-label">
+                Main 风扇转速
+              </span>
+
+              <span class="metric-indicator fan-main"></span>
+            </div>
+
+            <div class="metric-value-row">
+              <span class="metric-value" id="fan1-rpm">
+                --
+              </span>
+
+              <span class="metric-unit">
+                RPM
+              </span>
+            </div>
+
+          </div>
+
+
+          <!-- Secondary 风扇 -->
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-label">
+                Secondary 风扇转速
+              </span>
+              <span class="metric-indicator fan-secondary"></span>
+            </div>
+            <div class="metric-value-row">
+              <span class="metric-value" id="fan2-rpm">
+                --
+              </span>
+              <span class="metric-unit">
+                RPM
+              </span>
+            </div>
+          </div>
+
+          <!-- APC WATT -->
+          <div class="metric-card">
+            <div class="metric-header">
+              <span class="metric-label">
+                平台功耗
+              </span>
+              <span class="metric-indicator system_power"></span>
+            </div>
+            <div class="metric-value-row">
+              <span class="metric-value" id="system_power">
+                --
+              </span>
+              <span class="metric-unit">
+                W
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ===================================================
+          性能调优
+          =================================================== -->
+
+      <section id="page-tuning" class="page">
+        <header class="page-header">
+          <div class="page-heading">
+            <h1>性能调优</h1>
+            <p class="page-subtitle">
+              对设备性能释放进行调整
+            </p>
+          </div>
+        </header>
+
+
+        <div class="tuning-card">
+
+          <div class="tuning-header">
+            <div>
+              <div class="tuning-title">
+                模式切换
+              </div>
+
+              <div class="tuning-description">
+                选择适合当前使用场景的性能配置，显示的模式仅为显示，请以选择后为准
+              </div>
+            </div>
+          </div>
+
+
+          <div class="tuning-options">
+
+            <button class="tuning-btn active" data-mode="unspecified" type="button">
+            <span class="tuning-btn-title">
+              默认
+            </span>
+
+            <span class="tuning-btn-description">
+              不修改模式
+            </span>
+          </button>
+          
+            <button class="tuning-btn" data-mode="power-saving" type="button">
+              <span class="tuning-btn-title">
+                省电模式
+              </span>
+
+              <span class="tuning-btn-description">
+                降低功耗，延长续航
+              </span>
+            </button>
+
+
+            <button class="tuning-btn" data-mode="balanced" type="button">
+              <span class="tuning-btn-title">
+                平衡模式
+              </span>
+              <span class="tuning-btn-description">
+                平衡性能与功耗
+              </span>
+            </button>
+
+
+            <button class="tuning-btn" data-mode="performance" type="button">
+              <span class="tuning-btn-title">
+                性能模式
+              </span>
+              <span class="tuning-btn-description">
+                提供更高的性能
+              </span>
+            </button>
+
+
+            <button class="tuning-btn" data-mode="benchmark-on" type="button">
+              <span class="tuning-btn-title">
+                基准模式
+              </span>
+              <span class="tuning-btn-description">
+                更强大的性能
+              </span>
+            </button>
+
+          </div>
+        </div>
+
+        <!-- ===================================================
+             电源计划
+             =================================================== -->
+
+        <div class="power-plan-card">
+
+          <div class="power-plan-header">
+            <div>
+              <div class="power-plan-title">
+                电源计划
+              </div>
+
+              <div class="power-plan-description">
+                选择 Windows 电源计划，显示的计划仅为显示，请以选择后以及模式为准(模式切换会覆盖)
+              </div>
+            </div>
+          </div>
+
+
+          <div class="power-plan-options">
+
+            <!-- 未指定 -->
+            <button
+              class="power-plan-btn active"
+              data-power-plan="unspecified"
+              type="button"
+            >
+              <span class="power-plan-btn-title">
+                默认
+              </span>
+
+              <span class="power-plan-btn-description">
+                不修改电源计划
+              </span>
+            </button>
+
+
+            <!-- 关闭 -->
+            <!-- <button
+              class="power-plan-btn"
+              data-power-plan="0"
+              type="button"
+            >
+              <span class="power-plan-btn-title">
+                关闭
+              </span>
+
+              <span class="power-plan-btn-description">
+                关闭电源计划
+              </span>
+            </button> -->
+
+
+            <!-- 节能 -->
+            <button
+              class="power-plan-btn"
+              data-power-plan="3"
+              type="button"
+            >
+              <span class="power-plan-btn-title">
+                节能
+              </span>
+
+              <span class="power-plan-btn-description">
+                降低功耗，延长续航
+              </span>
+            </button>
+
+
+            <!-- 平衡 -->
+            <button
+              class="power-plan-btn"
+              data-power-plan="2"
+              type="button"
+            >
+              <span class="power-plan-btn-title">
+                平衡
+              </span>
+
+              <span class="power-plan-btn-description">
+                平衡性能与功耗
+              </span>
+            </button>
+
+
+            <!-- 高性能 -->
+            <button
+              class="power-plan-btn"
+              data-power-plan="1"
+              type="button"
+            >
+              <span class="power-plan-btn-title">
+                高性能
+              </span>
+
+              <span class="power-plan-btn-description">
+                提供更高的性能
+              </span>
+            </button>
+
+
+            <!-- 基准高性能 -->
+            <button
+              class="power-plan-btn"
+              data-power-plan="4"
+              type="button"
+            >
+              <span class="power-plan-btn-title">
+                基准高性能
+              </span>
+
+              <span class="power-plan-btn-description">
+                基准测试使用
+              </span>
+            </button>
+
+          </div>
+
+        </div>
+
+        <header class="page-header">
+        </header>
+        <div class="tdp-card">
+          <div class="tdp-header">
+            <div>
+              <div class="tdp-title">
+                功耗限制
+              </div>
+              <div class="tdp-description">
+                调整处理器与显卡的功耗限制
+              </div>
+            </div>
+            <button id="tdpRefreshButton" class="action-btn" type="button">
+              读取配置
+            </button>
+          </div>
+          <div class="tdp-section">
+            <div class="tdp-section-title">
+              CPU
+            </div>
+            <div class="tdp-grid">
+              <!-- CPU PL1 -->
+              <div class="tdp-item">
+                <div class="tdp-item-header">
+                  <span class="tdp-label">
+                    PL1
+                  </span>
+                  <span class="tdp-current">
+                    当前值
+                  </span>
+                </div>
+                <div class="tdp-input-row">
+                  <input id="cpu-pl1" class="tdp-input" type="number" min="0" step="1" placeholder="--" />
+                  <span class="tdp-unit">
+                    W
+                  </span>
+                  <button class="tdp-set-btn" data-tdp="cpu-pl1" type="button">
+                    写入
+                  </button>
+                </div>
+              </div>
+
+
+              <!-- CPU PL2 -->
+              <div class="tdp-item">
+                <div class="tdp-item-header">
+                  <span class="tdp-label">
+                    PL2
+                  </span>
+                  <span class="tdp-current">
+                    当前值
+                  </span>
+                </div>
+                <div class="tdp-input-row">
+                  <input id="cpu-pl2" class="tdp-input" type="number" min="0" step="1" placeholder="--" />
+                  <span class="tdp-unit">
+                    W
+                  </span>
+                  <button class="tdp-set-btn" data-tdp="cpu-pl2" type="button">
+                    写入
+                  </button>
+                </div>
+
+              </div>
+              <!-- CPU PL4 -->
+              <div class="tdp-item">
+                <div class="tdp-item-header">
+                  <span class="tdp-label">
+                    PL4
+                  </span>
+                  <span class="tdp-current">
+                    当前值
+                  </span>
+                </div>
+                <div class="tdp-input-row">
+                  <input id="cpu-pl4" class="tdp-input" type="number" min="0" step="1" placeholder="--" />
+                  <span class="tdp-unit">
+                    W
+                  </span>
+                  <button class="tdp-set-btn" data-tdp="cpu-pl4" type="button">
+                    写入
+                  </button>
+                </div>
+              </div>
+
+              <!-- PSYS PL1 -->
+              <div class="tdp-item">
+                <div class="tdp-item-header">
+                  <span class="tdp-label">
+                    PSYS PL1 Power
+                  </span>
+                  <span class="tdp-current">
+                    当前值
+                  </span>
+                </div>
+                <div class="tdp-input-row">
+                  <input id="psys_pl1" class="tdp-input" type="number" min="0" step="1" placeholder="--" />
+                  <span class="tdp-unit">
+                    W
+                  </span>
+                  <button class="tdp-set-btn" data-tdp="psys_pl1" type="button">
+                    写入
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+
+          <div class="tdp-section">
+            <div class="tdp-section-title">
+              GPU(Intel ARC)
+            </div>
+            <div class="tdp-grid">
+              <!-- GPU PL1 -->
+              <div class="tdp-item">
+                <div class="tdp-item-header">
+                  <span class="tdp-label">
+                    PL1
+                  </span>
+                  <span class="tdp-current">
+                    当前值
+                  </span>
+                </div>
+                <div class="tdp-input-row">
+                  <input id="gpu-pl1" class="tdp-input" type="number" min="0" step="1" placeholder="--" />
+                  <span class="tdp-unit">
+                    W
+                  </span>
+                  <button class="tdp-set-btn" data-tdp="gpu-pl1" type="button">
+                    写入
+                  </button>
+                </div>
+              </div>
+
+              <!-- GPU PL2 -->
+              <div class="tdp-item">
+                <div class="tdp-item-header">
+                  <span class="tdp-label">
+                    PL2
+                  </span>
+                  <span class="tdp-current">
+                    当前值
+                  </span>
+                </div>
+                <div class="tdp-input-row">
+                  <input id="gpu-pl2" class="tdp-input" type="number" min="0" step="1" placeholder="--" />
+                  <span class="tdp-unit">
+                    W
+                  </span>
+                  <button class="tdp-set-btn" data-tdp="gpu-pl2" type="button">
+                    写入
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+            <div class="tdp-section">
+            <div class="tdp-section-title">
+              Battery
+            </div>
+            <div class="tdp-grid">
+              <!-- Battery -->
+              <div class="tdp-item">
+                <div class="tdp-item-header">
+                  <span class="tdp-label">
+                    Charging limit
+                  </span>
+                  <span class="tdp-current">
+                    当前值
+                  </span>
+                </div>
+                <div class="tdp-input-row">
+                  <input id="battery_charglimit" class="tdp-input" type="number" min="0" step="1" placeholder="--" />
+                  <span class="tdp-unit">
+                    %
+                  </span>
+                  <button class="tdp-set-btn" data-tdp="battery_charglimit" type="button">
+                    写入
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+
+        </div>
+      </section>
+
+      <!-- ===================================================
+           风扇控制
+           =================================================== -->
+      <section id="page-fan" class="page">
+
+        <!-- 页面标题 -->
+        <header class="page-header">
+
+          <div class="page-heading">
+            <h1>风扇控制</h1>
+            <p class="page-subtitle">
+              根据温度调整风扇曲线
+            </p>
+          </div>
+
+          <div class="status" id="fan-status">
+            <span class="status-dot"></span>
+            <span class="status-text">未运行</span>
+          </div>
+        </header>
+
+
+        <!-- 风扇控制区域 -->
+        <div class="fan-section">
+          <!-- 操作栏 -->
+          <div class="control-bar">
+            <div class="control-left">
+              <button id="startStopButton" class="action-btn primary" type="button">
+                启动控制
+              </button>
+            </div>
+
+
+            <div class="control-right">
+              <button id="loadConfigButton" class="action-btn" type="button">
+                加载配置
+              </button>
+              <button id="saveConfigButton" class="action-btn" type="button">
+                保存配置
+              </button>
+            </div>
+          </div>
+
+
+          <!-- 风扇曲线 -->
+          <div class="fan-grid">
+            <!-- Main -->
+            <div class="chart-card">
+              <div class="chart-header">
+                <div class="chart-title">
+                  <span class="chart-dot main"></span>
+                  <span>
+                    Main 风扇曲线
+                  </span>
+                </div>
+                <span class="chart-hint">
+                  拖动节点调整
+                </span>
+              </div>
+              <div class="chart-container">
+                <canvas id="leftFanCurve"></canvas>
+              </div>
+            </div>
+            <!-- Secondary -->
+            <div class="chart-card">
+              <div class="chart-header">
+                <div class="chart-title">
+                  <span class="chart-dot secondary"></span>
+                  <span>
+                    Secondary 风扇曲线
+                  </span>
+                </div>
+                <span class="chart-hint">
+                  拖动节点调整
+                </span>
+              </div>
+              <div class="chart-container">
+                <canvas id="rightFanCurve"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ===================================================
+           占用
+           =================================================== -->
+      <section id="page-power" class="page">
+        <header class="page-header">
+
+          <div class="page-heading">
+            <h1>-</h1>
+
+            <p class="page-subtitle">
+              ---
+            </p>
+          </div>
+
+        </header>
+      </section>
+
+
+      <!-- ===================================================
+           设置
+           =================================================== -->
+      <section id="page-settings" class="page">
+        <header class="page-header">
+          <div class="page-heading">
+            <h1>设置</h1>
+            <p class="page-subtitle">
+              配置 NUCtool
+            </p>
+          </div>
+        </header>
+        <div class="settings-card">
+          <div class="settings-card-header">
+            <div>
+              <div class="settings-card-title">
+                开机自启动 & 自动控制
+              </div>
+              <div class="settings-card-description">
+                开机后NUCtool自动启动风扇控制
+              </div>
+            </div>
+            <div id="autostart-status" class="settings-status">
+              检查中...
+            </div>
+          </div>
+          <div class="settings-option">
+            <div class="settings-option-info">
+              <div class="settings-option-title">
+                开机启动
+              </div>
+              <div id="autostart-description" class="settings-option-description">
+                登录Windows后自动运行NUCtool
+              </div>
+            </div>
+            <label class="settings-switch">
+              <input id="autostart-toggle" type="checkbox" />
+              <span class="settings-slider"></span>
+            </label>
+          </div>
+        </div>
+
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <!-- =====================================================
+       主程序
+       必须最后加载
+       ===================================================== -->
+  <script type="module" src="main.js"></script>
+
 </body>
+
 </html>

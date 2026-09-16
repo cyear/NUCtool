@@ -1,13 +1,6 @@
 use powershell_script::PsScriptBuilder;
 use std::{env, process};
 
-/**
-* @Author: cyear
-* @Create time: 2025-01-30
-* @Description:
-* @Version: 0.3.5
-**/
-
 pub fn privilege_escalation() {
     let ps = PsScriptBuilder::new()
         .no_profile(true)
