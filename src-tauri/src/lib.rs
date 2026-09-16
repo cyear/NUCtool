@@ -2,9 +2,10 @@ mod acpi;
 mod config;
 mod fan_control;
 mod win;
-use acpi::{FnKeyhook, UniwillAcpiEc, UniwillWcfEc, UniwillWmiEc};
+use acpi::{uniwillfnkeyhook, UniwillAcpiEc, UniwillWcfEc, UniwillWmiEc};
 use config::FanData;
 use fan_control::{calculate_speed, FanControlState};
+use win::{privilege_escalation, create_startup_task, remove_startup_task, is_startup_task_exists};
 use serde::Serialize;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -16,8 +17,6 @@ use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     AppHandle, Emitter, Manager, State,
 };
-use tauri_plugin_autostart::ManagerExt;
-use win::privilege_escalation;
 use windows::Win32::{
     Foundation::HINSTANCE,
     UI::WindowsAndMessaging::{
@@ -232,7 +231,6 @@ fn start_fan_control_internal(
 
             thread::sleep(Duration::from_millis(1500));
         }
-
         println!("风扇自动控制线程退出");
 
         let _ = app_handle.emit("fan-control-status", false);
@@ -372,6 +370,47 @@ async fn set_performance_mode(mode: String) {
             return;
         }
     }
+    wcf.disconnect();
+}
+
+#[tauri::command]
+async fn set_power_plan(mode: i32) {
+    let wcf = match UniwillWcfEc::new() {
+        Ok(wcf) => wcf,
+        Err(e) => {
+            eprintln!("加载 NUCtool DLL 失败: {}", e);
+            None
+        }
+        .expect("加载 NUCtool DLL 失败"),
+    };
+    let ret = wcf.connect();
+    println!("connect: {}", ret);
+    match mode {
+        0 => {
+            wcf.set_power_plan(mode);
+            println!("电源计划切换: 关闭 {}", mode);
+        },
+        1 => {
+            wcf.set_power_plan(mode);
+            println!("电源计划切换: 高性能 {}", mode);
+        },
+        2 => {
+            wcf.set_power_plan(mode);
+            println!("电源计划切换: 平衡 {}", mode);
+        },
+        3 => {
+            wcf.set_power_plan(mode);
+            println!("电源计划切换: 节能 {}", mode);
+        },
+        4 => {
+            wcf.set_power_plan(mode);
+            println!("电源计划切换: 基准高性能 {}", mode);
+        },
+        _ => {
+            eprintln!("错误的电源计划: {}", mode);
+        }
+    }
+    wcf.disconnect();
 }
 
 // =====================================================
@@ -411,9 +450,24 @@ async fn get_tdp() -> Result<TdpConfig, String> {
     // =================================================
     // Battery
     // =================================================
+    let wcf = match UniwillWcfEc::new() {
+        Ok(wcf) => wcf,
+        Err(e) => {
+            eprintln!("加载 NUCtool DLL 失败: {}", e);
+            None
+        }
+        .expect("加载 NUCtool DLL 失败"),
+    };
+    let ret = wcf.connect();
+    println!("connect: {}", ret);
 
-    let battery_charglimit = ec.battery_read_charglimit().expect("Error");
+    let battery_charglimit = wcf.wcf_get_battery_charging_level() as u8;
+    wcf.disconnect();
 
+    // =================================================
+    // PSYS PL1
+    // =================================================
+    
     let psys_pl1 = ec.psys_read_pl1().expect("Error");
 
     println!(
@@ -488,9 +542,24 @@ async fn set_tdp(tdp_type: String, value: u8) -> Result<(), String> {
         // =============================================
         
         "battery_charglimit" => {
-            ec.battery_write_charglimit(value).expect("Error");
+            let wcf = match UniwillWcfEc::new() {
+                Ok(wcf) => wcf,
+                Err(e) => {
+                    eprintln!("加载 NUCtool DLL 失败: {}", e);
+                    None
+                }
+                .expect("加载 NUCtool DLL 失败"),
+            };
+            let ret = wcf.connect();
+            println!("connect: {}", ret);
+            wcf.wcf_set_battery_charging_level(value as i32);
             println!("写入Battery Charging limit： {}%", value);
+            wcf.disconnect();
         },
+
+        // =============================================
+        // PSYS PL1
+        // =============================================
 
         "psys_pl1" => {
             ec.psys_write_pl1(value).expect("Error");
@@ -509,48 +578,51 @@ async fn set_tdp(tdp_type: String, value: u8) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn get_autostart(app: tauri::AppHandle) -> Result<bool, String> {
-    println!("获取自启动状态");
-    app.autolaunch()
-        .is_enabled()
-        .map_err(|e| e.to_string())
+fn get_autostart() -> Result<bool, String> {
+    match is_startup_task_exists() {
+        Ok(b) => {
+            println!("自启动状态: {}", b);
+            Ok(b)
+        },
+        Err(e) => {
+            eprintln!("获取自启动失败: {}", e);
+            Ok(false)
+        }
+    }
 }
 
 #[tauri::command]
 fn set_autostart(
-    app: tauri::AppHandle,
     enabled: bool,
 ) -> Result<(), String> {
     if enabled {
-        app.autolaunch()
-            .enable()
-            .map_err(|e| e.to_string())?;
-        println!("启用开机自启动");
+        if let Err(e) = create_startup_task() {
+            println!("创建开机自启动任务计划失败: {}", e);
+        } else {
+            println!("添加开机自启动任务计划成功");
+        }
     } else {
-        app.autolaunch()
-            .disable()
-            .map_err(|e| e.to_string())?;
-        println!("关闭开机自启动");
+        if let Err(e) = remove_startup_task() {
+            println!("删除开机自启动任务计划失败: {}", e);
+        } else {
+            println!("删除开机自启动任务计划成功");
+        }
     }
-
     Ok(())
 }
 
 pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
-
-    let auto_launch_enable = app.autolaunch().is_enabled().map_err(|e| e.to_string())?;
 
     // =========================
     // 启动最小化
     // =========================
 
     let args: Vec<String> = std::env::args().collect();
-
     let hide = args.iter().any(|arg| arg == "--hide");
 
     let window = app.get_webview_window("main").unwrap();
 
-    if hide || auto_launch_enable {
+    if hide {
         println!("检测到 --hide: {}/开机自启，只保留托盘", hide);
         window.hide()?;
     } else {
@@ -729,12 +801,8 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     // =========================
 
     let auto_fan_control = args.iter().any(|arg| arg == "--fan-control");
-
-    println!("auto_fan_control: {}, auto_launch_enable: {}", auto_fan_control, auto_launch_enable);
-
-    if auto_fan_control || auto_launch_enable  {
-        println!("符合条件，自动启动风扇控制");
-
+    if auto_fan_control  {
+        println!("检测到 --fan-control，自动启动风扇控制");
         let fan_data = match config::load() {
             Ok(data) => data,
             Err(e) => {
@@ -743,28 +811,26 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
                 return Ok(());
             }
         };
-
         let state = app.state::<FanControlState>();
-
         if let Err(e) = start_fan_control_internal(&app.handle(), fan_data, &state) {
             eprintln!("自动启动风扇控制失败: {}", e);
         };
     } else {
-        println!("未符合条件，风扇控制默认关闭");
+        println!("未检测到 --fan-control，风扇控制默认关闭");
     }
-
     Ok(())
 }
 
 fn fnhook() {
     unsafe {
+
         // ==================================
         // 安装低级键盘 Hook
         // ==================================
 
         let hook = SetWindowsHookExW(
             WH_KEYBOARD_LL,
-            Some(FnKeyhook),
+            Some(uniwillfnkeyhook),
             Some(HINSTANCE::default()),
             0,
         )
@@ -772,20 +838,6 @@ fn fnhook() {
 
         println!("======================================");
         println!("       NUCtool Fn 快捷键监听");
-        println!("======================================");
-        println!();
-        println!("监听：");
-        println!("  Fn + 1");
-        println!("  Fn + 2");
-        println!("  Fn + 3");
-        println!("  Fn + 4");
-        println!("  Fn + 5");
-        println!("  Fn + 6");
-        println!("  Fn + 7");
-        println!("  Fn + 8");
-        println!("  Fn + 9");
-        println!();
-        println!("等待按键...");
         println!("======================================");
 
         // ==================================
@@ -816,7 +868,7 @@ pub fn run() {
     });
 
     let app = tauri::Builder::default()
-        .plugin(tauri_plugin_autostart::Builder::new().build())
+        // .plugin(tauri_plugin_autostart::Builder::new().build())
         .manage(AppState {
             running: Arc::new(AtomicBool::new(false)),
         })
@@ -833,6 +885,7 @@ pub fn run() {
             get_fan_control_status,
             get_autostart,
             set_autostart,
+            set_power_plan,
         ])
         .setup(setup)
         .build(tauri::generate_context!())

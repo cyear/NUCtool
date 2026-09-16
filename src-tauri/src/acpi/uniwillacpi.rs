@@ -297,14 +297,14 @@ impl UniwillAcpiEc {
     }
 
     /// 读取 Battery Charging limit
-    pub fn battery_read_charglimit(&self)  -> io::Result<u8> {
-        self.read_u8(EC_CUSTOM_CHARGELIMIT)
-    }
+    // pub fn battery_read_charglimit(&self)  -> io::Result<u8> {
+    //     self.read_u8(EC_CUSTOM_CHARGELIMIT)
+    // }
 
     /// 写入 Battery Charging limit
-    pub fn battery_write_charglimit(&self, w: u8)  -> io::Result<()> {
-        self.write_u8(EC_CUSTOM_CHARGELIMIT, w)
-    }
+    // pub fn battery_write_charglimit(&self, w: u8)  -> io::Result<()> {
+    //     self.write_u8(EC_CUSTOM_CHARGELIMIT, w)
+    // }
 
     /// 读取 PSYS PL1
     pub fn psys_read_pl1(&self)  -> io::Result<u8> {

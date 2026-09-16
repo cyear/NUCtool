@@ -7,8 +7,10 @@ type WcfIsConnectedFn = unsafe extern "system" fn() -> c_int;
 type WcfApplyProfileFn = unsafe extern "system" fn(index: c_int) -> c_int;
 type WcfSetPowerPlanFn = unsafe extern "system" fn(mode: c_int) -> c_int;
 type WcfApplyBenchmarkModeFn = unsafe extern "system" fn(enable: c_int) -> c_int;
-type WcfDisablePassiveCoolingFn = unsafe extern "system" fn(disable: c_int) -> c_int;
-type WcfGetSupportedFeaturesCountFn = unsafe extern "system" fn() -> c_int;
+// type WcfDisablePassiveCoolingFn = unsafe extern "system" fn(disable: c_int) -> c_int;
+// type WcfGetSupportedFeaturesCountFn = unsafe extern "system" fn() -> c_int;
+type WcfGetBatteryChargingLevelFn = unsafe extern "system" fn() -> c_int;
+type WcfSetBatteryChargingLevelFn = unsafe extern "system" fn(level: c_int) -> c_int;
 
 // ============================================================
 // Uniwill WCF interface
@@ -20,16 +22,17 @@ pub struct UniwillWcfEc {
     wcf_connect: Symbol<'static, WcfConnectFn>,
     wcf_disconnect: Symbol<'static, WcfDisconnectFn>,
     wcf_is_connected: Symbol<'static, WcfIsConnectedFn>,
-
     wcf_apply_profile: Symbol<'static, WcfApplyProfileFn>,
     wcf_set_power_plan: Symbol<'static, WcfSetPowerPlanFn>,
     wcf_apply_benchmark_mode: Symbol<'static, WcfApplyBenchmarkModeFn>,
-    wcf_disable_passive_cooling: Symbol<'static, WcfDisablePassiveCoolingFn>,
-
-    wcf_get_supported_features_count: Symbol<'static, WcfGetSupportedFeaturesCountFn>,
+    // wcf_disable_passive_cooling: Symbol<'static, WcfDisablePassiveCoolingFn>,
+    // wcf_get_supported_features_count: Symbol<'static, WcfGetSupportedFeaturesCountFn>,
+    wcf_get_battery_charging_level: Symbol<'static, WcfGetBatteryChargingLevelFn>,
+    wcf_set_battery_charging_level: Symbol<'static, WcfSetBatteryChargingLevelFn>,
 }
 
 impl UniwillWcfEc {
+
     // ========================================================
     // 加载 DLL
     // ========================================================
@@ -38,25 +41,21 @@ impl UniwillWcfEc {
         let exe_path = std::env::current_exe()?;
         let install_dir = exe_path.parent().unwrap();
         let dll_path = install_dir.join("NUCtool.dll");
-
         let lib = unsafe { Library::new(&dll_path)? };
         // Library 会被结构体持有，所以这里延长 Symbol 生命周期
         let lib_ref: &'static Library = unsafe { std::mem::transmute(&lib) };
-
         unsafe {
             Ok(Self {
                 wcf_connect: lib_ref.get(b"wcf_connect")?,
                 wcf_disconnect: lib_ref.get(b"wcf_disconnect")?,
                 wcf_is_connected: lib_ref.get(b"wcf_is_connected")?,
-
                 wcf_apply_profile: lib_ref.get(b"wcf_apply_profile")?,
                 wcf_set_power_plan: lib_ref.get(b"wcf_set_power_plan")?,
                 wcf_apply_benchmark_mode: lib_ref.get(b"wcf_apply_benchmark_mode")?,
-                wcf_disable_passive_cooling: lib_ref.get(b"wcf_disable_passive_cooling")?,
-
-                wcf_get_supported_features_count: lib_ref
-                    .get(b"wcf_get_supported_features_count")?,
-
+                // wcf_disable_passive_cooling: lib_ref.get(b"wcf_disable_passive_cooling")?,
+                // wcf_get_supported_features_count: lib_ref.get(b"wcf_get_supported_features_count")?,
+                wcf_get_battery_charging_level: lib_ref.get(b"wcf_get_battery_charging_level")?,
+                wcf_set_battery_charging_level: lib_ref.get(b"wcf_set_battery_charging_level")?,
                 lib,
             })
         }
@@ -108,15 +107,28 @@ impl UniwillWcfEc {
     // 被动散热
     // ========================================================
 
-    pub fn disable_passive_cooling(&self, enable: i32) -> i32 {
-        unsafe { (self.wcf_disable_passive_cooling)(enable) }
-    }
+    // pub fn disable_passive_cooling(&self, enable: i32) -> i32 {
+    //     unsafe { (self.wcf_disable_passive_cooling)(enable) }
+    // }
 
     // ========================================================
     // 获取支持的功能数量
     // ========================================================
 
-    pub fn get_supported_features_count(&self) -> i32 {
-        unsafe { (self.wcf_get_supported_features_count)() }
+    // pub fn get_supported_features_count(&self) -> i32 {
+    //     unsafe { (self.wcf_get_supported_features_count)() }
+    // }
+
+    // ========================================================
+    // 电池设置
+    // ========================================================
+    
+    pub fn wcf_get_battery_charging_level(&self) -> i32 {
+        unsafe { (self.wcf_get_battery_charging_level)() }
     }
+
+    pub fn wcf_set_battery_charging_level(&self, value: i32) -> i32 {
+        unsafe { (self.wcf_set_battery_charging_level)(value) }
+    }
+
 }

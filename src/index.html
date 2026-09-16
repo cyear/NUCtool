@@ -73,7 +73,7 @@
         </span>
 
         <span class="sidebar-version">
-          v1.0.1-Beta
+          v1.0.2
         </span>
       </div>
 
@@ -245,7 +245,7 @@
               </div>
 
               <div class="tuning-description">
-                选择适合当前使用场景的性能配置，默认显示的模式仅为显示，请以选择后为准
+                选择适合当前使用场景的性能配置，显示的模式仅为显示，请以选择后为准
               </div>
             </div>
           </div>
@@ -253,6 +253,16 @@
 
           <div class="tuning-options">
 
+            <button class="tuning-btn active" data-mode="unspecified" type="button">
+            <span class="tuning-btn-title">
+              默认
+            </span>
+
+            <span class="tuning-btn-description">
+              不修改模式
+            </span>
+          </button>
+          
             <button class="tuning-btn" data-mode="power-saving" type="button">
               <span class="tuning-btn-title">
                 省电模式
@@ -264,7 +274,7 @@
             </button>
 
 
-            <button class="tuning-btn active" data-mode="balanced" type="button">
+            <button class="tuning-btn" data-mode="balanced" type="button">
               <span class="tuning-btn-title">
                 平衡模式
               </span>
@@ -293,23 +303,129 @@
               </span>
             </button>
 
+          </div>
+        </div>
 
-            <!-- <button
-              class="tuning-btn"
-              data-mode="benchmark-off"
+        <!-- ===================================================
+             电源计划
+             =================================================== -->
+
+        <div class="power-plan-card">
+
+          <div class="power-plan-header">
+            <div>
+              <div class="power-plan-title">
+                电源计划
+              </div>
+
+              <div class="power-plan-description">
+                选择 Windows 电源计划，显示的计划仅为显示，请以选择后以及模式为准(模式切换会覆盖)
+              </div>
+            </div>
+          </div>
+
+
+          <div class="power-plan-options">
+
+            <!-- 未指定 -->
+            <button
+              class="power-plan-btn active"
+              data-power-plan="unspecified"
               type="button"
             >
-              <span class="tuning-btn-title">
-                基准模式 OFF
+              <span class="power-plan-btn-title">
+                默认
               </span>
 
-              <span class="tuning-btn-description">
-                简简单单
+              <span class="power-plan-btn-description">
+                不修改电源计划
+              </span>
+            </button>
+
+
+            <!-- 关闭 -->
+            <!-- <button
+              class="power-plan-btn"
+              data-power-plan="0"
+              type="button"
+            >
+              <span class="power-plan-btn-title">
+                关闭
+              </span>
+
+              <span class="power-plan-btn-description">
+                关闭电源计划
               </span>
             </button> -->
 
+
+            <!-- 节能 -->
+            <button
+              class="power-plan-btn"
+              data-power-plan="3"
+              type="button"
+            >
+              <span class="power-plan-btn-title">
+                节能
+              </span>
+
+              <span class="power-plan-btn-description">
+                降低功耗，延长续航
+              </span>
+            </button>
+
+
+            <!-- 平衡 -->
+            <button
+              class="power-plan-btn"
+              data-power-plan="2"
+              type="button"
+            >
+              <span class="power-plan-btn-title">
+                平衡
+              </span>
+
+              <span class="power-plan-btn-description">
+                平衡性能与功耗
+              </span>
+            </button>
+
+
+            <!-- 高性能 -->
+            <button
+              class="power-plan-btn"
+              data-power-plan="1"
+              type="button"
+            >
+              <span class="power-plan-btn-title">
+                高性能
+              </span>
+
+              <span class="power-plan-btn-description">
+                提供更高的性能
+              </span>
+            </button>
+
+
+            <!-- 基准高性能 -->
+            <button
+              class="power-plan-btn"
+              data-power-plan="4"
+              type="button"
+            >
+              <span class="power-plan-btn-title">
+                基准高性能
+              </span>
+
+              <span class="power-plan-btn-description">
+                基准测试使用
+              </span>
+            </button>
+
           </div>
+
         </div>
+
         <header class="page-header">
         </header>
         <div class="tdp-card">
@@ -624,7 +740,7 @@
                 开机自启动 & 自动控制
               </div>
               <div class="settings-card-description">
-                每次打开NUCtool后自动启动风扇控制
+                开机后NUCtool自动启动风扇控制
               </div>
             </div>
             <div id="autostart-status" class="settings-status">
@@ -634,7 +750,7 @@
           <div class="settings-option">
             <div class="settings-option-info">
               <div class="settings-option-title">
-                开机启动(不建议打开，如必须使用可使用任务计划，可查看README创建命令)
+                开机启动
               </div>
               <div id="autostart-description" class="settings-option-description">
                 登录Windows后自动运行NUCtool

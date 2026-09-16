@@ -489,25 +489,95 @@ saveConfigButton.addEventListener(
 const tuningButtons = document.querySelectorAll(".tuning-btn");
 
 tuningButtons.forEach((button) => {
-
   button.addEventListener("click", async () => {
-
     const mode = button.dataset.mode;
 
     // 更新选中状态
-    tuningButtons.forEach((btn) => {
-      btn.classList.remove("active");
-    });
-
+    tuningButtons.forEach((btn) => { btn.classList.remove("active");});
     button.classList.add("active");
 
-    console.log("模式:", mode);
-    await invoke("set_performance_mode", {
-      mode: mode
-    });
+    // 默认：不修改模式
+    if (mode === "unspecified") {
+      console.log("性能模式: 默认");
+      return;
+    }
 
+    try {
+      await invoke(
+        "set_performance_mode",
+        {
+          mode: mode
+        }
+      );
+      console.log(
+        "性能模式:",
+        mode
+      );
+    } catch (error) {
+      console.error(
+        "设置性能模式失败:",
+        error
+      );
+    }
   });
 
+});
+
+
+// =====================================================
+// 电源计划
+// =====================================================
+
+
+const powerPlanButtons = document.querySelectorAll(".power-plan-btn");
+
+powerPlanButtons.forEach((button) => {
+
+  button.addEventListener("click", async () => {
+
+    const plan = button.dataset.powerPlan;
+
+    // 更新选中状态
+    powerPlanButtons.forEach((btn) => {
+      btn.classList.remove("active");
+    });
+    button.classList.add("active");
+
+    // 默认：不修改电源计划
+    if (plan === "unspecified") {
+      console.log("电源计划: 默认");
+      return;
+    }
+
+    const value = Number(plan);
+
+    if (!Number.isInteger(value)) {
+      console.error(
+        "无效的电源计划:",
+        plan
+      );
+      return;
+    }
+
+    try {
+      await invoke(
+        "set_power_plan",
+        {
+          mode: value
+        }
+      );
+      console.log(
+        "电源计划:",
+        value
+      );
+    } catch (error) {
+      console.error(
+        "设置电源计划失败:",
+        error
+      );
+
+    }
+  });
 });
 
 

@@ -32,7 +32,7 @@ static FN_DOWN: AtomicBool = AtomicBool::new(false);
 // Low Level Keyboard Hook
 // ==========================================
 
-pub unsafe extern "system" fn FnKeyhook(code: i32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
+pub unsafe extern "system" fn uniwillfnkeyhook(code: i32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
     if code == HC_ACTION as i32 {
         let keyboard = unsafe { &*(lparam.0 as *const KBDLLHOOKSTRUCT) };
 
