@@ -54,10 +54,15 @@
           <span class="nav-text">风扇控制</span>
         </button>
 
-        <!-- <button class="nav-btn" data-page="power" type="button">
-          <span class="nav-icon">ϟ</span>
-          <span class="nav-text">- - - -</span>
-        </button> -->
+        <button class="nav-btn" data-page="display" type="button">
+          <span class="nav-icon">▣</span>
+          <span class="nav-text">显示设置</span>
+        </button>
+
+        <button class="nav-btn" data-page="keyboard" type="button">
+          <span class="nav-icon">⌨</span>
+          <span class="nav-text">键盘设置</span>
+        </button>
 
         <button class="nav-btn" data-page="settings" type="button">
           <span class="nav-icon">⚙</span>
@@ -73,7 +78,7 @@
         </span>
 
         <span class="sidebar-version">
-          v1.0.2
+          v1.0.3
         </span>
       </div>
 
@@ -718,6 +723,185 @@
           </div>
 
         </header>
+      </section>
+
+
+      <!-- ===================================================
+          显示设置
+          =================================================== -->
+
+      <section id="page-display" class="page">
+
+        <!-- 页面标题 -->
+        <header class="page-header">
+          <div class="page-heading">
+            <h1>显示设置</h1>
+            <p class="page-subtitle">
+              调整设备显示模式
+            </p>
+          </div>
+        </header>
+
+
+        <!-- 显示模式 -->
+        <div class="display-card">
+
+          <div class="display-header">
+            <div>
+              <div class="display-title">
+                显示模式
+              </div>
+
+              <div class="display-description">
+                选择适合当前使用场景的显示配置，显示的模式仅为显示，请以选择后为准
+              </div>
+            </div>
+          </div>
+
+
+          <div class="display-options">
+
+            <!-- 默认 -->
+            <button
+              class="display-btn active"
+              data-display="5"
+              type="button"
+            >
+              <span class="display-btn-title">
+                默认
+              </span>
+
+              <span class="display-btn-description">
+                默认不修改, 再次选择关闭
+              </span>
+            </button>
+
+
+            <!-- Standard -->
+            <button
+              class="display-btn"
+              data-display="0"
+              type="button"
+            >
+              <span class="display-btn-title">
+                Standard
+              </span>
+
+              <span class="display-btn-description">
+                标准显示模式
+              </span>
+            </button>
+
+
+            <!-- Gaming -->
+            <button
+              class="display-btn"
+              data-display="1"
+              type="button"
+            >
+              <span class="display-btn-title">
+                Gaming
+              </span>
+
+              <span class="display-btn-description">
+                游戏显示模式
+              </span>
+            </button>
+
+
+            <!-- Video -->
+            <button
+              class="display-btn"
+              data-display="2"
+              type="button"
+            >
+              <span class="display-btn-title">
+                Video
+              </span>
+
+              <span class="display-btn-description">
+                视频显示模式
+              </span>
+            </button>
+
+
+            <!-- Reading -->
+            <button
+              class="display-btn"
+              data-display="3"
+              type="button"
+            >
+              <span class="display-btn-title">
+                Reading
+              </span>
+
+              <span class="display-btn-description">
+                阅读显示模式
+              </span>
+            </button>
+
+
+            <!-- Custom -->
+            <button
+              class="display-btn"
+              data-display="4"
+              type="button"
+            >
+              <span class="display-btn-title">
+                Custom
+              </span>
+              <span class="display-btn-description">
+                自定义显示模式
+              </span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ===================================================
+          键盘设置
+          =================================================== -->
+
+      <section id="page-keyboard" class="page">
+
+        <header class="page-header">
+          <div class="page-heading">
+            <h1>键盘设置</h1>
+            <p class="page-subtitle">
+              配置键盘灯光
+            </p>
+          </div>
+        </header>
+
+        <div class="keyboard-card">
+
+          <div class="keyboard-header">
+            <div>
+              <div class="keyboard-title">
+                键盘 LED 灯
+              </div>
+
+              <div
+                class="keyboard-description"
+                id="keyboard-led-description"
+              >
+                控制键盘 LED 灯
+              </div>
+            </div>
+
+            <label class="keyboard-switch">
+              <input
+                type="checkbox"
+                id="keyboard-led-toggle"
+              >
+
+              <span class="keyboard-slider"></span>
+            </label>
+          </div>
+
+        </div>
+
       </section>
 
 

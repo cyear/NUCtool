@@ -413,6 +413,86 @@ async fn set_power_plan(mode: i32) {
     wcf.disconnect();
 }
 
+#[tauri::command]
+async fn set_display_mode(mode: i32) {
+    let wcf = match UniwillWcfEc::new() {
+        Ok(wcf) => wcf,
+        Err(e) => {
+            eprintln!("加载 NUCtool DLL 失败: {}", e);
+            None
+        }
+        .expect("加载 NUCtool DLL 失败"),
+    };
+    let ret = wcf.connect();
+    println!("connect: {}", ret);
+    println!("显示设置: {}",mode);
+    if mode != 5 {
+        wcf.wcf_enable_display_mode_mgmt(1);
+    }
+    match mode {
+        0 => {
+            wcf.wcf_set_display_mode(mode);
+        },
+        1 => {
+            wcf.wcf_set_display_mode(mode);
+        },
+        2 => {
+            wcf.wcf_set_display_mode(mode);
+        },
+        3 => {
+            wcf.wcf_set_display_mode(mode);
+        },
+        4 => {
+            wcf.wcf_set_display_mode(mode);
+        },
+        5 => {
+            wcf.wcf_enable_display_mode_mgmt(0);
+        },
+        _ => {
+            eprintln!("错误的显示模式: {}", mode);
+        }
+    }
+    wcf.disconnect();
+}
+
+#[tauri::command]
+fn get_keyboard_led() -> bool {
+    let wcf = match UniwillWcfEc::new() {
+        Ok(wcf) => wcf,
+        Err(e) => {
+            eprintln!("加载 NUCtool DLL 失败: {}", e);
+            None
+        }
+        .expect("加载 NUCtool DLL 失败"),
+    };
+    let ret = wcf.connect();
+    let g = wcf.wcf_get_keyboard_leds_power();
+    println!("connect: {} wcf_get_keyboard_leds_power: {}", ret, g);
+    wcf.disconnect();
+    if g==1 { true } else { false }
+}
+
+#[tauri::command]
+fn set_keyboard_led(enabled: bool) {
+    let wcf = match UniwillWcfEc::new() {
+        Ok(wcf) => wcf,
+        Err(e) => {
+            eprintln!("加载 NUCtool DLL 失败: {}", e);
+            None
+        }
+        .expect("加载 NUCtool DLL 失败"),
+    };
+    let ret = wcf.connect();
+    println!("connect: {} set_keyboard_led: {}", ret, enabled);
+    if enabled {
+        wcf.wcf_enable_keyboard_leds(1);
+    } else {
+        wcf.wcf_enable_keyboard_leds(0);
+    }
+    wcf.disconnect();
+}
+
+
 // =====================================================
 // 读取 TDP
 // =====================================================
@@ -886,6 +966,9 @@ pub fn run() {
             get_autostart,
             set_autostart,
             set_power_plan,
+            set_display_mode,
+            get_keyboard_led,
+            set_keyboard_led,
         ])
         .setup(setup)
         .build(tauri::generate_context!())

@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="NUCtool - Intel NUC X15 系列硬件控制工具，支持风扇控制、功耗控制、温度监控等功能。"
+    >
+
+    <meta name="theme-color" content="#09090b">
+
+    <title>NUCtool — Intel NUC X15 Tool</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="navbar">
+    <div class="container nav-inner">
+
+        <a class="logo" href="#">
+            <span class="logo-mark">◆</span>
+            <span>NUCtool</span>
+        </a>
+
+        <nav>
+            <a href="#features">功能</a>
+            <a href="#support">支持</a>
+            <a href="#install">安装</a>
+            <a
+                href="https://github.com/cyear/NUCtool"
+                target="_blank"
+                rel="noopener"
+            >
+                GitHub
+            </a>
+        </nav>
+
+    </div>
+</header>
+
+
+<main>
+
+    <!-- Hero -->
+
+    <section class="hero">
+
+        <div class="container hero-content">
+
+            <div class="badge">
+                Intel NUC X15 · LAPAC71H
+            </div>
+
+            <h1>
+                NUCtool
+                <span>Control your NUC.</span>
+            </h1>
+
+            <p class="hero-description">
+                面向 Intel NUC X15 系列笔记本的硬件控制工具。
+                提供风扇曲线、功耗控制、温度监控、模式切换等功能。
+            </p>
+
+            <div class="hero-buttons">
+
+                <a
+                    class="button primary"
+                    href="https://github.com/cyear/NUCtool/releases"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    下载 NUCtool
+                </a>
+
+                <a
+                    class="button secondary"
+                    href="https://github.com/cyear/NUCtool"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    查看源码
+                </a>
+
+            </div>
+
+            <div class="hero-meta">
+                <span>Rust</span>
+                <span>Tauri 2</span>
+                <span>Windows</span>
+                <span>Linux</span>
+                <span>GPL-3.0</span>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Features -->
+
+    <section id="features" class="section">
+
+        <div class="container">
+
+            <div class="section-header">
+
+                <div class="eyebrow">
+                    FEATURES
+                </div>
+
+                <h2>
+                    控制你的 NUC X15
+                </h2>
+
+                <p>
+                    从系统监控到 EC 控制，将常用的硬件控制功能集中到一个简洁的桌面应用中。
+                </p>
+
+            </div>
+
+
+            <div class="feature-grid">
+
+                <article class="feature-card">
+
+                    <div class="feature-icon">
+                        ◈
+                    </div>
+
+                    <h3>
+                        风扇控制
+                    </h3>
+
+                    <p>
+                        自定义 CPU / GPU 温度对应的风扇转速，
+                        创建自己的 Fan Curve，并支持自动控制。
+                    </p>
+
+                    <code>
+                        Temperature → Fan RPM
+                    </code>
+
+                </article>
+
+
+                <article class="feature-card">
+
+                    <div class="feature-icon">
+                        ⚡
+                    </div>
+
+                    <h3>
+                        功耗控制
+                    </h3>
+
+                    <p>
+                        对支持的 NUC X15 机型进行处理器和 GPU
+                        功耗参数控制。
+                    </p>
+
+                    <code>
+                        CPU PL1 / PL2 / PL4
+                    </code>
+
+                </article>
+
+
+                <article class="feature-card">
+
+                    <div class="feature-icon">
+                        ◌
+                    </div>
+
+                    <h3>
+                        实时监控
+                    </h3>
+
+                    <p>
+                        查看 CPU、GPU 温度以及风扇转速等硬件运行状态。
+                    </p>
+
+                    <code>
+                        CPU · GPU · FAN
+                    </code>
+
+                </article>
+
+
+                <article class="feature-card">
+
+                    <div class="feature-icon">
+                        ◆
+                    </div>
+
+                    <h3>
+                        键盘 LED
+                    </h3>
+
+                    <p>
+                        对支持的设备控制键盘灯状态，并与 NUCtool
+                        设置界面集成。
+                    </p>
+
+                    <code>
+                        Keyboard LED
+                    </code>
+
+                </article>
+
+
+                <article class="feature-card">
+
+                    <div class="feature-icon">
+                        ⌁
+                    </div>
+
+                    <h3>
+                        模式切换
+                    </h3>
+
+                    <p>
+                        根据硬件支持情况切换不同的性能和电源模式。
+                    </p>
+
+                    <code>
+                        Performance Profile
+                    </code>
+
+                </article>
+
+
+                <article class="feature-card">
+
+                    <div class="feature-icon">
+                        ◉
+                    </div>
+
+                    <h3>
+                        后台运行
+                    </h3>
+
+                    <p>
+                        支持系统托盘、开机自启以及后台风扇控制。
+                    </p>
+
+                    <code>
+                        Tray · Startup
+                    </code>
+
+                </article>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Architecture -->
+
+    <section class="section dark-section">
+
+        <div class="container">
+
+            <div class="section-header">
+
+                <div class="eyebrow">
+                    ARCHITECTURE
+                </div>
+
+                <h2>
+                    为硬件控制而设计
+                </h2>
+
+                <p>
+                    NUCtool 使用 Rust + Tauri 构建，
+                    Windows 平台通过底层硬件接口实现设备控制。
+                </p>
+
+            </div>
+
+
+            <div class="architecture">
+
+                <div class="architecture-item">
+
+                    <span class="architecture-number">
+                        01
+                    </span>
+
+                    <div>
+                        <strong>前端</strong>
+                        <p>
+                            HTML / CSS / JavaScript
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="architecture-line"></div>
+
+
+                <div class="architecture-item">
+
+                    <span class="architecture-number">
+                        02
+                    </span>
+
+                    <div>
+                        <strong>Tauri</strong>
+                        <p>
+                            Desktop Application
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="architecture-line"></div>
+
+
+                <div class="architecture-item">
+
+                    <span class="architecture-number">
+                        03
+                    </span>
+
+                    <div>
+                        <strong>Rust</strong>
+                        <p>
+                            Hardware Control Layer
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="architecture-line"></div>
+
+
+                <div class="architecture-item">
+
+                    <span class="architecture-number">
+                        04
+                    </span>
+
+                    <div>
+                        <strong>底层</strong>
+                        <p>
+                            Hardware Interface
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Supported hardware -->
+
+    <section id="support" class="section">
+
+        <div class="container">
+
+            <div class="section-header">
+
+                <div class="eyebrow">
+                    HARDWARE
+                </div>
+
+                <h2>
+                    硬件支持
+                </h2>
+
+                <p>
+                    不同 NUC X15 型号的硬件接口存在差异，
+                    实际支持情况以设备和版本为准。
+                </p>
+
+            </div>
+
+
+            <div class="hardware-table">
+
+                <div class="table-head">
+                    <span>功能</span>
+                    <span>LAPAC71H</span>
+                    <span>其他机型</span>
+                </div>
+
+
+                <div class="table-row">
+                    <span>风扇控制</span>
+                    <strong class="yes">✓</strong>
+                    <strong class="yes">—</strong>
+                </div>
+
+
+                <div class="table-row">
+                    <span>CPU 功耗控制</span>
+                    <strong class="yes">✓</strong>
+                    <strong class="yes">—</strong>
+                </div>
+
+
+                <div class="table-row">
+                    <span>GPU 功耗控制</span>
+                    <strong class="yes">✓</strong>
+                    <strong class="yes">—</strong>
+                </div>
+
+
+                <div class="table-row">
+                    <span>键盘 LED</span>
+                    <strong class="yes">✓</strong>
+                    <strong class="yes">—</strong>
+                </div>
+
+
+                <div class="table-row">
+                    <span>性能模式</span>
+                    <strong class="yes">✓</strong>
+                    <strong class="yes">—</strong>
+                </div>
+
+
+                <div class="table-row">
+                    <span>硬件监控</span>
+                    <strong class="yes">✓</strong>
+                    <strong class="yes">—</strong>
+                </div>
+
+
+                <div class="table-row">
+                    <span>更多功能</span>
+                    <strong class="yes">开发中</strong>
+                    <strong class="yes">开发中</strong>
+                </div>
+
+            </div>
+
+
+            <p class="table-note">
+                ✓ 已实现 / 支持　　— 未经过任何测试以及反馈
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- Installation -->
+
+    <section id="install" class="section install-section">
+
+        <div class="container">
+
+            <div class="install-card">
+
+                <div>
+
+                    <div class="eyebrow">
+                        GET STARTED
+                    </div>
+
+                    <h2>
+                        开始使用 NUCtool
+                    </h2>
+
+                    <p>
+                        前往 GitHub Releases 获取最新构建版本。
+                    </p>
+
+                </div>
+
+
+                <div class="install-buttons">
+
+                    <a
+                        class="button primary"
+                        href="https://github.com/cyear/NUCtool/releases"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        GitHub Releases
+                    </a>
+
+                    <a
+                        class="button secondary"
+                        href="https://github.com/cyear/NUCtool/issues"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        Issues
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Warning -->
+
+    <section class="warning-section">
+
+        <div class="container">
+
+            <div class="warning">
+
+                <div class="warning-title">
+                    硬件控制风险
+                </div>
+
+                <p>
+                    NUCtool 会与设备底层硬件接口进行交互。
+                    不正确的功耗、温度或风扇配置可能导致系统不稳定、
+                    过热、死机或硬件损坏。
+                </p>
+
+                <p>
+                    使用前请确认你的设备型号以及相关参数。
+                    对硬件造成的损坏及数据损失，请使用者自行承担风险。
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer>
+
+    <div class="container footer-inner">
+
+        <div>
+
+            <div class="footer-logo">
+                ◆ NUCtool
+            </div>
+
+            <p>
+                Intel NUC X15 hardware control tool.
+            </p>
+
+        </div>
+
+
+        <div class="footer-links">
+
+            <a
+                href="https://github.com/cyear/NUCtool"
+                target="_blank"
+                rel="noopener"
+            >
+                GitHub
+            </a>
+
+            <a
+                href="https://github.com/cyear/NUCtool/releases"
+                target="_blank"
+                rel="noopener"
+            >
+                Releases
+            </a>
+
+            <a
+                href="https://discord.gg/8geBWer34C"
+                target="_blank"
+                rel="noopener"
+            >
+                Discord
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="container copyright">
+
+        © 2026 NUCtool · GPL-3.0 License
+
+    </div>
+
+</footer>
+
+
+</body>
+</html>

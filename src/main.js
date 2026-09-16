@@ -846,11 +846,205 @@ if (autostartToggle) {
   );
 }
 
+// =====================================================
+// 显示设置
+// =====================================================
 
-/**
- * 初始化
- */
-loadAutostartState();
+const displayButtons =
+  document.querySelectorAll(".display-btn");
+
+displayButtons.forEach((button) => {
+
+  button.addEventListener("click", async () => {
+
+    const mode = button.dataset.display;
+
+    // 先更新选中状态
+    displayButtons.forEach((btn) => {
+      btn.classList.remove("active");
+    });
+
+    button.classList.add("active");
+
+
+    // 默认：不修改显示模式
+    // if (mode === "5") {
+    //   console.log("显示模式: 关闭");
+    //   return;
+    // }
+
+
+    const value = Number(mode);
+    if (!Number.isInteger(value)) {
+      console.error(
+        "无效的显示模式:",
+        mode
+      );
+      return;
+    }
+
+
+    try {
+      await invoke(
+        "set_display_mode",
+        {
+          mode: value
+        }
+      );
+      console.log(
+        "显示模式:",
+        value
+      );
+
+    } catch (error) {
+      console.error(
+        "设置显示模式失败:",
+        error
+      );
+
+    }
+  });
+});
+
+
+// =====================================================
+// 键盘设置
+// =====================================================
+
+const keyboardLedToggle =
+  document.getElementById("keyboard-led-toggle");
+
+const keyboardLedDescription =
+  document.getElementById("keyboard-led-description");
+
+
+// -----------------------------------------------------
+// 更新键盘 LED UI
+// -----------------------------------------------------
+
+function updateKeyboardLedUI(enabled) {
+
+  if (!keyboardLedToggle) {
+    return;
+  }
+
+  keyboardLedToggle.checked = enabled;
+
+  if (keyboardLedDescription) {
+    keyboardLedDescription.textContent =
+      enabled
+        ? "键盘 LED 灯已开启"
+        : "键盘 LED 灯已关闭";
+  }
+}
+
+
+// -----------------------------------------------------
+// 获取键盘 LED 状态
+// -----------------------------------------------------
+
+async function loadKeyboardLedState() {
+
+  if (!keyboardLedToggle) {
+    return;
+  }
+
+  try {
+
+    keyboardLedToggle.disabled = true;
+
+    if (keyboardLedDescription) {
+      keyboardLedDescription.textContent = "读取中...";
+    }
+
+    const enabled =
+      await invoke("get_keyboard_led");
+
+    updateKeyboardLedUI(
+      Boolean(enabled)
+    );
+
+  } catch (error) {
+
+    console.error(
+      "读取键盘 LED 状态失败:",
+      error
+    );
+
+    if (keyboardLedDescription) {
+      keyboardLedDescription.textContent = "读取失败";
+    }
+
+  } finally {
+
+    keyboardLedToggle.disabled = false;
+  }
+}
+
+
+// -----------------------------------------------------
+// 修改键盘 LED 状态
+// -----------------------------------------------------
+
+async function setKeyboardLed(enabled) {
+
+  if (!keyboardLedToggle) {
+    return;
+  }
+
+  try {
+
+    keyboardLedToggle.disabled = true;
+
+    await invoke(
+      "set_keyboard_led",
+      {
+        enabled: enabled
+      }
+    );
+
+    updateKeyboardLedUI(enabled);
+
+    console.log(
+      "键盘 LED:",
+      enabled ? "开启" : "关闭"
+    );
+
+  } catch (error) {
+
+    console.error(
+      "设置键盘 LED 失败:",
+      error
+    );
+
+    // 设置失败，恢复实际状态
+    await loadKeyboardLedState();
+
+  } finally {
+
+    keyboardLedToggle.disabled = false;
+  }
+}
+
+
+// -----------------------------------------------------
+// 开关事件
+// -----------------------------------------------------
+
+if (keyboardLedToggle) {
+
+  keyboardLedToggle.addEventListener(
+    "change",
+    async () => {
+
+      const enabled =
+        keyboardLedToggle.checked;
+
+      await setKeyboardLed(enabled);
+    }
+  );
+
+}
 
 
 /* =========================================================
@@ -859,11 +1053,14 @@ loadAutostartState();
 
 async function init() {
   await loadConfig();
-
+  
   // 初始化风扇控制状态
   await initFanControlStatus();
 
   updateControlState();
+  loadAutostartState();
+  loadKeyboardLedState();
+  
 }
 
 init();

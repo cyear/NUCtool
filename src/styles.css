@@ -1558,3 +1558,259 @@ body {
     max-width: 90%;
   }
 }
+
+
+/* =====================================================
+   显示设置
+   ===================================================== */
+
+.display-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.display-card:hover {
+  border-color: var(--border-hover);
+}
+
+
+/* =====================================================
+   显示设置标题
+   ===================================================== */
+
+.display-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 22px;
+}
+
+.display-title {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.display-description {
+  margin-top: 5px;
+
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+
+/* =====================================================
+   显示模式选项
+   ===================================================== */
+
+.display-options {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+
+/* =====================================================
+   显示模式按钮
+   ===================================================== */
+
+.display-btn {
+  min-height: 92px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+
+  padding: 16px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+
+  background: #1a1f27;
+  color: var(--text-secondary);
+
+  font-family: inherit;
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.display-btn:hover {
+  background: #202630;
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+
+  transform: translateY(-1px);
+}
+
+.display-btn:active {
+  transform: translateY(0);
+}
+
+
+/* =====================================================
+   当前选中
+   ===================================================== */
+
+.display-btn.active {
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+
+/* =====================================================
+   显示模式文字
+   ===================================================== */
+
+.display-btn-title {
+  color: inherit;
+
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.display-btn-description {
+  margin-top: 7px;
+
+  color: var(--text-muted);
+
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.display-btn.active .display-btn-description {
+  color: var(--text-secondary);
+}
+
+
+/* =====================================================
+   显示设置响应式
+   ===================================================== */
+
+@media (max-width: 700px) {
+  .display-options {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .display-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* =========================================================
+   键盘设置
+   ========================================================= */
+
+.keyboard-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+
+.keyboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.keyboard-title {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.keyboard-description {
+  margin-top: 5px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+
+/* =========================================================
+   键盘 LED 开关
+   ========================================================= */
+
+.keyboard-switch {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 46px;
+  height: 26px;
+  cursor: pointer;
+}
+
+.keyboard-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.keyboard-slider {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #1a1f27;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.keyboard-slider::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  left: 2px;
+  top: 2px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease;
+}
+
+.keyboard-switch:hover .keyboard-slider {
+  border-color: var(--border-hover);
+}
+
+.keyboard-switch input:checked + .keyboard-slider {
+  background: var(--accent-soft);
+  border-color: var(--accent-border);
+}
+
+.keyboard-switch input:checked + .keyboard-slider::before {
+  background: var(--accent);
+  transform: translateX(20px);
+}
+
+.keyboard-switch input:disabled + .keyboard-slider {
+  opacity: 0.5;
+  cursor: default;
+}
