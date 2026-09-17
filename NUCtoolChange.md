@@ -35,3 +35,41 @@ FN快捷键支持如下：
 
 - `--hide` 启动只保留托盘
 - `--fan-control` 自动启动风扇控制
+
+### 自启动不建议使用(手动脚本)
+
+#### 1.创建
+
+```PowerShell
+$action = New-ScheduledTaskAction `
+    -Execute 'C:\Program Files\NUCtool\nuctool.exe' `
+    -Argument '--hide --fan-control'
+
+$trigger = New-ScheduledTaskTrigger -AtLogOn
+
+$principal = New-ScheduledTaskPrincipal `
+    -UserId "$env:USERDOMAIN\$env:USERNAME" `
+    -LogonType Interactive `
+    -RunLevel Highest
+
+Register-ScheduledTask `
+    -TaskName 'NUCtool' `
+    -Action $action `
+    -Trigger $trigger `
+    -Principal $principal `
+    -Force
+```
+
+#### 2.查询
+
+```PowerShell
+Get-ScheduledTask -TaskName 'NUCtool' | Select-Object TaskName,State
+```
+
+#### 3.删除
+
+```PowerShell
+Unregister-ScheduledTask -TaskName 'NUCtool' -Confirm:$false
+```
+
+---
