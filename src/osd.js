@@ -21,7 +21,7 @@ async function hideOsd() {
 
     // 等待 CSS 淡出动画完成
     await new Promise((resolve) => {
-        setTimeout(resolve, 180);
+        setTimeout(resolve, 300);
     });
 
     await appWindow.hide();

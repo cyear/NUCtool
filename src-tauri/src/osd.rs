@@ -47,14 +47,14 @@ pub fn create_osd(app: &AppHandle) -> Result<(), String> {
     .map_err(|e| e.to_string())?;
 
     // 不允许 OSD 获得焦点
-    // window
-    //     .set_focusable(false)
-    //     .map_err(|e| e.to_string())?;
+    window
+        .set_focusable(false)
+        .map_err(|e| e.to_string())?;
 
-    // // 鼠标穿透
-    // window
-    //     .set_ignore_cursor_events(true)
-    //     .map_err(|e| e.to_string())?;
+    // 鼠标穿透
+    window
+        .set_ignore_cursor_events(true)
+        .map_err(|e| e.to_string())?;
 
     // 定位
     position_osd(&window)?;

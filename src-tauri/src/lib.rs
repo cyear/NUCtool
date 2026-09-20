@@ -172,7 +172,7 @@ fn start_fan_control_internal(
 
         // 通知前端：已经启动
         let _ = app_handle.emit("fan-control-status", true);
-        let _ = show_osd(&app_handle, "风扇控制", "开始 OK");
+        let _ = show_osd(&app_handle, "风扇控制", "开始");
 
         while running.load(Ordering::SeqCst) {
 
@@ -211,10 +211,10 @@ fn start_fan_control_internal(
                 println!("当前是 Auto Mode");
 
                 if let Err(e) = ec.fan_write_mode(acpi::uniwillacpi::FanModeByte::FanBoostMode) {
-                    let _ = show_osd(&app_handle, "风扇控制", "异常恢复 ERR");
+                    let _ = show_osd(&app_handle, "风扇控制", format!("错误: FANMODE={}", e));
                     eprintln!("切换FAN手动模式失败: {}", e);
                 } else {
-                    let _ = show_osd(&app_handle, "风扇控制", "异常恢复 OK");
+                    let _ = show_osd(&app_handle, "风扇控制", format!("成功: FANMODE={}", fanm));
                     println!("切换FAN手动模式成功");
                 }
             }
@@ -318,7 +318,7 @@ fn stop_fan_control_inner(app: &tauri::AppHandle, state: &FanControlState) -> Re
     // ========================================
     
     let _ = app.emit("fan-control-status", false);
-    let _ = show_osd(app, "风扇控制", "停止 OK");
+    let _ = show_osd(app, "风扇控制", "停止");
 
     Ok(())
 }
@@ -332,7 +332,7 @@ async fn stop_fan_control(
 }
 
 #[tauri::command]
-async fn set_performance_mode(mode: String) {
+async fn set_performance_mode(app: tauri::AppHandle, mode: String) {
     let wcf = match UniwillWcfEc::new() {
         Ok(wcf) => wcf,
         Err(e) => {
@@ -350,6 +350,7 @@ async fn set_performance_mode(mode: String) {
                 "benchmark_off apply_profile: {}",
                 wcf.apply_benchmark_mode(0)
             );
+            let _ = show_osd(&app, "省电模式", "");
             println!("quiet apply_profile: {}", wcf.apply_profile(3));
         },
         "balanced" => {
@@ -358,6 +359,7 @@ async fn set_performance_mode(mode: String) {
                 "benchmark_off apply_profile: {}",
                 wcf.apply_benchmark_mode(0)
             );
+            let _ = show_osd(&app, "平衡模式", "");
             println!("balanced apply_profile: {}", wcf.apply_profile(2));
         },
         "performance" => {
@@ -366,6 +368,7 @@ async fn set_performance_mode(mode: String) {
                 "benchmark_off apply_profile: {}",
                 wcf.apply_benchmark_mode(0)
             );
+            let _ = show_osd(&app, "性能模式", "");
             println!("performance apply_profile: {}", wcf.apply_profile(1));
         },
         "benchmark-on" => {
@@ -374,6 +377,7 @@ async fn set_performance_mode(mode: String) {
                 "benchmark_on apply_profile: {}",
                 wcf.apply_benchmark_mode(1)
             );
+            let _ = show_osd(&app, "基准模式", "");
         },
         // "benchmark-off" => {
         //     println!("基准模式 OFF");
@@ -403,28 +407,28 @@ async fn set_power_plan(app: tauri::AppHandle, mode: i32) -> Result<(), String> 
         0 => {
             wcf.set_power_plan(mode);
             println!("电源计划切换: 关闭 {}", mode);
-            let _ = show_osd(&app, "电源计划", "关闭 OK");
+            let _ = show_osd(&app, "电源计划", "关闭");
         },
         1 => {
             wcf.set_power_plan(mode);
             println!("电源计划切换: 高性能 {}", mode);
-            let _ = show_osd(&app, "电源计划", "高性能 OK");
+            let _ = show_osd(&app, "电源计划", "高性能");
         },
         2 => {
             wcf.set_power_plan(mode);
             println!("电源计划切换: 平衡 {}", mode);
-            let _ = show_osd(&app, "电源计划", "平衡 OK");
+            let _ = show_osd(&app, "电源计划", "平衡");
         },
         3 => {
             wcf.set_power_plan(mode);
             println!("电源计划切换: 节能 {}", mode);
-            let _ = show_osd(&app, "电源计划", "节能 OK");
+            let _ = show_osd(&app, "电源计划", "节能");
 
         },
         4 => {
             wcf.set_power_plan(mode);
             println!("电源计划切换: 基准高性能 {}", mode);
-            let _ = show_osd(&app, "电源计划", "基准 OK");
+            let _ = show_osd(&app, "电源计划", "基准");
         },
         _ => {
             eprintln!("错误的电源计划: {}", mode);
@@ -435,7 +439,7 @@ async fn set_power_plan(app: tauri::AppHandle, mode: i32) -> Result<(), String> 
 }
 
 #[tauri::command]
-async fn set_display_mode(mode: i32) {
+async fn set_display_mode(app: tauri::AppHandle, mode: i32) {
     let wcf = match UniwillWcfEc::new() {
         Ok(wcf) => wcf,
         Err(e) => {
@@ -449,25 +453,33 @@ async fn set_display_mode(mode: i32) {
     println!("显示设置: {}",mode);
     if mode != 5 {
         wcf.wcf_enable_display_mode_mgmt(1);
+        let _ = show_osd(&app, "显示设置", "ON");
+
     }
     match mode {
         0 => {
             wcf.wcf_set_display_mode(mode);
+            let _ = show_osd(&app, "显示设置", "Standard");
         },
         1 => {
             wcf.wcf_set_display_mode(mode);
+            let _ = show_osd(&app, "显示设置", "Gaming");
         },
         2 => {
             wcf.wcf_set_display_mode(mode);
+            let _ = show_osd(&app, "显示设置", "Video");
         },
         3 => {
             wcf.wcf_set_display_mode(mode);
+            let _ = show_osd(&app, "显示设置", "Reading");
         },
         4 => {
             wcf.wcf_set_display_mode(mode);
+            let _ = show_osd(&app, "显示设置", "Custom");
         },
         5 => {
             wcf.wcf_enable_display_mode_mgmt(0);
+            let _ = show_osd(&app, "显示设置", "OFF");
         },
         _ => {
             eprintln!("错误的显示模式: {}", mode);
@@ -494,7 +506,7 @@ fn get_keyboard_led() -> bool {
 }
 
 #[tauri::command]
-fn set_keyboard_led(enabled: bool) {
+fn set_keyboard_led(app: tauri::AppHandle, enabled: bool) {
     let wcf = match UniwillWcfEc::new() {
         Ok(wcf) => wcf,
         Err(e) => {
@@ -507,8 +519,11 @@ fn set_keyboard_led(enabled: bool) {
     println!("connect: {} set_keyboard_led: {}", ret, enabled);
     if enabled {
         wcf.wcf_enable_keyboard_leds(1);
+        let _ = show_osd(&app, "键盘LED灯", "ON");
+
     } else {
         wcf.wcf_enable_keyboard_leds(0);
+        let _ = show_osd(&app, "键盘LED灯", "OFF");
     }
     wcf.disconnect();
 }
@@ -592,7 +607,7 @@ async fn get_tdp() -> Result<TdpConfig, String> {
 // =====================================================
 
 #[tauri::command]
-async fn set_tdp(tdp_type: String, value: u8) -> Result<(), String> {
+async fn set_tdp(app: tauri::AppHandle, tdp_type: String, value: u8) -> Result<(), String> {
     // EC init
     let ec = match UniwillAcpiEc::open() {
         Ok(ec) => ec,
@@ -612,16 +627,19 @@ async fn set_tdp(tdp_type: String, value: u8) -> Result<(), String> {
         "cpu-pl1" => {
             ec.cpu_write_pl1(value).expect("Error");
             println!("写入 CPU PL1: {} W", value);
+            let _ = show_osd(&app, "TDP设置", format!("CPU PL1 = {}W", value));
         }
 
         "cpu-pl2" => {
             ec.cpu_write_pl2(value).expect("Error");
             println!("写入 CPU PL2: {} W", value);
+            let _ = show_osd(&app, "TDP设置", format!("CPU PL2 = {}W", value));
         }
 
         "cpu-pl4" => {
             ec.cpu_write_pl4(value).expect("Error");
             println!("写入 CPU PL4: {} W", value);
+            let _ = show_osd(&app, "TDP设置", format!("CPU PL4 = {}W", value));
         }
 
         // =============================================
@@ -631,11 +649,13 @@ async fn set_tdp(tdp_type: String, value: u8) -> Result<(), String> {
         "gpu-pl1" => {
             ec.gpu_write_pl1(value).expect("Error");
             println!("写入 GPU PL1: {} W", value);
+            let _ = show_osd(&app, "TDP设置", format!("GPU PL1 = {}W", value));
         }
 
         "gpu-pl2" => {
             ec.gpu_write_pl2(value).expect("Error");
             println!("写入 GPU PL2: {} W", value);
+            let _ = show_osd(&app, "TDP设置", format!("GPU PL2 = {}W", value));
         },
 
         // =============================================
@@ -655,6 +675,7 @@ async fn set_tdp(tdp_type: String, value: u8) -> Result<(), String> {
             println!("connect: {}", ret);
             wcf.wcf_set_battery_charging_level(value as i32);
             println!("写入Battery Charging limit： {}%", value);
+            let _ = show_osd(&app, "电池设置", format!("电池充电上限 = {}%", value));
             wcf.disconnect();
         },
 
@@ -665,6 +686,7 @@ async fn set_tdp(tdp_type: String, value: u8) -> Result<(), String> {
         "psys_pl1" => {
             ec.psys_write_pl1(value).expect("Error");
             println!("写入PSYS PL1： {} W", value);
+            let _ = show_osd(&app, "TDP设置", format!("PSYS PL1 = {}W", value));
         }
 
         // =============================================
@@ -693,20 +715,22 @@ fn get_autostart() -> Result<bool, String> {
 }
 
 #[tauri::command]
-fn set_autostart(
-    enabled: bool,
-) -> Result<(), String> {
+fn set_autostart(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
     if enabled {
         if let Err(e) = create_startup_task() {
             println!("创建开机自启动任务计划失败: {}", e);
+            let _ = show_osd(&app, "自启动创建失败", format!("错误: {}", e));
         } else {
             println!("添加开机自启动任务计划成功");
+            let _ = show_osd(&app, "自启动创建成功", "");
         }
     } else {
         if let Err(e) = remove_startup_task() {
             println!("删除开机自启动任务计划失败: {}", e);
+            let _ = show_osd(&app, "自启动删除失败", format!("错误: {}", e));
         } else {
             println!("删除开机自启动任务计划成功");
+            let _ = show_osd(&app, "自启动删除成功", "");
         }
     }
     Ok(())

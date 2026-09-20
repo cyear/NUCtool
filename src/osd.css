@@ -40,6 +40,30 @@ body {
 
     border-radius: 10px;
 
+    color: white;
+
+    opacity: 1;
+
+    transform: none;
+
+    pointer-events: none;
+
+    background: transparent;
+}
+
+/* ==============================
+   OSD 背景
+   ============================== */
+
+#osd::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    border-radius: 10px;
+
     background: rgba(24, 24, 27, 0.94);
 
     border: 1px solid rgba(255, 255, 255, 0.10);
@@ -48,23 +72,22 @@ body {
         0 7px 24px rgba(0, 0, 0, 0.32),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
 
-    color: white;
-
     opacity: 0;
 
-    transform: translateX(-16px);
+    transition:
+        opacity 120ms ease;
+}
+
+#osd.visible::before {
+    opacity: 1;
 
     transition:
-        opacity 180ms ease,
-        transform 180ms ease;
-
-    pointer-events: none;
+        opacity 120ms ease;
 }
 
-#osd.visible {
-    opacity: 1;
-    transform: translateX(0);
-}
+/* ==============================
+   内容
+   ============================== */
 
 #osd-content {
     flex: 1;
@@ -73,7 +96,75 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
+
+    position: relative;
+    z-index: 1;
+
+    opacity: 0;
+
+    transform: translateX(-16px);
+
+    transition:
+        opacity 300ms ease,
+        transform 300ms ease;
 }
+
+#osd.visible #osd-content {
+    opacity: 1;
+    transform: translateX(0);
+
+    transition:
+        opacity 300ms ease,
+        transform 300ms ease;
+}
+
+/* ==============================
+   品牌
+   ============================== */
+
+#osd-brand {
+    flex: 0 0 auto;
+
+    margin-left: 14px;
+
+    position: relative;
+    z-index: 1;
+
+    font-size: 12px;
+    line-height: 17px;
+
+    font-weight: 600;
+
+    color: #3b82f6;
+
+    white-space: nowrap;
+
+    text-align: right;
+
+    text-shadow:
+        0 0 7px rgba(59, 130, 246, 0.22);
+
+    opacity: 0;
+
+    transform: translateX(-16px);
+
+    transition:
+        opacity 300ms ease,
+        transform 300ms ease;
+}
+
+#osd.visible #osd-brand {
+    opacity: 1;
+    transform: translateX(0);
+
+    transition:
+        opacity 300ms ease,
+        transform 300ms ease;
+}
+
+/* ==============================
+   标题
+   ============================== */
 
 #osd-title {
     font-size: 16px;
@@ -99,26 +190,28 @@ body {
     text-overflow: ellipsis;
 }
 
-#osd-brand {
-    flex: 0 0 auto;
-
-    margin-left: 14px;
-
-    font-size: 12px;
-    line-height: 17px;
-
-    font-weight: 600;
-
-    color: #3b82f6;
-
-    white-space: nowrap;
-
-    text-align: right;
-
-    text-shadow:
-        0 0 7px rgba(59, 130, 246, 0.22);
-}
-
 #osd-subtitle:empty {
     display: none;
+}
+
+/* ==============================
+   隐藏
+   ============================== */
+
+#osd:not(.visible)::before {
+    opacity: 0;
+
+    transition:
+        opacity 500ms ease;
+}
+
+#osd:not(.visible) #osd-content,
+#osd:not(.visible) #osd-brand {
+    opacity: 0;
+
+    transform: translateX(0);
+
+    transition:
+        opacity 500ms ease,
+        transform 180ms ease;
 }
