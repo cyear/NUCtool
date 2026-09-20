@@ -413,11 +413,11 @@ body {
 }
 
 .metric-indicator.cpu {
-  background: #3b34ff;
+  background: #8e65ff;
 }
 
 .metric-indicator.gpu {
-  background: #48baf8;
+  background: #3a94c4;
 }
 
 .metric-indicator.fan-main {
@@ -430,6 +430,10 @@ body {
 
 .metric-indicator.system_power {
   background: #f74a64;
+}
+
+.metric-indicator.bat_mah_percent {
+  background: #5ef74a;
 }
 
 /* =========================================================

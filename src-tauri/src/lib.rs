@@ -31,6 +31,7 @@ struct SensorData {
     fan1_rpm: u16,
     fan2_rpm: u16,
     system_power: u8,
+    bat_mah_percent: u8,
 }
 
 // =====================================================
@@ -61,7 +62,14 @@ fn start_sensor_loop(app: AppHandle, state: State<AppState>) {
 
     let running = state.running.clone();
     let handle = app.clone();
-
+    let wmi = match UniwillWmiEc::new() {
+        Ok(wmi) => wmi,
+        Err(e) => {
+            eprintln!("打开 WMI 失败: {}", e);
+            return;
+        }
+    };
+    let bat_mah_percent = (100 * wmi.get_set(0x0000010000000404).unwrap_or(0) / wmi.get_set(0x0000010000000402).unwrap_or(1)) as u8;
     thread::spawn(move || {
         let ec = match UniwillAcpiEc::open() {
             Ok(ec) => ec,
@@ -71,7 +79,6 @@ fn start_sensor_loop(app: AppHandle, state: State<AppState>) {
                 return;
             }
         };
-
         while running.load(Ordering::SeqCst) {
             let data = SensorData {
                 cpu_temp: ec.cpu_temperature().unwrap_or(0),
@@ -79,6 +86,7 @@ fn start_sensor_loop(app: AppHandle, state: State<AppState>) {
                 fan1_rpm: ec.fan1_rpm().unwrap_or(0),
                 fan2_rpm: ec.fan2_rpm().unwrap_or(0),
                 system_power: ec.system_read_power().unwrap_or(0),
+                bat_mah_percent: bat_mah_percent,
             };
 
             // 推送给前端

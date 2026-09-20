@@ -56,6 +56,7 @@ function updateUI(data) {
   document.getElementById("fan1-rpm").textContent = data.fan1_rpm ?? "--";
   document.getElementById("fan2-rpm").textContent = data.fan2_rpm ?? "--";
   document.getElementById("system_power").textContent = data.system_power ?? "--";
+  document.getElementById("bat_mah_percent").textContent = data.bat_mah_percent ?? "--";
 
   // 风扇控制页同步显示当前转速
   document.getElementById("fan1-current").textContent = data.fan1_rpm ?? "--";

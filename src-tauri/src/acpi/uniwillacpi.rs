@@ -66,9 +66,6 @@ const EC_GPU_PL2: u16 = 0x072e;
 // PSYS PL1 BYTE2 (W)
 const EC_PSYS_PL1_2: u16 = 0x0721;
 
-// Custom Charge Limit
-const EC_CUSTOM_CHARGELIMIT: u16 = 0x07B9;
-
 // FAN MODE
 const EC_FAN_MODE: u16 = 0x0751;
 
