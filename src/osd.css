@@ -1,0 +1,124 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+
+    background: transparent;
+}
+
+body {
+    font-family:
+        "Segoe UI",
+        "Microsoft YaHei UI",
+        "Microsoft YaHei",
+        sans-serif;
+
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#osd {
+    position: fixed;
+
+    left: 0;
+    top: 0;
+
+    width: 300px;
+    height: 64px;
+
+    box-sizing: border-box;
+
+    padding: 0 16px;
+
+    display: flex;
+    align-items: center;
+
+    border-radius: 10px;
+
+    background: rgba(24, 24, 27, 0.94);
+
+    border: 1px solid rgba(255, 255, 255, 0.10);
+
+    box-shadow:
+        0 7px 24px rgba(0, 0, 0, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+    color: white;
+
+    opacity: 0;
+
+    transform: translateX(-16px);
+
+    transition:
+        opacity 180ms ease,
+        transform 180ms ease;
+
+    pointer-events: none;
+}
+
+#osd.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+#osd-content {
+    flex: 1;
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#osd-title {
+    font-size: 16px;
+    line-height: 21px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#osd-subtitle {
+    margin-top: 1px;
+
+    font-size: 11px;
+    line-height: 15px;
+
+    color: rgba(255, 255, 255, 0.60);
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#osd-brand {
+    flex: 0 0 auto;
+
+    margin-left: 14px;
+
+    font-size: 12px;
+    line-height: 17px;
+
+    font-weight: 600;
+
+    color: #3b82f6;
+
+    white-space: nowrap;
+
+    text-align: right;
+
+    text-shadow:
+        0 0 7px rgba(59, 130, 246, 0.22);
+}
+
+#osd-subtitle:empty {
+    display: none;
+}

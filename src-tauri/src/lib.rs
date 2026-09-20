@@ -1,11 +1,13 @@
+mod osd;
+mod win;
 mod acpi;
 mod config;
 mod fan_control;
-mod win;
+use osd::{create_osd, show_osd, osd_ready, show_osd_command};
+use win::{privilege_escalation, create_startup_task, remove_startup_task, is_startup_task_exists};
 use acpi::{uniwillfnkeyhook, UniwillAcpiEc, UniwillWcfEc, UniwillWmiEc};
 use config::FanData;
 use fan_control::{calculate_speed, FanControlState};
-use win::{privilege_escalation, create_startup_task, remove_startup_task, is_startup_task_exists};
 use serde::Serialize;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -170,6 +172,7 @@ fn start_fan_control_internal(
 
         // 通知前端：已经启动
         let _ = app_handle.emit("fan-control-status", true);
+        let _ = show_osd(&app_handle, "风扇控制", "开始 OK");
 
         while running.load(Ordering::SeqCst) {
 
@@ -208,8 +211,10 @@ fn start_fan_control_internal(
                 println!("当前是 Auto Mode");
 
                 if let Err(e) = ec.fan_write_mode(acpi::uniwillacpi::FanModeByte::FanBoostMode) {
+                    let _ = show_osd(&app_handle, "风扇控制", "异常恢复 ERR");
                     eprintln!("切换FAN手动模式失败: {}", e);
                 } else {
+                    let _ = show_osd(&app_handle, "风扇控制", "异常恢复 OK");
                     println!("切换FAN手动模式成功");
                 }
             }
@@ -240,7 +245,7 @@ fn start_fan_control_internal(
             thread::sleep(Duration::from_millis(1500));
         }
         println!("风扇自动控制线程退出");
-
+        
         let _ = app_handle.emit("fan-control-status", false);
     });
 
@@ -311,8 +316,9 @@ fn stop_fan_control_inner(app: &tauri::AppHandle, state: &FanControlState) -> Re
     // ========================================
     // 5. 通知前端
     // ========================================
-
+    
     let _ = app.emit("fan-control-status", false);
+    let _ = show_osd(app, "风扇控制", "停止 OK");
 
     Ok(())
 }
@@ -382,7 +388,7 @@ async fn set_performance_mode(mode: String) {
 }
 
 #[tauri::command]
-async fn set_power_plan(mode: i32) {
+async fn set_power_plan(app: tauri::AppHandle, mode: i32) -> Result<(), String> {
     let wcf = match UniwillWcfEc::new() {
         Ok(wcf) => wcf,
         Err(e) => {
@@ -397,28 +403,35 @@ async fn set_power_plan(mode: i32) {
         0 => {
             wcf.set_power_plan(mode);
             println!("电源计划切换: 关闭 {}", mode);
+            let _ = show_osd(&app, "电源计划", "关闭 OK");
         },
         1 => {
             wcf.set_power_plan(mode);
             println!("电源计划切换: 高性能 {}", mode);
+            let _ = show_osd(&app, "电源计划", "高性能 OK");
         },
         2 => {
             wcf.set_power_plan(mode);
             println!("电源计划切换: 平衡 {}", mode);
+            let _ = show_osd(&app, "电源计划", "平衡 OK");
         },
         3 => {
             wcf.set_power_plan(mode);
             println!("电源计划切换: 节能 {}", mode);
+            let _ = show_osd(&app, "电源计划", "节能 OK");
+
         },
         4 => {
             wcf.set_power_plan(mode);
             println!("电源计划切换: 基准高性能 {}", mode);
+            let _ = show_osd(&app, "电源计划", "基准 OK");
         },
         _ => {
             eprintln!("错误的电源计划: {}", mode);
         }
     }
     wcf.disconnect();
+    Ok(())
 }
 
 #[tauri::command]
@@ -701,6 +714,12 @@ fn set_autostart(
 
 pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
+    // OSD
+    
+    if let Err(e) = create_osd(&app.handle()) {
+        eprintln!("OSD ERROR: {}", e);
+    }
+
     // =========================
     // 启动最小化
     // =========================
@@ -977,6 +996,8 @@ pub fn run() {
             set_display_mode,
             get_keyboard_led,
             set_keyboard_led,
+            osd_ready,
+            show_osd_command,
         ])
         .setup(setup)
         .build(tauri::generate_context!())

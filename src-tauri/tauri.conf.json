@@ -11,6 +11,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
+        "label": "main",
         "title": "NUCtool",
         "width": 900,
         "height": 600,
