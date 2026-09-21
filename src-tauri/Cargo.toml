@@ -33,6 +33,8 @@ wmi = "0.18"
 dirs = "7.0.0"
 powershell_script = "1.1.0"
 libloading = "0.8"
+sha2 = "0.10"
+hex = "0.4"
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
 [profile.release]

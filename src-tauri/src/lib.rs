@@ -738,17 +738,23 @@ fn set_autostart(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
 
 pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
+    let args: Vec<String> = std::env::args().collect();
+
     // OSD
-    
-    if let Err(e) = create_osd(&app.handle()) {
-        eprintln!("OSD ERROR: {}", e);
+    let osd = args.iter().any(|arg| arg == "--no-osd");
+    if !osd {
+        if let Err(e) = create_osd(&app.handle()) {
+            eprintln!("OSD ERROR: {}", e);
+        }
+    } else {
+        println!("检测到 --no-osd: {}/跳过创建OSD界面", osd);
     }
 
     // =========================
     // 启动最小化
     // =========================
 
-    let args: Vec<String> = std::env::args().collect();
+    
     let hide = args.iter().any(|arg| arg == "--hide");
 
     let window = app.get_webview_window("main").unwrap();

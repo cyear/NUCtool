@@ -1,6 +1,13 @@
 const { invoke } = window.__TAURI__.core;
 const { listen } = window.__TAURI__.event;
 
+import {
+  initI18n,
+  setLanguage,
+  getLanguageSetting,
+  t,
+} from "./i18n.js";
+
 // ==============================================
 // 禁止右键菜单
 document.addEventListener("contextmenu", (e) => {
@@ -47,41 +54,151 @@ document.addEventListener("keydown", (e) => {
     return;
   }
 });
+
+// ==============================================
+// 多语言状态
 // ==============================================
 
-// ========== 更新监控数据 ==========
-function updateUI(data) {
-  document.getElementById("cpu-temp").textContent = data.cpu_temp ?? "--";
-  document.getElementById("gpu-temp").textContent = data.gpu_temp ?? "--";
-  document.getElementById("fan1-rpm").textContent = data.fan1_rpm ?? "--";
-  document.getElementById("fan2-rpm").textContent = data.fan2_rpm ?? "--";
-  document.getElementById("system_power").textContent = data.system_power ?? "--";
-  document.getElementById("bat_mah_percent").textContent = data.bat_mah_percent ?? "--";
+let monitorStatusKey = "status.connecting";
 
-  // 风扇控制页同步显示当前转速
-  document.getElementById("fan1-current").textContent = data.fan1_rpm ?? "--";
-  document.getElementById("fan2-current").textContent = data.fan2_rpm ?? "--";
-}
 
-// ========== 监听 Rust 推送 ==========
-async function startListen() {
+// ==============================================
+// 更新动态多语言文字
+// ==============================================
+
+function updateDynamicTranslations() {
+
+  // --------------------------------------------
+  // 监控状态
+  // --------------------------------------------
+
   const statusEl = document.getElementById("status");
 
+  if (statusEl && monitorStatusKey) {
+    statusEl.textContent = t(monitorStatusKey);
+  }
+
+
+  // --------------------------------------------
+  // 风扇控制
+  // --------------------------------------------
+
+  if (typeof updateControlState === "function") {
+    updateControlState();
+  }
+
+
+  // --------------------------------------------
+  // 开机自启动
+  // --------------------------------------------
+
+  if (autostartToggle) {
+    updateAutostartUI(autostartToggle.checked);
+  }
+
+
+  // --------------------------------------------
+  // 键盘 LED
+  // --------------------------------------------
+
+  if (keyboardLedToggle) {
+    updateKeyboardLedUI(keyboardLedToggle.checked);
+  }
+}
+
+
+// ==============================================
+// 监听语言变化
+// ==============================================
+
+window.addEventListener(
+  "nuctool-language-changed",
+  () => {
+    updateDynamicTranslations();
+  }
+);
+
+
+// ========== 更新监控数据 ==========
+
+function updateUI(data) {
+  document.getElementById("cpu-temp").textContent =
+    data.cpu_temp ?? "--";
+
+  document.getElementById("gpu-temp").textContent =
+    data.gpu_temp ?? "--";
+
+  document.getElementById("fan1-rpm").textContent =
+    data.fan1_rpm ?? "--";
+
+  document.getElementById("fan2-rpm").textContent =
+    data.fan2_rpm ?? "--";
+
+  document.getElementById("system_power").textContent =
+    data.system_power ?? "--";
+
+  document.getElementById("bat_mah_percent").textContent =
+    data.bat_mah_percent ?? "--";
+
+  // 风扇控制页同步显示当前转速
+  document.getElementById("fan1-current").textContent =
+    data.fan1_rpm ?? "--";
+
+  document.getElementById("fan2-current").textContent =
+    data.fan2_rpm ?? "--";
+}
+
+
+// ========== 监听 Rust 推送 ==========
+
+async function startListen() {
+
+  const statusEl =
+    document.getElementById("status");
+
   try {
+
     await invoke("start_sensor_loop");
 
-    await listen("sensor-update", (event) => {
-      updateUI(event.payload);
-      statusEl.textContent = "实时监控中";
-      statusEl.className = "status ok";
-    });
+    await listen(
+      "sensor-update",
+      (event) => {
 
-    statusEl.textContent = "已连接";
-    statusEl.className = "status ok";
+        updateUI(event.payload);
+
+        monitorStatusKey =
+          "status.connected";
+
+        statusEl.textContent =
+          t(monitorStatusKey);
+
+        statusEl.className =
+          "status ok";
+      }
+    );
+
+
+    monitorStatusKey =
+      "status.connected";
+
+    statusEl.textContent =
+      t(monitorStatusKey);
+
+    statusEl.className =
+      "status ok";
+
   } catch (e) {
+
     console.error(e);
-    statusEl.textContent = "连接失败";
-    statusEl.className = "status err";
+
+    monitorStatusKey =
+      "status.disconnected";
+
+    statusEl.textContent =
+      t(monitorStatusKey);
+
+    statusEl.className =
+      "status err";
   }
 }
 
@@ -94,19 +211,31 @@ startListen();
    ========================================================= */
 
 document.querySelectorAll(".nav-btn").forEach((button) => {
+
   button.addEventListener("click", () => {
-    const page = button.dataset.page;
+
+    const page =
+      button.dataset.page;
 
     document.querySelectorAll(".nav-btn")
-      .forEach((btn) => btn.classList.remove("active"));
+      .forEach((btn) =>
+        btn.classList.remove("active")
+      );
 
     document.querySelectorAll(".page")
-      .forEach((el) => el.classList.remove("active"));
+      .forEach((el) =>
+        el.classList.remove("active")
+      );
 
     button.classList.add("active");
-    document.getElementById(`page-${page}`)?.classList.add("active");
+
+    document
+      .getElementById(`page-${page}`)
+      ?.classList.add("active");
   });
+
 });
+
 
 
 /* =========================================================
@@ -116,19 +245,31 @@ document.querySelectorAll(".nav-btn").forEach((button) => {
 const COLOR_CPU = "#3987e5";
 const COLOR_GPU = "#d95926";
 
-const GRID = "rgba(255, 255, 255, 0.08)";
+const GRID =
+  "rgba(255, 255, 255, 0.08)";
 
-Chart.defaults.color = "#898781";
-Chart.defaults.borderColor = GRID;
+Chart.defaults.color =
+  "#898781";
+
+Chart.defaults.borderColor =
+  GRID;
+
 Chart.defaults.font.family =
   '"Segoe UI", "Microsoft YaHei", system-ui, sans-serif';
+
 Chart.defaults.font.size = 11;
+
 Chart.defaults.animation = false;
 
 
 /* 温度节点：30°C ~ 100°C，每 5°C 一个节点 */
+
 const CURVE_TEMPS =
-  Array.from({ length: 15 }, (_, i) => 30 + i * 5);
+  Array.from(
+    { length: 15 },
+    (_, i) => 30 + i * 5
+  );
+
 
 
 /* =========================================================
@@ -136,100 +277,138 @@ const CURVE_TEMPS =
    ========================================================= */
 
 function createCurveChart(id, color) {
-  return new Chart(document.getElementById(id), {
-    type: "line",
 
-    data: {
-      labels: CURVE_TEMPS,
+  return new Chart(
+    document.getElementById(id),
+    {
+      type: "line",
 
-      datasets: [{
-        data: Array(CURVE_TEMPS.length).fill(50),
+      data: {
 
-        borderColor: color,
-        borderWidth: 2,
+        labels: CURVE_TEMPS,
 
-        pointRadius: 4,
-        pointHoverRadius: 6,
+        datasets: [
+          {
+            data:
+              Array(
+                CURVE_TEMPS.length
+              ).fill(50),
 
-        pointBackgroundColor: color,
+            borderColor:
+              color,
 
-        fill: false,
-      }],
-    },
+            borderWidth: 2,
 
-    options: {
-      maintainAspectRatio: false,
+            pointRadius: 4,
 
-      cubicInterpolationMode: "monotone",
+            pointHoverRadius: 6,
 
-      plugins: {
-        legend: {
-          display: false,
-        },
+            pointBackgroundColor:
+              color,
 
-        tooltip: {
-          displayColors: false,
-
-          callbacks: {
-            title: (items) =>
-              `${items[0].label} °C`,
-
-            label: (item) =>
-              `${item.formattedValue} %`,
+            fill: false,
           },
-        },
-
-        // 允许拖动曲线节点
-        dragData: {
-          round: 0,
-          dragX: false,
-        },
+        ],
       },
 
-      scales: {
-        x: {
-          grid: {
+      options: {
+
+        maintainAspectRatio:
+          false,
+
+        cubicInterpolationMode:
+          "monotone",
+
+        plugins: {
+
+          legend: {
             display: false,
           },
 
-          ticks: {
-            maxRotation: 0,
+          tooltip: {
 
-            callback: (value, index) =>
-              index % 2 === 0
-                ? `${CURVE_TEMPS[index]}°`
-                : "",
+            displayColors:
+              false,
+
+            callbacks: {
+
+              title: (items) =>
+                `${items[0].label} °C`,
+
+              label: (item) =>
+                `${item.formattedValue} %`,
+            },
+          },
+
+          // 允许拖动曲线节点
+          dragData: {
+            round: 0,
+            dragX: false,
           },
         },
 
-        y: {
-          min: 0,
-          max: 100,
+        scales: {
 
-          grid: {
-            color: GRID,
+          x: {
+
+            grid: {
+              display: false,
+            },
+
+            ticks: {
+
+              maxRotation: 0,
+
+              callback: (
+                value,
+                index
+              ) =>
+                index % 2 === 0
+                  ? `${CURVE_TEMPS[index]}°`
+                  : "",
+            },
           },
 
-          border: {
-            display: false,
-          },
+          y: {
 
-          ticks: {
-            stepSize: 25,
-            callback: (value) => `${value}%`,
+            min: 0,
+
+            max: 100,
+
+            grid: {
+              color: GRID,
+            },
+
+            border: {
+              display: false,
+            },
+
+            ticks: {
+
+              stepSize: 25,
+
+              callback: (value) =>
+                `${value}%`,
+            },
           },
         },
       },
-    },
-  });
+    }
+  );
 }
 
 
 const leftFanCurve =
-  createCurveChart("leftFanCurve", COLOR_CPU);
+  createCurveChart(
+    "leftFanCurve",
+    COLOR_CPU
+  );
 
 const rightFanCurve =
-  createCurveChart("rightFanCurve", COLOR_GPU);
+  createCurveChart(
+    "rightFanCurve",
+    COLOR_GPU
+  );
 
 
 /* =========================================================
@@ -237,74 +416,125 @@ const rightFanCurve =
    ========================================================= */
 
 function getFanCurveData() {
+
   const getCurve = (chart) =>
-    chart.data.labels.map((temperature, index) => ({
-      temperature,
-      speed: chart.data.datasets[0].data[index],
-    }));
+    chart.data.labels.map(
+      (temperature, index) => ({
+        temperature,
+        speed:
+          chart.data.datasets[0]
+            .data[index],
+      })
+    );
 
   return {
-    left_fan: getCurve(leftFanCurve),
-    right_fan: getCurve(rightFanCurve),
+    left_fan:
+      getCurve(leftFanCurve),
+
+    right_fan:
+      getCurve(rightFanCurve),
   };
 }
 
 
 /* 将后端配置应用到曲线 */
-function applyCurve(chart, points) {
-  if (!Array.isArray(points)) return;
 
-  const map = new Map(
-    points.map((point) => [
-      Math.round(point.temperature),
-      point.speed,
-    ])
-  );
+function applyCurve(chart, points) {
+
+  if (!Array.isArray(points)) {
+    return;
+  }
+
+  const map =
+    new Map(
+      points.map((point) => [
+        Math.round(
+          point.temperature
+        ),
+        point.speed,
+      ])
+    );
 
   chart.data.datasets[0].data =
-    chart.data.labels.map((temperature, index) =>
-      map.get(temperature) ??
-      chart.data.datasets[0].data[index]
+    chart.data.labels.map(
+      (temperature, index) =>
+        map.get(temperature) ??
+        chart.data.datasets[0]
+          .data[index]
     );
 
   chart.update();
 }
+
 
 /* =========================================================
    配置
    ========================================================= */
 
 async function loadConfig() {
-  try {
-    const data = await invoke("load_fan_config");
 
-    applyCurve(leftFanCurve, data.left_fan);
-    applyCurve(rightFanCurve, data.right_fan);
+  try {
+
+    const data =
+      await invoke(
+        "load_fan_config"
+      );
+
+    applyCurve(
+      leftFanCurve,
+      data.left_fan
+    );
+
+    applyCurve(
+      rightFanCurve,
+      data.right_fan
+    );
 
     return true;
+
   } catch (error) {
-    console.error("加载配置失败:", error);
+
+    console.error(
+      "加载配置失败:",
+      error
+    );
+
     return false;
   }
 }
 
 
 async function saveConfig() {
-  try {
-    await invoke("save_fan_config", {
-      fanData: getFanCurveData(),
-    });
 
-    saveConfigButton.textContent = "已保存 ✓";
+  try {
+
+    await invoke(
+      "save_fan_config",
+      {
+        fanData:
+          getFanCurveData(),
+      }
+    );
+
+    saveConfigButton.textContent =
+      t("common.saved");
 
     setTimeout(() => {
-      saveConfigButton.textContent = "保存配置";
+
+      saveConfigButton.textContent =
+        t("fan.saveConfig");
+
     }, 1200);
 
   } catch (error) {
-    console.error("保存配置失败:", error);
+
+    console.error(
+      "保存配置失败:",
+      error
+    );
   }
 }
+
 
 
 /* =========================================================
@@ -312,18 +542,27 @@ async function saveConfig() {
    ========================================================= */
 
 const startStopButton =
-  document.getElementById("startStopButton");
+  document.getElementById(
+    "startStopButton"
+  );
 
 const loadConfigButton =
-  document.getElementById("loadConfigButton");
+  document.getElementById(
+    "loadConfigButton"
+  );
 
 const saveConfigButton =
-  document.getElementById("saveConfigButton");
+  document.getElementById(
+    "saveConfigButton"
+  );
 
 const fanStatus =
-  document.getElementById("fan-status");
+  document.getElementById(
+    "fan-status"
+  );
 
 let isRunning = false;
+
 
 
 // ==============================================
@@ -331,6 +570,7 @@ let isRunning = false;
 // ==============================================
 
 async function initFanControlStatus() {
+
   try {
 
     // Rust 主动推送状态
@@ -351,6 +591,7 @@ async function initFanControlStatus() {
         updateControlState();
       }
     );
+
 
     // 页面加载后主动查询一次
     const status =
@@ -373,6 +614,7 @@ async function initFanControlStatus() {
 }
 
 
+
 // ==============================================
 // 更新 UI
 // ==============================================
@@ -381,8 +623,9 @@ function updateControlState() {
 
   startStopButton.textContent =
     isRunning
-      ? "停止控制"
-      : "启动控制";
+      ? t("fan.stopControl")
+      : t("fan.startControl");
+
 
   startStopButton.classList.toggle(
     "primary",
@@ -394,16 +637,19 @@ function updateControlState() {
     isRunning
   );
 
+
   fanStatus.textContent =
     isRunning
-      ? "控制运行中"
-      : "未运行";
+      ? t("status.running")
+      : t("status.stopped");
+
 
   fanStatus.className =
     isRunning
       ? "status ok"
       : "status";
 }
+
 
 
 // ==============================================
@@ -432,6 +678,7 @@ async function startControl() {
 }
 
 
+
 // ==============================================
 // 停止风扇控制
 // ==============================================
@@ -454,6 +701,7 @@ async function stopControl() {
 }
 
 
+
 // ==============================================
 // 按钮
 // ==============================================
@@ -463,9 +711,13 @@ startStopButton.addEventListener(
   () => {
 
     if (isRunning) {
+
       stopControl();
+
     } else {
+
       startControl();
+
     }
 
   }
@@ -477,117 +729,198 @@ loadConfigButton.addEventListener(
   loadConfig
 );
 
+
 saveConfigButton.addEventListener(
   "click",
   saveConfig
 );
 
 
+
 // =====================================================
 // 性能调优
 // =====================================================
 
-const tuningButtons = document.querySelectorAll(".tuning-btn");
+const tuningButtons =
+  document.querySelectorAll(
+    ".tuning-btn"
+  );
 
-tuningButtons.forEach((button) => {
-  button.addEventListener("click", async () => {
-    const mode = button.dataset.mode;
 
-    // 更新选中状态
-    tuningButtons.forEach((btn) => { btn.classList.remove("active");});
-    button.classList.add("active");
+tuningButtons.forEach(
+  (button) => {
 
-    // 默认：不修改模式
-    if (mode === "unspecified") {
-      console.log("性能模式: 默认");
-      return;
-    }
+    button.addEventListener(
+      "click",
+      async () => {
 
-    try {
-      await invoke(
-        "set_performance_mode",
-        {
-          mode: mode
+        const mode =
+          button.dataset.mode;
+
+        // 更新选中状态
+        tuningButtons.forEach(
+          (btn) => {
+            btn.classList.remove(
+              "active"
+            );
+          }
+        );
+
+        button.classList.add(
+          "active"
+        );
+
+        // 默认：不修改模式
+        if (
+          mode === "unspecified"
+        ) {
+
+          console.log(
+            "性能模式: 默认"
+          );
+
+          return;
         }
-      );
-      console.log(
-        "性能模式:",
-        mode
-      );
-    } catch (error) {
-      console.error(
-        "设置性能模式失败:",
-        error
-      );
-    }
-  });
 
-});
+
+        try {
+
+          await invoke(
+            "set_performance_mode",
+            {
+              mode: mode
+            }
+          );
+
+          console.log(
+            "性能模式:",
+            mode
+          );
+
+        } catch (error) {
+
+          console.error(
+            "设置性能模式失败:",
+            error
+          );
+        }
+
+      }
+    );
+
+  }
+);
+
 
 
 // =====================================================
 // 电源计划
 // =====================================================
 
+const powerPlanButtons =
+  document.querySelectorAll(
+    ".power-plan-btn"
+  );
 
-const powerPlanButtons = document.querySelectorAll(".power-plan-btn");
 
-powerPlanButtons.forEach((button) => {
+powerPlanButtons.forEach(
+  (button) => {
 
-  button.addEventListener("click", async () => {
+    button.addEventListener(
+      "click",
+      async () => {
 
-    const plan = button.dataset.powerPlan;
+        const plan =
+          button.dataset.powerPlan;
 
-    // 更新选中状态
-    powerPlanButtons.forEach((btn) => {
-      btn.classList.remove("active");
-    });
-    button.classList.add("active");
+        // 更新选中状态
+        powerPlanButtons.forEach(
+          (btn) => {
+            btn.classList.remove(
+              "active"
+            );
+          }
+        );
 
-    // 默认：不修改电源计划
-    if (plan === "unspecified") {
-      console.log("电源计划: 默认");
-      return;
-    }
+        button.classList.add(
+          "active"
+        );
 
-    const value = Number(plan);
 
-    if (!Number.isInteger(value)) {
-      console.error(
-        "无效的电源计划:",
-        plan
-      );
-      return;
-    }
+        // 默认：不修改电源计划
+        if (
+          plan === "unspecified"
+        ) {
 
-    try {
-      await invoke(
-        "set_power_plan",
-        {
-          mode: value
+          console.log(
+            "电源计划: 默认"
+          );
+
+          return;
         }
-      );
-      console.log(
-        "电源计划:",
-        value
-      );
-    } catch (error) {
-      console.error(
-        "设置电源计划失败:",
-        error
-      );
 
-    }
-  });
-});
+
+        const value =
+          Number(plan);
+
+
+        if (
+          !Number.isInteger(value)
+        ) {
+
+          console.error(
+            "无效的电源计划:",
+            plan
+          );
+
+          return;
+        }
+
+
+        try {
+
+          await invoke(
+            "set_power_plan",
+            {
+              mode: value
+            }
+          );
+
+          console.log(
+            "电源计划:",
+            value
+          );
+
+        } catch (error) {
+
+          console.error(
+            "设置电源计划失败:",
+            error
+          );
+        }
+
+      }
+    );
+
+  }
+);
+
 
 
 // =====================================================
 // 功耗设置
 // =====================================================
 
-const tdpRefreshButton = document.getElementById("tdpRefreshButton");
-const tdpSetButtons = document.querySelectorAll(".tdp-set-btn");
+const tdpRefreshButton =
+  document.getElementById(
+    "tdpRefreshButton"
+  );
+
+const tdpSetButtons =
+  document.querySelectorAll(
+    ".tdp-set-btn"
+  );
+
 
 
 // -----------------------------------------------------
@@ -598,26 +931,62 @@ async function loadTdp() {
 
   try {
 
-    const tdp = await invoke("get_tdp");
+    const tdp =
+      await invoke(
+        "get_tdp"
+      );
 
-    console.log("TDP:", tdp);
+    console.log(
+      "TDP:",
+      tdp
+    );
 
-    document.getElementById("cpu-pl1").value = tdp.cpu_pl1;
-    document.getElementById("cpu-pl2").value = tdp.cpu_pl2;
-    document.getElementById("cpu-pl4").value = tdp.cpu_pl4;
 
-    document.getElementById("gpu-pl1").value = tdp.gpu_pl1;
-    document.getElementById("gpu-pl2").value = tdp.gpu_pl2;
-    document.getElementById("battery_charglimit").value = tdp.battery_charglimit;
-    document.getElementById("psys_pl1").value = tdp.psys_pl1;
+    document.getElementById(
+      "cpu-pl1"
+    ).value =
+      tdp.cpu_pl1;
+
+    document.getElementById(
+      "cpu-pl2"
+    ).value =
+      tdp.cpu_pl2;
+
+    document.getElementById(
+      "cpu-pl4"
+    ).value =
+      tdp.cpu_pl4;
+
+
+    document.getElementById(
+      "gpu-pl1"
+    ).value =
+      tdp.gpu_pl1;
+
+    document.getElementById(
+      "gpu-pl2"
+    ).value =
+      tdp.gpu_pl2;
+
+    document.getElementById(
+      "battery_charglimit"
+    ).value =
+      tdp.battery_charglimit;
+
+    document.getElementById(
+      "psys_pl1"
+    ).value =
+      tdp.psys_pl1;
 
   } catch (error) {
 
-    console.error("读取功耗配置失败:", error);
-
+    console.error(
+      "读取功耗配置失败:",
+      error
+    );
   }
-
 }
+
 
 
 // -----------------------------------------------------
@@ -626,17 +995,29 @@ async function loadTdp() {
 
 async function setTdp(type) {
 
-  const input = document.getElementById(type);
+  const input =
+    document.getElementById(
+      type
+    );
 
   if (!input) {
     return;
   }
 
-  const value = Number(input.value);
 
-  if (!Number.isFinite(value) || value < 0) {
+  const value =
+    Number(input.value);
 
-    console.error("无效的功耗值:", value);
+
+  if (
+    !Number.isFinite(value) ||
+    value < 0
+  ) {
+
+    console.error(
+      "无效的功耗值:",
+      value
+    );
 
     return;
   }
@@ -644,19 +1025,27 @@ async function setTdp(type) {
 
   try {
 
-    await invoke("set_tdp", {
-      tdpType: type,
-      value: value
-    });
-    console.log(`设置 ${type}: ${value} W`);
+    await invoke(
+      "set_tdp",
+      {
+        tdpType: type,
+        value: value
+      }
+    );
+
+    console.log(
+      `设置 ${type}: ${value} W`
+    );
 
   } catch (error) {
 
-    console.error(`设置 ${type} 失败:`, error);
-
+    console.error(
+      `设置 ${type} 失败:`,
+      error
+    );
   }
-
 }
+
 
 
 // -----------------------------------------------------
@@ -665,28 +1054,39 @@ async function setTdp(type) {
 
 if (tdpRefreshButton) {
 
-  tdpRefreshButton.addEventListener("click", () => {
-    loadTdp();
-  });
+  tdpRefreshButton.addEventListener(
+    "click",
+    () => {
+      loadTdp();
+    }
+  );
 
 }
+
 
 
 // -----------------------------------------------------
 // 写入按钮
 // -----------------------------------------------------
 
-tdpSetButtons.forEach((button) => {
+tdpSetButtons.forEach(
+  (button) => {
 
-  button.addEventListener("click", () => {
+    button.addEventListener(
+      "click",
+      () => {
 
-    const type = button.dataset.tdp;
+        const type =
+          button.dataset.tdp;
 
-    setTdp(type);
+        setTdp(type);
 
-  });
+      }
+    );
 
-});
+  }
+);
+
 
 
 // =====================================================
@@ -694,80 +1094,127 @@ tdpSetButtons.forEach((button) => {
 // =====================================================
 
 const autostartToggle =
-  document.getElementById("autostart-toggle");
+  document.getElementById(
+    "autostart-toggle"
+  );
 
 const autostartStatus =
-  document.getElementById("autostart-status");
+  document.getElementById(
+    "autostart-status"
+  );
 
 const autostartDescription =
-  document.getElementById("autostart-description");
+  document.getElementById(
+    "autostart-description"
+  );
+
 
 
 /**
  * 更新开机自启动 UI
  */
-function updateAutostartUI(enabled) {
 
-  if (!autostartToggle || !autostartStatus) {
+function updateAutostartUI(
+  enabled
+) {
+
+  if (
+    !autostartToggle ||
+    !autostartStatus
+  ) {
     return;
   }
 
-  autostartToggle.checked = enabled;
+
+  autostartToggle.checked =
+    enabled;
+
 
   if (enabled) {
 
-    autostartStatus.textContent = "已启用";
+    autostartStatus.textContent =
+      t("settings.enabled");
 
     autostartStatus.classList.remove(
       "disabled",
       "error"
     );
 
-    autostartStatus.classList.add("enabled");
+    autostartStatus.classList.add(
+      "enabled"
+    );
+
 
     if (autostartDescription) {
+
       autostartDescription.textContent =
-        "登录 Windows 后自动运行 NUCtool";
+        t(
+          "settings.startupEnabledDescription"
+        );
     }
 
   } else {
 
-    autostartStatus.textContent = "未启用";
+    autostartStatus.textContent =
+      t("settings.disabled");
 
     autostartStatus.classList.remove(
       "enabled",
       "error"
     );
 
-    autostartStatus.classList.add("disabled");
+    autostartStatus.classList.add(
+      "disabled"
+    );
+
 
     if (autostartDescription) {
+
       autostartDescription.textContent =
-        "开机后不会自动运行 NUCtool";
+        t(
+          "settings.startupDisabledDescription"
+        );
     }
   }
 }
 
 
+
 /**
  * 读取当前开机自启动状态
  */
+
 async function loadAutostartState() {
 
-  if (!autostartToggle || !autostartStatus) {
+  if (
+    !autostartToggle ||
+    !autostartStatus
+  ) {
     return;
   }
 
+
   try {
 
-    autostartToggle.disabled = true;
+    autostartToggle.disabled =
+      true;
 
-    autostartStatus.textContent = "检查中...";
+
+    autostartStatus.textContent =
+      t(
+        "settings.autostartChecking"
+      );
+
 
     const enabled =
-      await invoke("get_autostart");
+      await invoke(
+        "get_autostart"
+      );
 
-    updateAutostartUI(enabled);
+
+    updateAutostartUI(
+      enabled
+    );
 
   } catch (error) {
 
@@ -776,42 +1223,66 @@ async function loadAutostartState() {
       error
     );
 
-    autostartStatus.textContent = "读取失败";
+
+    autostartStatus.textContent =
+      t(
+        "settings.readFailed"
+      );
+
 
     autostartStatus.classList.remove(
       "enabled",
       "disabled"
     );
 
-    autostartStatus.classList.add("error");
+    autostartStatus.classList.add(
+      "error"
+    );
 
-    autostartToggle.checked = false;
+
+    autostartToggle.checked =
+      false;
 
   } finally {
 
-    autostartToggle.disabled = false;
+    autostartToggle.disabled =
+      false;
   }
 }
+
 
 
 /**
  * 设置开机自启动
  */
-async function setAutostart(enabled) {
+
+async function setAutostart(
+  enabled
+) {
 
   if (!autostartToggle) {
     return;
   }
 
+
   try {
 
-    autostartToggle.disabled = true;
+    autostartToggle.disabled =
+      true;
 
-    await invoke("set_autostart", {
-      enabled: enabled
-    });
 
-    updateAutostartUI(enabled);
+    await invoke(
+      "set_autostart",
+      {
+        enabled:
+          enabled
+      }
+    );
+
+
+    updateAutostartUI(
+      enabled
+    );
 
   } catch (error) {
 
@@ -820,19 +1291,23 @@ async function setAutostart(enabled) {
       error
     );
 
+
     // 操作失败，重新读取真实状态
     await loadAutostartState();
 
   } finally {
 
-    autostartToggle.disabled = false;
+    autostartToggle.disabled =
+      false;
   }
 }
+
 
 
 /**
  * 开机自启动开关
  */
+
 if (autostartToggle) {
 
   autostartToggle.addEventListener(
@@ -842,70 +1317,106 @@ if (autostartToggle) {
       const enabled =
         autostartToggle.checked;
 
-      await setAutostart(enabled);
+      await setAutostart(
+        enabled
+      );
+
     }
   );
+
 }
+
+
 
 // =====================================================
 // 显示设置
 // =====================================================
 
 const displayButtons =
-  document.querySelectorAll(".display-btn");
-
-displayButtons.forEach((button) => {
-
-  button.addEventListener("click", async () => {
-
-    const mode = button.dataset.display;
-
-    // 先更新选中状态
-    displayButtons.forEach((btn) => {
-      btn.classList.remove("active");
-    });
-
-    button.classList.add("active");
+  document.querySelectorAll(
+    ".display-btn"
+  );
 
 
-    // 默认：不修改显示模式
-    // if (mode === "5") {
-    //   console.log("显示模式: 关闭");
-    //   return;
-    // }
+displayButtons.forEach(
+  (button) => {
+
+    button.addEventListener(
+      "click",
+      async () => {
+
+        const mode =
+          button.dataset.display;
 
 
-    const value = Number(mode);
-    if (!Number.isInteger(value)) {
-      console.error(
-        "无效的显示模式:",
-        mode
-      );
-      return;
-    }
+        // 先更新选中状态
+        displayButtons.forEach(
+          (btn) => {
+            btn.classList.remove(
+              "active"
+            );
+          }
+        );
 
 
-    try {
-      await invoke(
-        "set_display_mode",
-        {
-          mode: value
+        button.classList.add(
+          "active"
+        );
+
+
+        // 默认：不修改显示模式
+        // if (mode === "5") {
+        //   console.log("显示模式: 关闭");
+        //   return;
+        // }
+
+
+        const value =
+          Number(mode);
+
+
+        if (
+          !Number.isInteger(value)
+        ) {
+
+          console.error(
+            "无效的显示模式:",
+            mode
+          );
+
+          return;
         }
-      );
-      console.log(
-        "显示模式:",
-        value
-      );
 
-    } catch (error) {
-      console.error(
-        "设置显示模式失败:",
-        error
-      );
 
-    }
-  });
-});
+        try {
+
+          await invoke(
+            "set_display_mode",
+            {
+              mode: value
+            }
+          );
+
+
+          console.log(
+            "显示模式:",
+            value
+          );
+
+        } catch (error) {
+
+          console.error(
+            "设置显示模式失败:",
+            error
+          );
+        }
+
+      }
+    );
+
+  }
+);
+
 
 
 // =====================================================
@@ -913,31 +1424,47 @@ displayButtons.forEach((button) => {
 // =====================================================
 
 const keyboardLedToggle =
-  document.getElementById("keyboard-led-toggle");
+  document.getElementById(
+    "keyboard-led-toggle"
+  );
 
 const keyboardLedDescription =
-  document.getElementById("keyboard-led-description");
+  document.getElementById(
+    "keyboard-led-description"
+  );
+
 
 
 // -----------------------------------------------------
 // 更新键盘 LED UI
 // -----------------------------------------------------
 
-function updateKeyboardLedUI(enabled) {
+function updateKeyboardLedUI(
+  enabled
+) {
 
   if (!keyboardLedToggle) {
     return;
   }
 
-  keyboardLedToggle.checked = enabled;
+
+  keyboardLedToggle.checked =
+    enabled;
+
 
   if (keyboardLedDescription) {
+
     keyboardLedDescription.textContent =
       enabled
-        ? "键盘 LED 灯已开启"
-        : "键盘 LED 灯已关闭";
+        ? t(
+            "keyboard.ledEnabled"
+          )
+        : t(
+            "keyboard.ledDisabled"
+          );
   }
 }
+
 
 
 // -----------------------------------------------------
@@ -950,16 +1477,27 @@ async function loadKeyboardLedState() {
     return;
   }
 
+
   try {
 
-    keyboardLedToggle.disabled = true;
+    keyboardLedToggle.disabled =
+      true;
+
 
     if (keyboardLedDescription) {
-      keyboardLedDescription.textContent = "读取中...";
+
+      keyboardLedDescription.textContent =
+        t(
+          "keyboard.reading"
+        );
     }
 
+
     const enabled =
-      await invoke("get_keyboard_led");
+      await invoke(
+        "get_keyboard_led"
+      );
+
 
     updateKeyboardLedUI(
       Boolean(enabled)
@@ -972,43 +1510,62 @@ async function loadKeyboardLedState() {
       error
     );
 
+
     if (keyboardLedDescription) {
-      keyboardLedDescription.textContent = "读取失败";
+
+      keyboardLedDescription.textContent =
+        t(
+          "keyboard.readFailed"
+        );
     }
 
   } finally {
 
-    keyboardLedToggle.disabled = false;
+    keyboardLedToggle.disabled =
+      false;
   }
 }
+
 
 
 // -----------------------------------------------------
 // 修改键盘 LED 状态
 // -----------------------------------------------------
 
-async function setKeyboardLed(enabled) {
+async function setKeyboardLed(
+  enabled
+) {
 
   if (!keyboardLedToggle) {
     return;
   }
 
+
   try {
 
-    keyboardLedToggle.disabled = true;
+    keyboardLedToggle.disabled =
+      true;
+
 
     await invoke(
       "set_keyboard_led",
       {
-        enabled: enabled
+        enabled:
+          enabled
       }
     );
 
-    updateKeyboardLedUI(enabled);
+
+    updateKeyboardLedUI(
+      enabled
+    );
+
 
     console.log(
       "键盘 LED:",
-      enabled ? "开启" : "关闭"
+      enabled
+        ? "开启"
+        : "关闭"
     );
 
   } catch (error) {
@@ -1018,14 +1575,17 @@ async function setKeyboardLed(enabled) {
       error
     );
 
+
     // 设置失败，恢复实际状态
     await loadKeyboardLedState();
 
   } finally {
 
-    keyboardLedToggle.disabled = false;
+    keyboardLedToggle.disabled =
+      false;
   }
 }
+
 
 
 // -----------------------------------------------------
@@ -1041,11 +1601,45 @@ if (keyboardLedToggle) {
       const enabled =
         keyboardLedToggle.checked;
 
-      await setKeyboardLed(enabled);
+      await setKeyboardLed(
+        enabled
+      );
+
     }
   );
 
 }
+
+
+
+// =====================================================
+// 语言设置
+// =====================================================
+
+const languageSelect =
+  document.getElementById(
+    "language-select"
+  );
+
+
+if (languageSelect) {
+
+  languageSelect.value =
+    getLanguageSetting();
+
+
+  languageSelect.addEventListener(
+    "change",
+    () => {
+
+      setLanguage(
+        languageSelect.value
+      );
+
+    }
+  );
+}
+
 
 
 /* =========================================================
@@ -1053,15 +1647,27 @@ if (keyboardLedToggle) {
    ========================================================= */
 
 async function init() {
+
+  // 初始化语言
+  initI18n();
+
+
   await loadConfig();
-  
+
+
   // 初始化风扇控制状态
   await initFanControlStatus();
 
+
   updateControlState();
+
+
   loadAutostartState();
+
+
   loadKeyboardLedState();
-  
+
 }
+
 
 init();

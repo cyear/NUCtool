@@ -2169,10 +2169,12 @@ name = "nuctool"
 version = "0.1.0"
 dependencies = [
  "dirs 7.0.0",
+ "hex",
  "libloading 0.8.9",
  "powershell_script",
  "serde",
  "serde_json",
+ "sha2",
  "tauri",
  "tauri-build",
  "tauri-plugin-opener",

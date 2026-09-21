@@ -1,5 +1,9 @@
 use libloading::{Library, Symbol};
 use std::os::raw::c_int;
+use sha2::{Digest, Sha256};
+use std::fs;
+
+const EXPECTED_HASH: &str = "8F7B8338EAF242372FBF096CC9364CA0F60145281ACA17E4E97955945A920875";
 
 type WcfConnectFn = unsafe extern "system" fn() -> c_int;
 type WcfDisconnectFn = unsafe extern "system" fn();
@@ -52,6 +56,17 @@ impl UniwillWcfEc {
         let exe_path = std::env::current_exe()?;
         let install_dir = exe_path.parent().unwrap();
         let dll_path = install_dir.join("NUCtool.dll");
+        let dll_data = fs::read(&dll_path)?;
+        // 计算 SHA-256
+        let hash = Sha256::digest(&dll_data);
+        let hash = hex::encode(hash);
+        if !hash.eq_ignore_ascii_case(EXPECTED_HASH) {
+            return Err(std::io::Error::other(
+                "NUCtool.dll 完整性校验失败，文件可能已被修改或替换",
+            ).into());
+        } else {
+            println!("NUCtool.dll 完整性校验成功");
+        }
         let lib = unsafe { Library::new(&dll_path)? };
         // Library 会被结构体持有，所以这里延长 Symbol 生命周期
         let lib_ref: &'static Library = unsafe { std::mem::transmute(&lib) };

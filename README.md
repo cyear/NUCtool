@@ -24,6 +24,8 @@
 > 随缘更新, 如果觉得有用请给个⭐
 >
 > [Hi~ 详细更新说明查看这里😊](./NUCtoolChange.md)
+>
+> [View the English README here. Cut-off date: September 21, 2026. Versions: 1.0.5 (unreleased), 1.0.4 (beta).](./README_en-US.md)
 
 ```markdown
 # 免责声明（Disclaimer）
@@ -60,8 +62,6 @@
 >
 > 平台支持：Windows 11
 >
-> [如需在Linux使用查看旧版0.4.4](https://github.com/cyear/NUCtool/tree/0.4.4-%E5%A4%87%E4%BB%BD)
->
 > 安装要求：UniwillService、UWACPIDriver、WebView2
 >
 > PS：如果你的`Intel(R) NUC Software Studio for Gaming Laptops`可以正常使用就是符合全部要求
@@ -74,7 +74,7 @@
 
 ## 机型支持情况(严重缺少测试)
 
-| 功能 | LAPAC71H | LAPKC71F |
+| 功能 | LAPAC71H | NUC X15 |
 | :---: | :---: | :---: |
 | 风扇控制 | ✅ 支持 | ❌ 未测试 |
 | 功耗控制 | ✅ 支持 | ❌ 未测试 |
@@ -88,9 +88,10 @@
 | 显示设置 | ✅ 部分支持 | ❌ 未测试 |
 | 快捷键 | ✅ 可用 | ❌ 未测试 |
 | 自启动 | ✅ 可用 | ❌ 未测试 |
-| 自制 OSD | ✅ 可用 | ❌ 未测试 |
+| DIY OSD | ✅ 可用 | ❌ 未测试 |
+| 多语言 | ✅ 可用 | ❌ 未测试 |
 
-> **注意：** 当前仅 `LAPAC71H` 支持。其他功能暂未实现或硬件/固件不支持。
+> **注意：** 当前仅 `LAPAC71H` 支持。其他功能未测试或硬件/固件不支持。
 
 ## 说明
 
@@ -100,7 +101,10 @@
 - Fn + 4 => 基准模式
 - `--hide` 启动只保留托盘
 - `--fan-control` 自动启动风扇控制
-- 默认配置文件位置`C:\Program Files\NUCtool`
+- `--no-osd` 关闭osd
+- 默认安装文件位置`C:\Program Files\NUCtool`
+- 默认配置文件位置`%AppData%\com.cyear.nuctool`
+- 如需在Linux建议查看文档底部致谢中的Linux驱动
 
 ---
 
