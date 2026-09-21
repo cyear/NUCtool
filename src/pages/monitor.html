@@ -1,0 +1,205 @@
+<!-- ===================================================
+     性能监控
+     =================================================== -->
+<section id="page-monitor" class="page active">
+
+  <header class="page-header">
+
+    <div class="page-heading">
+
+      <h1 data-i18n="monitor.title">
+        性能监控
+      </h1>
+
+      <p class="page-subtitle" data-i18n="monitor.subtitle">
+        实时查看系统温度与风扇状态
+      </p>
+
+    </div>
+
+    <div class="status" id="status">
+
+      <span class="status-dot"></span>
+
+      <span class="status-text" data-i18n="status.connecting">
+        连接中...
+      </span>
+
+    </div>
+
+  </header>
+
+
+  <!-- 监控卡片 -->
+  <div class="cards">
+
+    <!-- CPU 温度 -->
+    <div class="metric-card">
+
+      <div class="metric-header">
+
+        <span class="metric-label" data-i18n="monitor.cpuTemperature">
+          CPU 温度
+        </span>
+
+        <span class="metric-indicator cpu"></span>
+
+      </div>
+
+      <div class="metric-value-row">
+
+        <span class="metric-value" id="cpu-temp">
+          --
+        </span>
+
+        <span class="metric-unit" data-i18n="common.celsius">
+          °C
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- GPU 温度 -->
+    <div class="metric-card">
+
+      <div class="metric-header">
+
+        <span class="metric-label" data-i18n="monitor.gpuTemperature">
+          GPU 温度
+        </span>
+
+        <span class="metric-indicator gpu"></span>
+
+      </div>
+
+      <div class="metric-value-row">
+
+        <span class="metric-value" id="gpu-temp">
+          --
+        </span>
+
+        <span class="metric-unit" data-i18n="common.celsius">
+          °C
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- Main 风扇 -->
+    <div class="metric-card">
+
+      <div class="metric-header">
+
+        <span class="metric-label" data-i18n="monitor.mainFan">
+          Main 风扇转速
+        </span>
+
+        <span class="metric-indicator fan-main"></span>
+
+      </div>
+
+      <div class="metric-value-row">
+
+        <span class="metric-value" id="fan1-rpm">
+          --
+        </span>
+
+        <span class="metric-unit" data-i18n="common.rpm">
+          RPM
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- Secondary 风扇 -->
+    <div class="metric-card">
+
+      <div class="metric-header">
+
+        <span class="metric-label" data-i18n="monitor.secondaryFan">
+          Secondary 风扇转速
+        </span>
+
+        <span class="metric-indicator fan-secondary"></span>
+
+      </div>
+
+      <div class="metric-value-row">
+
+        <span class="metric-value" id="fan2-rpm">
+          --
+        </span>
+
+        <span class="metric-unit" data-i18n="common.rpm">
+          RPM
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- APC WATT -->
+    <div class="metric-card">
+
+      <div class="metric-header">
+
+        <span class="metric-label" data-i18n="monitor.systemPower">
+          平台功耗
+        </span>
+
+        <span class="metric-indicator system_power"></span>
+
+      </div>
+
+      <div class="metric-value-row">
+
+        <span class="metric-value" id="system_power">
+          --
+        </span>
+
+        <span class="metric-unit" data-i18n="common.watts">
+          W
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- BAT 健康度 -->
+    <div class="metric-card">
+
+      <div class="metric-header">
+
+        <span class="metric-label" data-i18n="monitor.batteryHealth">
+          BAT健康度
+        </span>
+
+        <span class="metric-indicator bat_mah_percent"></span>
+
+      </div>
+
+      <div class="metric-value-row">
+
+        <span class="metric-value" id="bat_mah_percent">
+          --
+        </span>
+
+        <span class="metric-unit" data-i18n="common.percent">
+          %
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>

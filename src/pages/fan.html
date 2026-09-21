@@ -1,0 +1,137 @@
+<!-- ===================================================
+     风扇控制
+     =================================================== -->
+<section id="page-fan" class="page">
+
+  <header class="page-header">
+
+    <div class="page-heading">
+
+      <h1 data-i18n="fan.title">
+        风扇控制
+      </h1>
+
+      <p class="page-subtitle" data-i18n="fan.subtitle">
+        根据温度调整风扇曲线
+      </p>
+
+    </div>
+
+    <div class="status" id="fan-status">
+
+      <span class="status-dot"></span>
+
+      <span class="status-text" data-i18n="status.stopped">
+        未运行
+      </span>
+
+    </div>
+
+  </header>
+
+
+  <!-- 风扇控制区域 -->
+  <div class="fan-section">
+
+    <!-- 操作栏 -->
+    <div class="control-bar">
+
+      <div class="control-left">
+
+        <button
+          id="startStopButton"
+          class="action-btn primary"
+          type="button"
+          data-i18n="fan.startControl">
+          启动控制
+        </button>
+
+      </div>
+
+
+      <div class="control-right">
+
+        <button
+          id="loadConfigButton"
+          class="action-btn"
+          type="button"
+          data-i18n="fan.loadConfig">
+          加载配置
+        </button>
+
+        <button
+          id="saveConfigButton"
+          class="action-btn"
+          type="button"
+          data-i18n="fan.saveConfig">
+          保存配置
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- 风扇曲线 -->
+    <div class="fan-grid">
+
+      <!-- Main -->
+      <div class="chart-card">
+
+        <div class="chart-header">
+
+          <div class="chart-title">
+
+            <span class="chart-dot main"></span>
+
+            <span data-i18n="fan.mainCurve">
+              Main 风扇曲线
+            </span>
+
+          </div>
+
+          <span class="chart-hint" data-i18n="fan.dragHint">
+            拖动节点调整
+          </span>
+
+        </div>
+
+        <div class="chart-container">
+          <canvas id="leftFanCurve"></canvas>
+        </div>
+
+      </div>
+
+
+      <!-- Secondary -->
+      <div class="chart-card">
+
+        <div class="chart-header">
+
+          <div class="chart-title">
+
+            <span class="chart-dot secondary"></span>
+
+            <span data-i18n="fan.secondaryCurve">
+              Secondary 风扇曲线
+            </span>
+
+          </div>
+
+          <span class="chart-hint" data-i18n="fan.dragHint">
+            拖动节点调整
+          </span>
+
+        </div>
+
+        <div class="chart-container">
+          <canvas id="rightFanCurve"></canvas>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>

@@ -1,0 +1,573 @@
+<!-- ===================================================
+     性能调优
+     =================================================== -->
+<section id="page-tuning" class="page">
+
+  <header class="page-header">
+
+    <div class="page-heading">
+
+      <h1 data-i18n="tuning.title">
+        性能调优
+      </h1>
+
+      <p class="page-subtitle" data-i18n="tuning.subtitle">
+        对设备性能释放进行调整
+      </p>
+
+    </div>
+
+  </header>
+
+
+  <div class="tuning-card">
+
+    <div class="tuning-header">
+
+      <div>
+
+        <div class="tuning-title" data-i18n="tuning.modeSwitch">
+          模式切换
+        </div>
+
+        <div class="tuning-description" data-i18n="tuning.modeDescription">
+          选择适合当前使用场景的性能配置，显示的模式仅为显示，请以选择后为准
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="tuning-options">
+
+      <button class="tuning-btn active" data-mode="unspecified" type="button">
+
+        <span class="tuning-btn-title" data-i18n="tuning.default">
+          默认
+        </span>
+
+        <span class="tuning-btn-description" data-i18n="tuning.defaultDescription">
+          不修改模式
+        </span>
+
+      </button>
+
+
+      <button class="tuning-btn" data-mode="power-saving" type="button">
+
+        <span class="tuning-btn-title" data-i18n="tuning.powerSaving">
+          省电模式
+        </span>
+
+        <span class="tuning-btn-description" data-i18n="tuning.powerSavingDescription">
+          降低功耗，延长续航
+        </span>
+
+      </button>
+
+
+      <button class="tuning-btn" data-mode="balanced" type="button">
+
+        <span class="tuning-btn-title" data-i18n="tuning.balanced">
+          平衡模式
+        </span>
+
+        <span class="tuning-btn-description" data-i18n="tuning.balancedDescription">
+          平衡性能与功耗
+        </span>
+
+      </button>
+
+
+      <button class="tuning-btn" data-mode="performance" type="button">
+
+        <span class="tuning-btn-title" data-i18n="tuning.performance">
+          性能模式
+        </span>
+
+        <span class="tuning-btn-description" data-i18n="tuning.performanceDescription">
+          提供更高的性能
+        </span>
+
+      </button>
+
+
+      <button class="tuning-btn" data-mode="benchmark-on" type="button">
+
+        <span class="tuning-btn-title" data-i18n="tuning.benchmark">
+          基准模式
+        </span>
+
+        <span class="tuning-btn-description" data-i18n="tuning.benchmarkDescription">
+          更强大的性能
+        </span>
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================
+       电源计划
+       =================================================== -->
+
+  <div class="power-plan-card">
+
+    <div class="power-plan-header">
+
+      <div>
+
+        <div class="power-plan-title" data-i18n="tuning.powerPlan">
+          电源计划
+        </div>
+
+        <div class="power-plan-description" data-i18n="tuning.powerPlanDescription">
+          选择 Windows 电源计划，显示的计划仅为显示，请以选择后以及模式为准(模式切换会覆盖)
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="power-plan-options">
+
+      <!-- 默认 -->
+      <button class="power-plan-btn active" data-power-plan="unspecified" type="button">
+
+        <span class="power-plan-btn-title" data-i18n="tuning.powerPlanDefault">
+          默认
+        </span>
+
+        <span class="power-plan-btn-description" data-i18n="tuning.powerPlanDefaultDescription">
+          不修改电源计划
+        </span>
+
+      </button>
+
+
+      <!-- 节能 -->
+      <button class="power-plan-btn" data-power-plan="3" type="button">
+
+        <span class="power-plan-btn-title" data-i18n="tuning.powerSavingPlan">
+          节能
+        </span>
+
+        <span class="power-plan-btn-description" data-i18n="tuning.powerSavingPlanDescription">
+          降低功耗，延长续航
+        </span>
+
+      </button>
+
+
+      <!-- 平衡 -->
+      <button class="power-plan-btn" data-power-plan="2" type="button">
+
+        <span class="power-plan-btn-title" data-i18n="tuning.balancedPlan">
+          平衡
+        </span>
+
+        <span class="power-plan-btn-description" data-i18n="tuning.balancedPlanDescription">
+          平衡性能与功耗
+        </span>
+
+      </button>
+
+
+      <!-- 高性能 -->
+      <button class="power-plan-btn" data-power-plan="1" type="button">
+
+        <span class="power-plan-btn-title" data-i18n="tuning.highPerformancePlan">
+          高性能
+        </span>
+
+        <span class="power-plan-btn-description" data-i18n="tuning.highPerformancePlanDescription">
+          提供更高的性能
+        </span>
+
+      </button>
+
+
+      <!-- 基准高性能 -->
+      <button class="power-plan-btn" data-power-plan="4" type="button">
+
+        <span class="power-plan-btn-title" data-i18n="tuning.benchmarkHighPerformancePlan">
+          基准高性能
+        </span>
+
+        <span class="power-plan-btn-description" data-i18n="tuning.benchmarkHighPerformancePlanDescription">
+          基准测试使用
+        </span>
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <header class="page-header">
+  </header>
+
+
+  <div class="tdp-card">
+
+    <div class="tdp-header">
+
+      <div>
+
+        <div class="tdp-title" data-i18n="tuning.powerLimit">
+          功耗限制
+        </div>
+
+        <div class="tdp-description" data-i18n="tuning.powerLimitDescription">
+          调整处理器与显卡的功耗限制
+        </div>
+
+      </div>
+
+      <button
+        id="tdpRefreshButton"
+        class="action-btn"
+        type="button"
+        data-i18n="tuning.refreshConfig">
+        读取配置
+      </button>
+
+    </div>
+
+
+    <!-- CPU -->
+    <div class="tdp-section">
+
+      <div class="tdp-section-title" data-i18n="tuning.cpu">
+        CPU
+      </div>
+
+      <div class="tdp-grid">
+
+        <!-- CPU PL1 -->
+        <div class="tdp-item">
+
+          <div class="tdp-item-header">
+
+            <span class="tdp-label">
+              PL1
+            </span>
+
+            <span class="tdp-current" data-i18n="tuning.currentValue">
+              当前值
+            </span>
+
+          </div>
+
+          <div class="tdp-input-row">
+
+            <input
+              id="cpu-pl1"
+              class="tdp-input"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="--" />
+
+            <span class="tdp-unit" data-i18n="common.watts">
+              W
+            </span>
+
+            <button
+              class="tdp-set-btn"
+              data-tdp="cpu-pl1"
+              type="button"
+              data-i18n="tuning.write">
+              写入
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- CPU PL2 -->
+        <div class="tdp-item">
+
+          <div class="tdp-item-header">
+
+            <span class="tdp-label">
+              PL2
+            </span>
+
+            <span class="tdp-current" data-i18n="tuning.currentValue">
+              当前值
+            </span>
+
+          </div>
+
+          <div class="tdp-input-row">
+
+            <input
+              id="cpu-pl2"
+              class="tdp-input"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="--" />
+
+            <span class="tdp-unit" data-i18n="common.watts">
+              W
+            </span>
+
+            <button
+              class="tdp-set-btn"
+              data-tdp="cpu-pl2"
+              type="button"
+              data-i18n="tuning.write">
+              写入
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- CPU PL4 -->
+        <div class="tdp-item">
+
+          <div class="tdp-item-header">
+
+            <span class="tdp-label">
+              PL4
+            </span>
+
+            <span class="tdp-current" data-i18n="tuning.currentValue">
+              当前值
+            </span>
+
+          </div>
+
+          <div class="tdp-input-row">
+
+            <input
+              id="cpu-pl4"
+              class="tdp-input"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="--" />
+
+            <span class="tdp-unit" data-i18n="common.watts">
+              W
+            </span>
+
+            <button
+              class="tdp-set-btn"
+              data-tdp="cpu-pl4"
+              type="button"
+              data-i18n="tuning.write">
+              写入
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- PSYS PL1 -->
+        <div class="tdp-item">
+
+          <div class="tdp-item-header">
+
+            <span class="tdp-label">
+              PSYS PL1 Power
+            </span>
+
+            <span class="tdp-current" data-i18n="tuning.currentValue">
+              当前值
+            </span>
+
+          </div>
+
+          <div class="tdp-input-row">
+
+            <input
+              id="psys_pl1"
+              class="tdp-input"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="--" />
+
+            <span class="tdp-unit" data-i18n="common.watts">
+              W
+            </span>
+
+            <button
+              class="tdp-set-btn"
+              data-tdp="psys_pl1"
+              type="button"
+              data-i18n="tuning.write">
+              写入
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- GPU -->
+    <div class="tdp-section">
+
+      <div class="tdp-section-title" data-i18n="tuning.gpuIntelArc">
+        GPU(Intel ARC)
+      </div>
+
+      <div class="tdp-grid">
+
+        <!-- GPU PL1 -->
+        <div class="tdp-item">
+
+          <div class="tdp-item-header">
+
+            <span class="tdp-label">
+              PL1
+            </span>
+
+            <span class="tdp-current" data-i18n="tuning.currentValue">
+              当前值
+            </span>
+
+          </div>
+
+          <div class="tdp-input-row">
+
+            <input
+              id="gpu-pl1"
+              class="tdp-input"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="--" />
+
+            <span class="tdp-unit" data-i18n="common.watts">
+              W
+            </span>
+
+            <button
+              class="tdp-set-btn"
+              data-tdp="gpu-pl1"
+              type="button"
+              data-i18n="tuning.write">
+              写入
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- GPU PL2 -->
+        <div class="tdp-item">
+
+          <div class="tdp-item-header">
+
+            <span class="tdp-label">
+              PL2
+            </span>
+
+            <span class="tdp-current" data-i18n="tuning.currentValue">
+              当前值
+            </span>
+
+          </div>
+
+          <div class="tdp-input-row">
+
+            <input
+              id="gpu-pl2"
+              class="tdp-input"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="--" />
+
+            <span class="tdp-unit" data-i18n="common.watts">
+              W
+            </span>
+
+            <button
+              class="tdp-set-btn"
+              data-tdp="gpu-pl2"
+              type="button"
+              data-i18n="tuning.write">
+              写入
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Battery -->
+    <div class="tdp-section">
+
+      <div class="tdp-section-title" data-i18n="tuning.battery">
+        Battery
+      </div>
+
+      <div class="tdp-grid">
+
+        <div class="tdp-item">
+
+          <div class="tdp-item-header">
+
+            <span class="tdp-label" data-i18n="tuning.chargingLimit">
+              Charging limit
+            </span>
+
+            <span class="tdp-current" data-i18n="tuning.currentValue">
+              当前值
+            </span>
+
+          </div>
+
+          <div class="tdp-input-row">
+
+            <input
+              id="battery_charglimit"
+              class="tdp-input"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="--" />
+
+            <span class="tdp-unit" data-i18n="common.percent">
+              %
+            </span>
+
+            <button
+              class="tdp-set-btn"
+              data-tdp="battery_charglimit"
+              type="button"
+              data-i18n="tuning.write">
+              写入
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</section>
