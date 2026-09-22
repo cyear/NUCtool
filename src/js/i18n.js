@@ -5,15 +5,17 @@
 import zhCN from "./locales/zh-CN.js";
 import enUS from "./locales/en-US.js";
 import jaJP from "./locales/ja-JP.js";
+import ruRU from "./locales/ru-RU.js";
 
 const locales = {
   "zh-CN": zhCN,
   "en-US": enUS,
   "ja-JP": jaJP,
+  "ru-RU": ruRU,
 };
 
 // 默认语言
-const DEFAULT_LANGUAGE = "zh-CN";
+const DEFAULT_LANGUAGE = "en-US";
 
 // 当前语言
 let currentLanguage = DEFAULT_LANGUAGE;
@@ -41,10 +43,14 @@ function detectSystemLanguage() {
   if (language.toLowerCase().startsWith("zh")) {
     return "zh-CN";
   }
-
+  if (language.toLowerCase().startsWith("ja")) {
+    return "ja-JP";
+  }
+  if (language.toLowerCase().startsWith("ru")) {
+    return "ru-RU";
+  }
   return "en-US";
 }
-
 // ------------------------------------------------------------
 // 获取保存的语言设置
 // ------------------------------------------------------------

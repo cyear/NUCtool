@@ -223,6 +223,7 @@ const jaJP = {
     languageChinese: "簡体字中国語",
     languageEnglish: "English",
     languageJapanese: "日本語",
+    languageRussian: "Русский",
   },
 
   // ==========================================================
