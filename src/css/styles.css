@@ -42,8 +42,20 @@ body {
   height: 100%;
 }
 
+@font-face {
+    font-family: "ziti";
+
+    src: url("../fonts/NotoSansSC-Regular.ttf")
+        format("truetype");
+
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
 body {
   font-family:
+    "ziti",
     "Segoe UI",
     "Microsoft YaHei",
     "PingFang SC",
@@ -1743,14 +1755,14 @@ body {
 }
 
 .keyboard-title {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1.4;
 }
 
 .keyboard-description {
   margin-top: 5px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-secondary);
 }
 
@@ -1904,23 +1916,6 @@ body {
     min-width: 130px;
   }
 
-}
-
-
-/* =========================================================
-   日文字体支持
-   ========================================================= */
-
-body {
-  font-family:
-    "Segoe UI",
-    "Microsoft YaHei",
-    "Meiryo",
-    "Yu Gothic UI",
-    "PingFang SC",
-    system-ui,
-    -apple-system,
-    sans-serif;
 }
 
 .language-option {

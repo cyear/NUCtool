@@ -11,7 +11,7 @@ body {
     background: transparent;
 }
 
-body {
+/* body {
     font-family:
         "Segoe UI",
         "Microsoft YaHei UI",
@@ -20,7 +20,28 @@ body {
 
     user-select: none;
     -webkit-user-select: none;
+} */
+
+
+@font-face {
+    font-family: "ziti";
+
+    src: url("../fonts/NotoSansSC-Regular.ttf")
+        format("truetype");
+
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
 }
+
+body {
+    font-family:
+        "ziti";
+
+    user-select: none;
+    -webkit-user-select: none;
+}
+
 
 /* ==============================
    OSD
