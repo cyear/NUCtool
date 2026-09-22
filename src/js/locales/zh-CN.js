@@ -199,7 +199,7 @@ const zhCN = {
 
     readFailed: "读取失败",
 
-    languageTitle: "语言 / Language / 言語",
+    languageTitle: "语言 / Language / Язык / 言語",
     languageDescription: "选择 NUCtool 的显示语言",
 
     languageAuto: "跟随系统",

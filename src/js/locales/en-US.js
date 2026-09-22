@@ -213,7 +213,7 @@ const enUS = {
 
     readFailed: "Read failed",
 
-    languageTitle: "语言 / Language / 言語",
+    languageTitle: "语言 / Language / Язык / 言語",
     languageDescription:
       "Select the NUCtool display language",
 

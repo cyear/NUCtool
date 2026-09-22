@@ -215,12 +215,12 @@ const jaJP = {
 
     readFailed: "読み込みに失敗しました",
 
-    languageTitle: "语言 / Language / 言語",
+    languageTitle: "语言 / Language / Язык / 言語",
     languageDescription:
       "NUCtool の表示言語を選択します",
 
     languageAuto: "システムに合わせる",
-    languageChinese: "簡体字中国語",
+    languageChinese: "简体中文",
     languageEnglish: "English",
     languageJapanese: "日本語",
     languageRussian: "Русский",

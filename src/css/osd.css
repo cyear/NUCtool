@@ -22,12 +22,17 @@ body {
     -webkit-user-select: none;
 }
 
+/* ==============================
+   OSD
+   ============================== */
+
 #osd {
     position: fixed;
 
     left: 0;
     top: 0;
 
+    /* 固定尺寸 */
     width: 300px;
     height: 64px;
 
@@ -42,17 +47,13 @@ body {
 
     color: white;
 
-    opacity: 1;
-
-    transform: none;
-
     pointer-events: none;
 
     background: transparent;
 }
 
 /* ==============================
-   OSD 背景
+   背景
    ============================== */
 
 #osd::before {
@@ -74,15 +75,11 @@ body {
 
     opacity: 0;
 
-    transition:
-        opacity 120ms ease;
+    transition: opacity 120ms ease;
 }
 
 #osd.visible::before {
     opacity: 1;
-
-    transition:
-        opacity 120ms ease;
 }
 
 /* ==============================
@@ -90,15 +87,18 @@ body {
    ============================== */
 
 #osd-content {
-    flex: 1;
+    flex: 1 1 0;
+
     min-width: 0;
+
+    position: relative;
+    z-index: 1;
 
     display: flex;
     flex-direction: column;
     justify-content: center;
 
-    position: relative;
-    z-index: 1;
+    overflow: hidden;
 
     opacity: 0;
 
@@ -111,6 +111,7 @@ body {
 
 #osd.visible #osd-content {
     opacity: 1;
+
     transform: translateX(0);
 
     transition:
@@ -119,13 +120,21 @@ body {
 }
 
 /* ==============================
-   品牌
+   文字
    ============================== */
 
 #osd-brand {
+    /*
+     * 不允许品牌区域被 flex 压缩
+     */
     flex: 0 0 auto;
 
-    margin-left: 14px;
+    /*
+     * 给 NUCtool 留出确定空间
+     */
+    min-width: 54px;
+
+    margin-left: 10px;
 
     position: relative;
     z-index: 1;
@@ -155,6 +164,7 @@ body {
 
 #osd.visible #osd-brand {
     opacity: 1;
+
     transform: translateX(0);
 
     transition:
@@ -173,9 +183,15 @@ body {
     font-weight: 600;
 
     white-space: nowrap;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
 }
+
+/* ==============================
+   副标题
+   ============================== */
 
 #osd-subtitle {
     margin-top: 1px;
@@ -186,7 +202,9 @@ body {
     color: rgba(255, 255, 255, 0.60);
 
     white-space: nowrap;
+
     overflow: hidden;
+
     text-overflow: ellipsis;
 }
 
@@ -201,8 +219,7 @@ body {
 #osd:not(.visible)::before {
     opacity: 0;
 
-    transition:
-        opacity 500ms ease;
+    transition: opacity 500ms ease;
 }
 
 #osd:not(.visible) #osd-content,
@@ -212,6 +229,6 @@ body {
     transform: translateX(0);
 
     transition:
-        opacity 500ms ease,
+        opacity 400ms ease,
         transform 180ms ease;
 }

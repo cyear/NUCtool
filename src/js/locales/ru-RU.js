@@ -213,7 +213,7 @@ const ruRU = {
 
     readFailed: "Ошибка чтения",
 
-    languageTitle: "语言 / Language / Язык",
+    languageTitle: "语言 / Language / Язык / 言語",
     languageDescription:
       "Выберите язык интерфейса NUCtool",
 

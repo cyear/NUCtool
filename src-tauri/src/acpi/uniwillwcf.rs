@@ -4,6 +4,7 @@ use sha2::{Digest, Sha256};
 use std::fs;
 
 const EXPECTED_HASH: &str = "8F7B8338EAF242372FBF096CC9364CA0F60145281ACA17E4E97955945A920875";
+const EXPECTED_HASH_V2: &str = "838E83709F1E2C45A470868F210EEF1A3A48EAE10E13DBA896905E6DAA387497";
 
 type WcfConnectFn = unsafe extern "system" fn() -> c_int;
 type WcfDisconnectFn = unsafe extern "system" fn();
@@ -11,11 +12,8 @@ type WcfIsConnectedFn = unsafe extern "system" fn() -> c_int;
 type WcfApplyProfileFn = unsafe extern "system" fn(index: c_int) -> c_int;
 type WcfSetPowerPlanFn = unsafe extern "system" fn(mode: c_int) -> c_int;
 type WcfApplyBenchmarkModeFn = unsafe extern "system" fn(enable: c_int) -> c_int;
-// type WcfDisablePassiveCoolingFn = unsafe extern "system" fn(disable: c_int) -> c_int;
-// type WcfGetSupportedFeaturesCountFn = unsafe extern "system" fn() -> c_int;
 type WcfGetBatteryChargingLevelFn = unsafe extern "system" fn() -> c_int;
 type WcfSetBatteryChargingLevelFn = unsafe extern "system" fn(level: c_int) -> c_int;
-type WcfEnableDisplayFn          = unsafe extern "system" fn(enable: c_int) -> c_int;
 type WcfEnableDisplayModeMgmtFn  = unsafe extern "system" fn(enable: c_int) -> c_int;
 type WcfSetDisplayModeFn         = unsafe extern "system" fn(index: c_int) -> c_int;
 type WcfEnableKeyboardLedsFn     = unsafe extern "system" fn(enable: c_int) -> c_int;
