@@ -25,7 +25,9 @@
 >
 > [Hi~ 详细更新说明查看这里😊](./NUCtoolChange.md)
 >
-> [View the English README here. Cut-off date: September 21, 2026. Versions: 1.0.5 (unreleased), 1.0.4 (beta).](./README_en-US.md)
+> [English translation deadline: September 22, 2026 (Version 1.0.6)](./README_en-US.md)
+>
+> [Срок сдачи перевода на русский язык: 22 сентября 2026 г. (версия 1.0.6)](./README_ru-RU.md)
 
 ```markdown
 # 免责声明（Disclaimer）
