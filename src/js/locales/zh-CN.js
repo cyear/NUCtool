@@ -206,6 +206,7 @@ const zhCN = {
     languageChinese: "简体中文",
     languageEnglish: "English",
     languageJapanese: "日本語",
+    languageRussian: "Русский",
   },
 
   // ==========================================================
