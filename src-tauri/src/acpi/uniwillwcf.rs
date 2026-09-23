@@ -73,6 +73,7 @@ impl UniwillWcfEc {
         // 计算 SHA-256
         let hash = Sha256::digest(&dll_data);
         let hash = hex::encode(hash);
+        println!("HASH: {}", hash);
         if !hash.eq_ignore_ascii_case(EXPECTED_HASH_V2) {
             return Err(std::io::Error::other(
                 "NUCtool.dll 完整性校验失败，文件可能已被修改或替换",

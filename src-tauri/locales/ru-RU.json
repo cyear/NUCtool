@@ -1,0 +1,56 @@
+{
+  "fanControl": "Управление вентиляторами",
+  "startMainPriority": "Запуск: приоритет основного вентилятора",
+  "startSplitPriority": "Запуск: раздельное управление вентиляторами",
+  "startIndependent": "Запуск: независимый режим",
+
+  "stopFanControl": "Остановить",
+
+  "fanModeError": "Ошибка: FANMODE={value}",
+  "fanModeSuccess": "Успешно: FANMODE={value}",
+
+  "powerSavingMode": "Энергосберегающий режим",
+  "balancedMode": "Сбалансированный режим",
+  "performanceMode": "Производительный режим",
+  "benchmarkMode": "Режим тестирования",
+
+  "powerPlan": "План электропитания",
+  "powerPlanOff": "Отключен",
+  "powerPlanHighPerformance": "Высокая производительность",
+  "powerPlanBalanced": "Сбалансированный",
+  "powerPlanPowerSaving": "Энергосбережение",
+  "powerPlanBenchmark": "Тестовый",
+
+  "displaySettings": "Настройки дисплея",
+  "displaySettingsOn": "ВКЛ.",
+  "displaySettingsOff": "ВЫКЛ.",
+  "displaySettingsStandard": "Стандартный",
+  "displaySettingsGaming": "Игровой",
+  "displaySettingsVideo": "Видео",
+  "displaySettingsReading": "Чтение",
+  "displaySettingsCustom": "Пользовательский",
+
+  "keyboardLed": "Подсветка клавиатуры",
+  "keyboardLedOn": "ВКЛ.",
+  "keyboardLedOff": "ВЫКЛ.",
+
+  "tdpSettings": "Настройки TDP",
+  "cpuPl1": "CPU PL1 = {value}W",
+  "cpuPl2": "CPU PL2 = {value}W",
+  "cpuPl4": "CPU PL4 = {value}W",
+  "gpuPl1": "GPU PL1 = {value}W",
+  "gpuPl2": "GPU PL2 = {value}W",
+  "psysPl1": "PSYS PL1 = {value}W",
+
+  "batterySettings": "Настройки батареи",
+  "batteryChargingLimit": "Лимит зарядки батареи = {value}%",
+
+  "autostartCreateFailed": "Не удалось создать автозапуск",
+  "autostartCreateSuccess": "Автозапуск успешно создан",
+  "autostartRemoveFailed": "Не удалось удалить автозапуск",
+  "autostartRemoveSuccess": "Автозапуск успешно удалён",
+
+  "error": "Ошибка: {value}",
+
+  "empty": ""
+}

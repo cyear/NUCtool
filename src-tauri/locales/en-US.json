@@ -1,0 +1,55 @@
+{
+  "fanControl": "Fan Control",
+  "startMainPriority": "Start Main Fan Priority",
+  "startSplitPriority": "Start Separate Fan Priority",
+  "startIndependent": "Start Independent",
+  "stopFanControl": "Stop",
+
+  "fanModeError": "Error: FANMODE={value}",
+  "fanModeSuccess": "Success: FANMODE={value}",
+
+  "powerSavingMode": "Power Saving Mode",
+  "balancedMode": "Balanced Mode",
+  "performanceMode": "Performance Mode",
+  "benchmarkMode": "Benchmark Mode",
+
+  "powerPlan": "Power Plan",
+  "powerPlanOff": "Off",
+  "powerPlanHighPerformance": "High Performance",
+  "powerPlanBalanced": "Balanced",
+  "powerPlanPowerSaving": "Power Saving",
+  "powerPlanBenchmark": "Benchmark",
+
+  "displaySettings": "Display Settings",
+  "displaySettingsOn": "ON",
+  "displaySettingsOff": "OFF",
+  "displaySettingsStandard": "Standard",
+  "displaySettingsGaming": "Gaming",
+  "displaySettingsVideo": "Video",
+  "displaySettingsReading": "Reading",
+  "displaySettingsCustom": "Custom",
+
+  "keyboardLed": "Keyboard LED",
+  "keyboardLedOn": "ON",
+  "keyboardLedOff": "OFF",
+
+  "tdpSettings": "TDP Settings",
+  "cpuPl1": "CPU PL1 = {value}W",
+  "cpuPl2": "CPU PL2 = {value}W",
+  "cpuPl4": "CPU PL4 = {value}W",
+  "gpuPl1": "GPU PL1 = {value}W",
+  "gpuPl2": "GPU PL2 = {value}W",
+  "psysPl1": "PSYS PL1 = {value}W",
+
+  "batterySettings": "Battery Settings",
+  "batteryChargingLimit": "Battery Charging Limit = {value}%",
+
+  "autostartCreateFailed": "Failed to Create Startup Task",
+  "autostartCreateSuccess": "Startup Task Created Successfully",
+  "autostartRemoveFailed": "Failed to Remove Startup Task",
+  "autostartRemoveSuccess": "Startup Task Removed Successfully",
+
+  "error": "Error: {value}",
+
+  "empty": ""
+}

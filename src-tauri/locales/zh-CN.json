@@ -1,0 +1,53 @@
+{
+  "fanControl": "风扇控制",
+  "startMainPriority": "开始 主风扇优先",
+  "startSplitPriority": "开始 分风扇优先",
+  "startIndependent": "开始 独立",
+  "stopFanControl": "停止",
+  "fanModeError": "错误: FANMODE={value}",
+  "fanModeSuccess": "成功: FANMODE={value}",
+
+  "powerSavingMode": "省电模式",
+  "balancedMode": "平衡模式",
+  "performanceMode": "性能模式",
+  "benchmarkMode": "基准模式",
+
+  "powerPlan": "电源计划",
+  "powerPlanOff": "关闭",
+  "powerPlanHighPerformance": "高性能",
+  "powerPlanBalanced": "平衡",
+  "powerPlanPowerSaving": "节能",
+  "powerPlanBenchmark": "基准",
+
+  "displaySettings": "显示设置",
+  "displaySettingsOn": "ON",
+  "displaySettingsOff": "OFF",
+  "displaySettingsStandard": "Standard",
+  "displaySettingsGaming": "Gaming",
+  "displaySettingsVideo": "Video",
+  "displaySettingsReading": "Reading",
+  "displaySettingsCustom": "Custom",
+
+  "keyboardLed": "键盘LED灯",
+  "keyboardLedOn": "ON",
+  "keyboardLedOff": "OFF",
+
+  "tdpSettings": "TDP设置",
+  "cpuPl1": "CPU PL1 = {value}W",
+  "cpuPl2": "CPU PL2 = {value}W",
+  "cpuPl4": "CPU PL4 = {value}W",
+  "gpuPl1": "GPU PL1 = {value}W",
+  "gpuPl2": "GPU PL2 = {value}W",
+  "psysPl1": "PSYS PL1 = {value}W",
+
+  "batterySettings": "电池设置",
+  "batteryChargingLimit": "电池充电上限 = {value}%",
+
+  "autostartCreateFailed": "自启动创建失败",
+  "autostartCreateSuccess": "自启动创建成功",
+  "autostartRemoveFailed": "自启动删除失败",
+  "autostartRemoveSuccess": "自启动删除成功",
+
+  "error": "错误: {value}",
+  "empty": ""
+}

@@ -33,7 +33,8 @@
       "icons/icon.ico"
     ],
     "resources": {
-      "dll/NUCtool.dll": "NUCtoolV2.dll"
+      "dll/NUCtoolV2.dll": "NUCtoolV2.dll",
+      "locales/": "locales/"
     }
   }
 }

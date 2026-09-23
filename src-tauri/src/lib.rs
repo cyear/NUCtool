@@ -1,13 +1,12 @@
-mod osd;
-mod win;
 mod acpi;
 mod config;
 mod fan_control;
-use osd::{create_osd, show_osd, osd_ready, show_osd_command};
-use win::{privilege_escalation, create_startup_task, remove_startup_task, is_startup_task_exists};
+mod osd;
+mod win;
 use acpi::{uniwillfnkeyhook, UniwillAcpiEc, UniwillWcfEc, UniwillWmiEc};
 use config::FanData;
 use fan_control::{calculate_speed, FanControlState};
+use osd::{create_osd, osd_ready, show_osd_command, show_osd_i18n, show_osd_i18n_value};
 use serde::Serialize;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -19,6 +18,7 @@ use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     AppHandle, Emitter, Manager, State,
 };
+use win::{create_startup_task, is_startup_task_exists, privilege_escalation, remove_startup_task};
 use windows::Win32::{
     Foundation::HINSTANCE,
     UI::WindowsAndMessaging::{
@@ -48,7 +48,7 @@ pub struct TdpConfig {
     pub gpu_pl1: u8,
     pub gpu_pl2: u8,
     pub battery_charglimit: u8,
-    pub psys_pl1: u8
+    pub psys_pl1: u8,
 }
 
 struct AppState {
@@ -71,7 +71,8 @@ fn start_sensor_loop(app: AppHandle, state: State<AppState>) {
             return;
         }
     };
-    let bat_mah_percent = (100 * wmi.get_set(0x0000010000000404).unwrap_or(0) / wmi.get_set(0x0000010000000402).unwrap_or(1)) as u8;
+    let bat_mah_percent = (100 * wmi.get_set(0x0000010000000404).unwrap_or(0)
+        / wmi.get_set(0x0000010000000402).unwrap_or(1)) as u8;
     thread::spawn(move || {
         let ec = match UniwillAcpiEc::open() {
             Ok(ec) => ec,
@@ -180,23 +181,22 @@ fn start_fan_control_internal(
             Ok(1) => {
                 fan_data_set.right_fan = fan_data_set.left_fan.clone();
                 println!("主风扇优先");
-                let _ = show_osd(&app_handle, "风扇控制", "开始 主风扇优先");
-            },
+                let _ = show_osd_i18n(&app_handle, "fanControl", "startMainPriority");
+            }
             Ok(2) => {
                 fan_data_set.left_fan = fan_data_set.right_fan.clone();
                 println!("分风扇优先");
-                let _ = show_osd(&app_handle, "风扇控制", "开始 分风扇优先");
-            },
+                let _ = show_osd_i18n(&app_handle, "fanControl", "startSplitPriority");
+            }
             Ok(_) => {
                 println!("独立");
-                let _ = show_osd(&app_handle, "风扇控制", "开始 独立");
-            },
+                let _ = show_osd_i18n(&app_handle, "fanControl", "startIndependent");
+            }
             Err(e) => {
                 println!("读取风扇模式配置失败: {}", e);
             }
         }
         while running.load(Ordering::SeqCst) {
-
             // ========================================
             // 1. 读取温度
             // ========================================
@@ -232,11 +232,11 @@ fn start_fan_control_internal(
                 println!("当前是 Auto Mode");
 
                 if let Err(e) = ec.fan_write_mode(acpi::uniwillacpi::FanModeByte::FanBoostMode) {
-                    let _ = show_osd(&app_handle, "风扇控制", format!("错误: FANMODE={}", e));
                     eprintln!("切换FAN手动模式失败: {}", e);
+                    let _ = show_osd_i18n_value(&app_handle, "fanControl", "fanModeError", e);
                 } else {
-                    let _ = show_osd(&app_handle, "风扇控制", format!("成功: FANMODE={}", fanm));
                     println!("切换FAN手动模式成功");
+                    let _ = show_osd_i18n_value(&app_handle, "fanControl", "fanModeSuccess", fanm);
                 }
             }
 
@@ -266,7 +266,7 @@ fn start_fan_control_internal(
             thread::sleep(Duration::from_millis(1500));
         }
         println!("风扇自动控制线程退出");
-        
+
         let _ = app_handle.emit("fan-control-status", false);
     });
 
@@ -285,7 +285,6 @@ async fn start_fan_control(
 }
 
 fn stop_fan_control_inner(app: &tauri::AppHandle, state: &FanControlState) -> Result<(), String> {
-
     // ========================================
     // 1. 检查是否正在运行
     // ========================================
@@ -337,9 +336,9 @@ fn stop_fan_control_inner(app: &tauri::AppHandle, state: &FanControlState) -> Re
     // ========================================
     // 5. 通知前端
     // ========================================
-    
+
     let _ = app.emit("fan-control-status", false);
-    let _ = show_osd(app, "风扇控制", "停止");
+    let _ = show_osd_i18n(app, "fanControl", "stopFanControl");
 
     Ok(())
 }
@@ -386,39 +385,35 @@ async fn set_performance_mode(app: tauri::AppHandle, mode: String) {
                 "benchmark_off apply_profile: {}",
                 wcf.apply_benchmark_mode(0)
             );
-            let _ = show_osd(&app, "省电模式", "");
+            let _ = show_osd_i18n(&app, "powerSavingMode", "empty");
             println!("quiet apply_profile: {}", wcf.apply_profile(3));
-        },
+        }
         "balanced" => {
             println!("平衡模式");
             println!(
                 "benchmark_off apply_profile: {}",
                 wcf.apply_benchmark_mode(0)
             );
-            let _ = show_osd(&app, "平衡模式", "");
+            let _ = show_osd_i18n(&app, "balancedMode", "empty");
             println!("balanced apply_profile: {}", wcf.apply_profile(2));
-        },
+        }
         "performance" => {
             println!("性能模式");
             println!(
                 "benchmark_off apply_profile: {}",
                 wcf.apply_benchmark_mode(0)
             );
-            let _ = show_osd(&app, "性能模式", "");
+            let _ = show_osd_i18n(&app, "performanceMode", "empty");
             println!("performance apply_profile: {}", wcf.apply_profile(1));
-        },
+        }
         "benchmark-on" => {
             println!("基准模式");
             println!(
                 "benchmark_on apply_profile: {}",
                 wcf.apply_benchmark_mode(1)
             );
-            let _ = show_osd(&app, "基准模式", "");
-        },
-        // "benchmark-off" => {
-        //     println!("基准模式 OFF");
-        //     println!("benchmark_off apply_profile: {}", wcf.apply_benchmark_mode(0));
-        // }
+            let _ = show_osd_i18n(&app, "benchmarkMode", "empty");
+        }
         _ => {
             eprintln!("未知性能模式: {}", mode);
             return;
@@ -446,7 +441,7 @@ async fn get_performance_mode() -> i32 {
         state.selected_profile_index
     }
 }
-    
+
 #[tauri::command]
 async fn set_power_plan(app: tauri::AppHandle, mode: i32) -> Result<(), String> {
     let wcf = match UniwillWcfEc::new() {
@@ -463,29 +458,28 @@ async fn set_power_plan(app: tauri::AppHandle, mode: i32) -> Result<(), String> 
         0 => {
             wcf.set_power_plan(mode);
             println!("电源计划切换: 关闭 {}", mode);
-            let _ = show_osd(&app, "电源计划", "关闭");
-        },
+            let _ = show_osd_i18n(&app, "powerPlan", "powerPlanOff");
+        }
         1 => {
             wcf.set_power_plan(mode);
             println!("电源计划切换: 高性能 {}", mode);
-            let _ = show_osd(&app, "电源计划", "高性能");
-        },
+            let _ = show_osd_i18n(&app, "powerPlan", "powerPlanHighPerformance");
+        }
         2 => {
             wcf.set_power_plan(mode);
             println!("电源计划切换: 平衡 {}", mode);
-            let _ = show_osd(&app, "电源计划", "平衡");
-        },
+            let _ = show_osd_i18n(&app, "powerPlan", "powerPlanBalanced");
+        }
         3 => {
             wcf.set_power_plan(mode);
             println!("电源计划切换: 节能 {}", mode);
-            let _ = show_osd(&app, "电源计划", "节能");
-
-        },
+            let _ = show_osd_i18n(&app, "powerPlan", "powerPlanPowerSaving");
+        }
         4 => {
             wcf.set_power_plan(mode);
             println!("电源计划切换: 基准高性能 {}", mode);
-            let _ = show_osd(&app, "电源计划", "基准");
-        },
+            let _ = show_osd_i18n(&app, "powerPlan", "powerPlanBenchmark");
+        }
         _ => {
             eprintln!("错误的电源计划: {}", mode);
         }
@@ -506,37 +500,36 @@ async fn set_display_mode(app: tauri::AppHandle, mode: i32) {
     };
     let ret = wcf.connect();
     println!("connect: {}", ret);
-    println!("显示设置: {}",mode);
+    println!("显示设置: {}", mode);
     if mode != 5 {
         wcf.wcf_enable_display_mode_mgmt(1);
-        let _ = show_osd(&app, "显示设置", "ON");
-
+        let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsOn");
     }
     match mode {
         0 => {
             wcf.wcf_set_display_mode(mode);
-            let _ = show_osd(&app, "显示设置", "Standard");
-        },
+            let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsStandard");
+        }
         1 => {
             wcf.wcf_set_display_mode(mode);
-            let _ = show_osd(&app, "显示设置", "Gaming");
-        },
+            let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsGaming");
+        }
         2 => {
             wcf.wcf_set_display_mode(mode);
-            let _ = show_osd(&app, "显示设置", "Video");
-        },
+            let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsVideo");
+        }
         3 => {
             wcf.wcf_set_display_mode(mode);
-            let _ = show_osd(&app, "显示设置", "Reading");
-        },
+            let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsReading");
+        }
         4 => {
             wcf.wcf_set_display_mode(mode);
-            let _ = show_osd(&app, "显示设置", "Custom");
-        },
+            let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsCustom");
+        }
         5 => {
             wcf.wcf_enable_display_mode_mgmt(0);
-            let _ = show_osd(&app, "显示设置", "OFF");
-        },
+            let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsOff");
+        }
         _ => {
             eprintln!("错误的显示模式: {}", mode);
         }
@@ -558,7 +551,11 @@ fn get_keyboard_led() -> bool {
     let g = wcf.wcf_get_keyboard_leds_power();
     println!("connect: {} wcf_get_keyboard_leds_power: {}", ret, g);
     wcf.disconnect();
-    if g==1 { true } else { false }
+    if g == 1 {
+        true
+    } else {
+        false
+    }
 }
 
 #[tauri::command]
@@ -575,15 +572,13 @@ fn set_keyboard_led(app: tauri::AppHandle, enabled: bool) {
     println!("connect: {} set_keyboard_led: {}", ret, enabled);
     if enabled {
         wcf.wcf_enable_keyboard_leds(1);
-        let _ = show_osd(&app, "键盘LED灯", "ON");
-
+        let _ = show_osd_i18n(&app, "keyboardLed", "keyboardLedOn");
     } else {
         wcf.wcf_enable_keyboard_leds(0);
-        let _ = show_osd(&app, "键盘LED灯", "OFF");
+        let _ = show_osd_i18n(&app, "keyboardLed", "keyboardLedOn");
     }
     wcf.disconnect();
 }
-
 
 // =====================================================
 // 读取 TDP
@@ -639,7 +634,7 @@ async fn get_tdp() -> Result<TdpConfig, String> {
     // =================================================
     // PSYS PL1
     // =================================================
-    
+
     let psys_pl1 = ec.psys_read_pl1().expect("Error");
 
     println!(
@@ -675,49 +670,45 @@ async fn set_tdp(app: tauri::AppHandle, tdp_type: String, value: u8) -> Result<(
     };
 
     match tdp_type.as_str() {
-
         // =============================================
         // CPU
         // =============================================
-
         "cpu-pl1" => {
             ec.cpu_write_pl1(value).expect("Error");
             println!("写入 CPU PL1: {} W", value);
-            let _ = show_osd(&app, "TDP设置", format!("CPU PL1 = {}W", value));
+            let _ = show_osd_i18n_value(&app, "tdpSettings", "cpuPl1", value);
         }
 
         "cpu-pl2" => {
             ec.cpu_write_pl2(value).expect("Error");
             println!("写入 CPU PL2: {} W", value);
-            let _ = show_osd(&app, "TDP设置", format!("CPU PL2 = {}W", value));
+            let _ = show_osd_i18n_value(&app, "tdpSettings", "cpuPl2", value);
         }
 
         "cpu-pl4" => {
             ec.cpu_write_pl4(value).expect("Error");
             println!("写入 CPU PL4: {} W", value);
-            let _ = show_osd(&app, "TDP设置", format!("CPU PL4 = {}W", value));
+            let _ = show_osd_i18n_value(&app, "tdpSettings", "cpuPl4", value);
         }
 
         // =============================================
         // GPU
         // =============================================
-
         "gpu-pl1" => {
             ec.gpu_write_pl1(value).expect("Error");
             println!("写入 GPU PL1: {} W", value);
-            let _ = show_osd(&app, "TDP设置", format!("GPU PL1 = {}W", value));
+            let _ = show_osd_i18n_value(&app, "tdpSettings", "gpuPl1", value);
         }
 
         "gpu-pl2" => {
             ec.gpu_write_pl2(value).expect("Error");
             println!("写入 GPU PL2: {} W", value);
-            let _ = show_osd(&app, "TDP设置", format!("GPU PL2 = {}W", value));
-        },
+            let _ = show_osd_i18n_value(&app, "tdpSettings", "gpuPl2", value);
+        }
 
         // =============================================
         // Battery
         // =============================================
-        
         "battery_charglimit" => {
             let wcf = match UniwillWcfEc::new() {
                 Ok(wcf) => wcf,
@@ -731,18 +722,17 @@ async fn set_tdp(app: tauri::AppHandle, tdp_type: String, value: u8) -> Result<(
             println!("connect: {}", ret);
             wcf.wcf_set_battery_charging_level(value as i32);
             println!("写入Battery Charging limit： {}%", value);
-            let _ = show_osd(&app, "电池设置", format!("电池充电上限 = {}%", value));
+            let _ = show_osd_i18n_value(&app, "batterySettings", "batteryChargingLimit", value);
             wcf.disconnect();
-        },
+        }
 
         // =============================================
         // PSYS PL1
         // =============================================
-
         "psys_pl1" => {
             ec.psys_write_pl1(value).expect("Error");
             println!("写入PSYS PL1： {} W", value);
-            let _ = show_osd(&app, "TDP设置", format!("PSYS PL1 = {}W", value));
+            let _ = show_osd_i18n_value(&app, "tdpSettings", "psysPl1", value);
         }
 
         // =============================================
@@ -762,7 +752,7 @@ fn get_autostart() -> Result<bool, String> {
         Ok(b) => {
             println!("自启动状态: {}", b);
             Ok(b)
-        },
+        }
         Err(e) => {
             eprintln!("获取自启动失败: {}", e);
             Ok(false)
@@ -775,25 +765,24 @@ fn set_autostart(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
     if enabled {
         if let Err(e) = create_startup_task() {
             println!("创建开机自启动任务计划失败: {}", e);
-            let _ = show_osd(&app, "自启动创建失败", format!("错误: {}", e));
+            let _ = show_osd_i18n_value(&app, "autostartCreateFailed", "error", e);
         } else {
             println!("添加开机自启动任务计划成功");
-            let _ = show_osd(&app, "自启动创建成功", "");
+            let _ = show_osd_i18n(&app, "autostartCreateSuccess", "empty");
         }
     } else {
         if let Err(e) = remove_startup_task() {
             println!("删除开机自启动任务计划失败: {}", e);
-            let _ = show_osd(&app, "自启动删除失败", format!("错误: {}", e));
+            let _ = show_osd_i18n_value(&app, "autostartRemoveFailed", "error", e);
         } else {
             println!("删除开机自启动任务计划成功");
-            let _ = show_osd(&app, "自启动删除成功", "");
+            let _ = show_osd_i18n(&app, "autostartRemoveSuccess", "empty");
         }
     }
     Ok(())
 }
 
 pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
-
     let args: Vec<String> = std::env::args().collect();
 
     // OSD
@@ -810,7 +799,6 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     // 启动最小化
     // =========================
 
-    
     let hide = args.iter().any(|arg| arg == "--hide");
 
     let window = app.get_webview_window("main").unwrap();
@@ -994,7 +982,7 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     // =========================
 
     let auto_fan_control = args.iter().any(|arg| arg == "--fan-control");
-    if auto_fan_control  {
+    if auto_fan_control {
         println!("检测到 --fan-control，自动启动风扇控制");
         let fan_data = match config::load() {
             Ok(data) => data,
@@ -1016,7 +1004,6 @@ pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
 fn fnhook() {
     unsafe {
-
         // ==================================
         // 安装低级键盘 Hook
         // ==================================

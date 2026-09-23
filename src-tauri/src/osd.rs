@@ -9,6 +9,13 @@ use tauri::{
     WebviewWindow,
     WebviewWindowBuilder,
 };
+use crate::win::get_windows_language;
+
+use std::collections::HashMap;
+use tauri::path::BaseDirectory;
+
+type Locale = HashMap<String, String>;
+
 
 static OSD_READY: AtomicBool = AtomicBool::new(false);
 
@@ -18,10 +25,113 @@ pub struct OsdPayload {
     pub subtitle: String,
 }
 
+pub enum OsdText {
+    PerformanceMode,
+    PowerSavingMode,
+    BalancedMode,
+    BenchmarkMode,
+}
+
+fn load_locale(
+    app: &AppHandle,
+    language: &str,
+) -> Result<Locale, String> {
+
+    let path = app
+        .path()
+        .resolve(
+            format!("locales/{language}.json"),
+            BaseDirectory::Resource,
+        )
+        .map_err(|e| e.to_string())?;
+
+    let content = std::fs::read_to_string(path)
+        .map_err(|e| e.to_string())?;
+
+    serde_json::from_str(&content)
+        .map_err(|e| e.to_string())
+}
+
+pub fn show_osd_i18n(
+    app: &AppHandle,
+    title_key: &str,
+    subtitle_key: &str,
+) -> Result<(), String> {
+
+    let language =
+        get_windows_language()
+            .unwrap_or_else(|_| "zh-CN".to_string());
+
+    let locale = load_locale(
+        app,
+        &language,
+    )
+    .or_else(|_| {
+        load_locale(
+            app,
+            "en-US",
+        )
+    })?;
+
+    let title = locale
+        .get(title_key)
+        .ok_or_else(|| {
+            format!("Missing translation: {title_key}")
+        })?;
+
+    let subtitle = locale
+        .get(subtitle_key)
+        .ok_or_else(|| {
+            format!("Missing translation: {subtitle_key}")
+        })?;
+
+    show_osd(
+        app,
+        title,
+        subtitle,
+    )
+}
+
+pub fn show_osd_i18n_value(
+    app: &AppHandle,
+    title_key: &str,
+    subtitle_key: &str,
+    value: impl ToString,
+) -> Result<(), String> {
+
+    let language = get_windows_language()
+        .unwrap_or_else(|_| "en-US".to_string());
+
+    let locale = load_locale(app, &language)
+        .or_else(|_| load_locale(app, "en-US"))?;
+
+    let title = locale
+        .get(title_key)
+        .ok_or_else(|| format!("Missing translation: {title_key}"))?;
+
+    let subtitle = locale
+        .get(subtitle_key)
+        .ok_or_else(|| format!("Missing translation: {subtitle_key}"))?;
+
+    let value = value.to_string();
+
+    let subtitle = subtitle
+        .replace("{value}", &value);
+
+    show_osd(
+        app,
+        title,
+        subtitle,
+    )
+}
+
 /// 创建 OSD 窗口
 ///
 /// 程序启动时调用一次。
 pub fn create_osd(app: &AppHandle) -> Result<(), String> {
+    let language = get_windows_language();
+    
+    println!("系统语言: {:?}", language);
     // 已经存在就不重复创建
     if app.get_webview_window("osd").is_some() {
         println!("OSD 已存在 跳过创建");

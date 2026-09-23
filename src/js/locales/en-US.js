@@ -14,6 +14,7 @@ const enUS = {
     monitor: "Performance",
     tuning: "Performance Tuning",
     fan: "Fan Control",
+    system: "System Config",
     display: "Display",
     keyboard: "Keyboard",
     settings: "Settings",
@@ -136,6 +137,19 @@ const enUS = {
     dragHint: "Drag points to adjust",
   },
 
+  system: {
+    title: "System Configuration",
+    subtitle: "Adjust system-related settings",
+
+    battery: "Battery",
+    batteryDescription: "Adjust battery charging settings",
+
+    chargingLimit: "Charging Limit",
+    currentValue: "Current Value",
+
+    write: "Write",
+  },
+
   // ==========================================================
   // Display
   // ==========================================================
@@ -222,6 +236,13 @@ const enUS = {
     languageEnglish: "English",
     languageJapanese: "日本語",
     languageRussian: "Русский",
+
+    fanModeTitle: "Fan Mode",
+    fanModeDescription: "Configure how the two fans are controlled",
+    independent: "Independent",
+    mainPriority: "Main Fan Priority",
+    splitPriority: "Separate Fan Priority",
+
   },
 
   // ==========================================================

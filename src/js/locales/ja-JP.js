@@ -14,6 +14,7 @@ const jaJP = {
     monitor: "パフォーマンス監視",
     tuning: "パフォーマンス調整",
     fan: "ファン制御",
+    system: "システム設定",
     display: "ディスプレイ設定",
     keyboard: "キーボード設定",
     settings: "設定",
@@ -138,6 +139,19 @@ const jaJP = {
     dragHint: "ノードをドラッグして調整",
   },
 
+  system: {
+    title: "システム設定",
+    subtitle: "システム関連の設定を調整します",
+
+    battery: "バッテリー",
+    batteryDescription: "バッテリーの充電設定を調整します",
+
+    chargingLimit: "充電制限",
+    currentValue: "現在値",
+
+    write: "書き込み",
+  },
+
   // ==========================================================
   // ディスプレイ
   // ==========================================================
@@ -224,6 +238,13 @@ const jaJP = {
     languageEnglish: "English",
     languageJapanese: "日本語",
     languageRussian: "Русский",
+
+    fanModeTitle: "ファンモード",
+    fanModeDescription: "2つのファンの制御方法を設定します",
+    independent: "独立",
+    mainPriority: "メインファン優先",
+    splitPriority: "個別ファン優先"
+  
   },
 
   // ==========================================================

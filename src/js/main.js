@@ -27,11 +27,11 @@ document.addEventListener("dragstart", (e) => {
 // 禁止常见开发者工具快捷键
 document.addEventListener("keydown", (e) => {
   // F12
-  if (e.key === "F12") {
-    e.preventDefault();
-    e.stopPropagation();
-    return;
-  }
+  // if (e.key === "F12") {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   return;
+  // }
 
   // Ctrl + Shift + I
   if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "i") {
@@ -766,6 +766,7 @@ tuningButtons.forEach(
         } catch (error) {
           console.error("设置性能模式失败:", error);
         }
+        loadPerformanceMode();
       }
     );
 

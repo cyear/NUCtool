@@ -28,6 +28,7 @@ windows = { version = "0.62.2", features = [
     "Win32_UI_WindowsAndMessaging",
     "Win32_System_Com",
     "Win32_System_TaskScheduler",
+    "Win32_Globalization",
 ] }
 wmi = "0.18"
 dirs = "7.0.0"

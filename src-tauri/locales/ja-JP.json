@@ -1,0 +1,56 @@
+{
+  "fanControl": "ファン制御",
+  "startMainPriority": "開始 メインファン優先",
+  "startSplitPriority": "開始 個別ファン制御",
+  "startIndependent": "開始 独立",
+
+  "stopFanControl": "停止",
+
+  "fanModeError": "エラー: FANMODE={value}",
+  "fanModeSuccess": "成功: FANMODE={value}",
+
+  "powerSavingMode": "省電力モード",
+  "balancedMode": "バランスモード",
+  "performanceMode": "パフォーマンスモード",
+  "benchmarkMode": "ベンチマークモード",
+
+  "powerPlan": "電源プラン",
+  "powerPlanOff": "オフ",
+  "powerPlanHighPerformance": "高パフォーマンス",
+  "powerPlanBalanced": "バランス",
+  "powerPlanPowerSaving": "省電力",
+  "powerPlanBenchmark": "ベンチマーク",
+
+  "displaySettings": "ディスプレイ設定",
+  "displaySettingsOn": "ON",
+  "displaySettingsOff": "OFF",
+  "displaySettingsStandard": "Standard",
+  "displaySettingsGaming": "Gaming",
+  "displaySettingsVideo": "Video",
+  "displaySettingsReading": "Reading",
+  "displaySettingsCustom": "Custom",
+
+  "keyboardLed": "キーボードLED",
+  "keyboardLedOn": "ON",
+  "keyboardLedOff": "OFF",
+
+  "tdpSettings": "TDP設定",
+  "cpuPl1": "CPU PL1 = {value}W",
+  "cpuPl2": "CPU PL2 = {value}W",
+  "cpuPl4": "CPU PL4 = {value}W",
+  "gpuPl1": "GPU PL1 = {value}W",
+  "gpuPl2": "GPU PL2 = {value}W",
+  "psysPl1": "PSYS PL1 = {value}W",
+
+  "batterySettings": "バッテリー設定",
+  "batteryChargingLimit": "バッテリー充電上限 = {value}%",
+
+  "autostartCreateFailed": "自動起動の作成に失敗しました",
+  "autostartCreateSuccess": "自動起動を作成しました",
+  "autostartRemoveFailed": "自動起動の削除に失敗しました",
+  "autostartRemoveSuccess": "自動起動を削除しました",
+
+  "error": "エラー: {value}",
+
+  "empty": ""
+}
