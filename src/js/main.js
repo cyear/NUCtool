@@ -1642,6 +1642,35 @@ if (languageSelect) {
 }
 
 
+const fanModeSelect = document.getElementById(
+  "fan-mode-select"
+);
+
+
+async function loadFanMode() {
+
+  const mode = await invoke(
+    "get_fan_mode"
+  );
+
+  fanModeSelect.value = String(mode);
+}
+
+
+fanModeSelect.addEventListener(
+  "change",
+  async () => {
+
+    await invoke(
+      "set_fan_mode",
+      {
+        mode: Number(fanModeSelect.value)
+      }
+    );
+
+  }
+);
+
 
 /* =========================================================
    初始化
@@ -1659,11 +1688,13 @@ async function init() {
 
   updateControlState();
 
-  loadAutostartState();
-
   loadPerformanceMode();
 
   loadKeyboardLedState();
+
+  loadFanMode();
+
+  loadAutostartState();
 
 }
 

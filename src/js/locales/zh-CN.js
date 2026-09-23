@@ -224,6 +224,12 @@ const zhCN = {
     languageEnglish: "English",
     languageJapanese: "日本語",
     languageRussian: "Русский",
+
+    fanModeTitle: "风扇模式",
+    fanModeDescription: "设置两个风扇的控制方式",
+    independent: "独立",
+    mainPriority: "主风扇优先",
+    splitPriority: "分风扇优先",
   },
 
   // ==========================================================

@@ -172,8 +172,29 @@ fn start_fan_control_internal(
 
         // 通知前端：已经启动
         let _ = app_handle.emit("fan-control-status", true);
-        let _ = show_osd(&app_handle, "风扇控制", "开始");
-
+        let mut fan_data_set = fan_data;
+        // 0 = 独立
+        // 1 = 主风扇优先
+        // 2 = 分风扇优先
+        match config::load_fan_mode() {
+            Ok(1) => {
+                fan_data_set.right_fan = fan_data_set.left_fan.clone();
+                println!("主风扇优先");
+                let _ = show_osd(&app_handle, "风扇控制", "开始 主风扇优先");
+            },
+            Ok(2) => {
+                fan_data_set.left_fan = fan_data_set.right_fan.clone();
+                println!("分风扇优先");
+                let _ = show_osd(&app_handle, "风扇控制", "开始 分风扇优先");
+            },
+            Ok(_) => {
+                println!("独立");
+                let _ = show_osd(&app_handle, "风扇控制", "开始 独立");
+            },
+            Err(e) => {
+                println!("读取风扇模式配置失败: {}", e);
+            }
+        }
         while running.load(Ordering::SeqCst) {
 
             // ========================================
@@ -190,10 +211,10 @@ fn start_fan_control_internal(
             // &fan_data.right_fan S
 
             // CPU 风扇 主 => 右
-            let right_speed = calculate_speed(&fan_data.left_fan, cpu_temp);
+            let right_speed = calculate_speed(&fan_data_set.left_fan, cpu_temp);
 
             // GPU 风扇 分 => 左
-            let left_speed = calculate_speed(&fan_data.right_fan, gpu_temp);
+            let left_speed = calculate_speed(&fan_data_set.right_fan, gpu_temp);
 
             // ========================================
             // 3. 模式检查
@@ -329,6 +350,21 @@ async fn stop_fan_control(
     state: tauri::State<'_, FanControlState>,
 ) -> Result<(), String> {
     stop_fan_control_inner(&app, &state)
+}
+
+#[tauri::command]
+async fn set_fan_mode(mode: i32) {
+    let _ = config::save_fan_mode(mode);
+}
+
+#[tauri::command]
+async fn get_fan_mode() -> i32 {
+    if let Ok(mode) = config::load_fan_mode() {
+        mode
+    } else {
+        println!("读取风扇模式配置失败");
+        1
+    }
 }
 
 #[tauri::command]
@@ -1049,6 +1085,8 @@ pub fn run() {
             set_keyboard_led,
             osd_ready,
             show_osd_command,
+            set_fan_mode,
+            get_fan_mode
         ])
         .setup(setup)
         .build(tauri::generate_context!())
