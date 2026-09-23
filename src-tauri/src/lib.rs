@@ -575,7 +575,7 @@ fn set_keyboard_led(app: tauri::AppHandle, enabled: bool) {
         let _ = show_osd_i18n(&app, "keyboardLed", "keyboardLedOn");
     } else {
         wcf.wcf_enable_keyboard_leds(0);
-        let _ = show_osd_i18n(&app, "keyboardLed", "keyboardLedOn");
+        let _ = show_osd_i18n(&app, "keyboardLed", "keyboardLedOff");
     }
     wcf.disconnect();
 }

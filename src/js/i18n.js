@@ -15,7 +15,7 @@ const locales = {
 };
 
 // 默认语言
-const DEFAULT_LANGUAGE = "en-US";
+const DEFAULT_LANGUAGE = "zh-CN";
 
 // 当前语言
 let currentLanguage = DEFAULT_LANGUAGE;
@@ -49,7 +49,7 @@ function detectSystemLanguage() {
   if (language.toLowerCase().startsWith("ru")) {
     return "ru-RU";
   }
-  return "en-US";
+  return "zh-CN";
 }
 // ------------------------------------------------------------
 // 获取保存的语言设置

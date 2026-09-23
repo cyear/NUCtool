@@ -69,7 +69,7 @@ pub fn show_osd_i18n(
     .or_else(|_| {
         load_locale(
             app,
-            "en-US",
+            "zh-CN",
         )
     })?;
 
