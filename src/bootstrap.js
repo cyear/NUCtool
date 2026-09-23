@@ -2,7 +2,7 @@ const pages = [
   "monitor",
   "tuning",
   "fan",
-  "power",
+  "system",
   "display",
   "keyboard",
   "settings",

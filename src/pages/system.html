@@ -1,0 +1,103 @@
+<section id="page-system" class="page">
+
+  <header class="page-header">
+
+    <div class="page-heading">
+
+      <h1 data-i18n="system.title">
+        系统配置
+      </h1>
+
+      <p class="page-subtitle" data-i18n="system.subtitle">
+        调整系统相关配置
+      </p>
+
+    </div>
+
+  </header>
+
+
+  <!-- ===================================================
+       电池
+       =================================================== -->
+
+  <div class="tdp-card">
+
+    <div class="tdp-header">
+
+      <div>
+
+        <div class="tdp-title" data-i18n="system.battery">
+          电池
+        </div>
+
+        <div class="tdp-description" data-i18n="system.batteryDescription">
+          调整电池充电相关设置
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="tdp-section">
+
+      <div class="tdp-section-title" data-i18n="system.battery">
+        Battery
+      </div>
+
+      <div class="tdp-grid">
+
+        <!-- Charging Limit -->
+        <div class="tdp-item">
+
+          <div class="tdp-item-header">
+
+            <span class="tdp-label" data-i18n="system.chargingLimit">
+              充电限制
+            </span>
+
+            <span
+              class="tdp-current"
+              data-i18n="system.currentValue">
+              当前值
+            </span>
+
+          </div>
+
+          <div class="tdp-input-row">
+
+            <input
+              id="battery_charglimit"
+              class="tdp-input"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              placeholder="--" />
+
+            <span
+              class="tdp-unit"
+              data-i18n="common.percent">
+              %
+            </span>
+
+            <button
+              class="tdp-set-btn"
+              data-tdp="battery_charglimit"
+              type="button"
+              data-i18n="system.write">
+              写入
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>

@@ -41,7 +41,7 @@
 
     <div class="tuning-options">
 
-      <button class="tuning-btn active" data-mode="unspecified" type="button">
+      <!-- <button class="tuning-btn active" data-mode="unspecified" type="button">
 
         <span class="tuning-btn-title" data-i18n="tuning.default">
           默认
@@ -51,7 +51,7 @@
           不修改模式
         </span>
 
-      </button>
+      </button> -->
 
 
       <button class="tuning-btn" data-mode="power-saving" type="button">
@@ -503,59 +503,6 @@
             <button
               class="tdp-set-btn"
               data-tdp="gpu-pl2"
-              type="button"
-              data-i18n="tuning.write">
-              写入
-            </button>
-
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-
-
-    <!-- Battery -->
-    <div class="tdp-section">
-
-      <div class="tdp-section-title" data-i18n="tuning.battery">
-        Battery
-      </div>
-
-      <div class="tdp-grid">
-
-        <div class="tdp-item">
-
-          <div class="tdp-item-header">
-
-            <span class="tdp-label" data-i18n="tuning.chargingLimit">
-              Charging limit
-            </span>
-
-            <span class="tdp-current" data-i18n="tuning.currentValue">
-              当前值
-            </span>
-
-          </div>
-
-          <div class="tdp-input-row">
-
-            <input
-              id="battery_charglimit"
-              class="tdp-input"
-              type="number"
-              min="0"
-              step="1"
-              placeholder="--" />
-
-            <span class="tdp-unit" data-i18n="common.percent">
-              %
-            </span>
-
-            <button
-              class="tdp-set-btn"
-              data-tdp="battery_charglimit"
               type="button"
               data-i18n="tuning.write">
               写入

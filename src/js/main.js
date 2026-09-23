@@ -753,63 +753,64 @@ tuningButtons.forEach(
     button.addEventListener(
       "click",
       async () => {
-
-        const mode =
-          button.dataset.mode;
-
-        // 更新选中状态
-        tuningButtons.forEach(
-          (btn) => {
-            btn.classList.remove(
-              "active"
-            );
-          }
-        );
-
-        button.classList.add(
-          "active"
-        );
-
-        // 默认：不修改模式
-        if (
-          mode === "unspecified"
-        ) {
-
-          console.log(
-            "性能模式: 默认"
-          );
-
+        const mode = button.dataset.mode;
+        tuningButtons.forEach((btn) => { btn.classList.remove(); });
+        button.classList.add("active");
+        if (mode === "unspecified") {
+          console.log("性能模式: 默认");
           return;
         }
-
-
         try {
-
-          await invoke(
-            "set_performance_mode",
-            {
-              mode: mode
-            }
-          );
-
-          console.log(
-            "性能模式:",
-            mode
-          );
-
+          await invoke("set_performance_mode", { mode: mode });
+          console.log("性能模式:", mode);
         } catch (error) {
-
-          console.error(
-            "设置性能模式失败:",
-            error
-          );
+          console.error("设置性能模式失败:", error);
         }
-
       }
     );
 
   }
 );
+
+// 获取性能模式
+async function loadPerformanceMode() {
+  try {
+    let mode;
+
+    do {
+      mode = await invoke("get_performance_mode");
+
+      if (mode === 0) {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 3000);
+        });
+      }
+    } while (mode === 0);
+
+    const modeMap = {
+      1: "performance",
+      2: "balanced",
+      3: "power-saving",
+      5: "benchmark-on"
+    };
+
+    tuningButtons.forEach((btn) => {
+      btn.classList.remove("active");
+    });
+
+    const modeName = modeMap[mode];
+
+    const activeButton = document.querySelector(
+      `.tuning-btn[data-mode="${modeName}"]`
+    );
+
+    if (activeButton) {
+      activeButton.classList.add("active");
+    }
+  } catch (error) {
+    console.error("获取性能模式失败:", error);
+  }
+}
 
 
 
@@ -1457,11 +1458,11 @@ function updateKeyboardLedUI(
     keyboardLedDescription.textContent =
       enabled
         ? t(
-            "keyboard.ledEnabled"
-          )
+          "keyboard.ledEnabled"
+        )
         : t(
-            "keyboard.ledDisabled"
-          );
+          "keyboard.ledDisabled"
+        );
   }
 }
 
@@ -1651,23 +1652,19 @@ async function init() {
   // 初始化语言
   initI18n();
 
-
   await loadConfig();
-
 
   // 初始化风扇控制状态
   await initFanControlStatus();
 
-
   updateControlState();
-
 
   loadAutostartState();
 
+  loadPerformanceMode();
 
   loadKeyboardLedState();
 
 }
-
 
 init();

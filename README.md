@@ -128,4 +128,4 @@
 >
 > Logo 下载来自 [veryicon](https://www.veryicon.com/icons/culture/antique-objects/antique-objects-chinese-style-fan-folding-fan.html?p=2&use_xbridge3=true&loader_name=forest&need_sec_link=1&sec_link_scene=im&theme=light)
 >
-> 字体 下载来自 [Goole Fonts](https://fonts.google.com/share?selection.family=Noto+Sans+SC:wght@100..900)
+> 字体 下载来自 [Google Fonts](https://fonts.google.com/share?selection.family=Noto+Sans+SC:wght@100..900)

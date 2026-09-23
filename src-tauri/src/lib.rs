@@ -392,6 +392,26 @@ async fn set_performance_mode(app: tauri::AppHandle, mode: String) {
 }
 
 #[tauri::command]
+async fn get_performance_mode() -> i32 {
+    let wcf = match UniwillWcfEc::new() {
+        Ok(wcf) => wcf,
+        Err(e) => {
+            eprintln!("加载 NUCtool DLL 失败: {}", e);
+            None
+        }
+        .expect("加载 NUCtool DLL 失败"),
+    };
+    let ret = wcf.connect();
+    let state = wcf.get_current_state();
+    println!("connect: {} get_performance_mode {:?}", ret, &state);
+    if state.benchmark_mode == 1 {
+        5
+    } else {
+        state.selected_profile_index
+    }
+}
+    
+#[tauri::command]
 async fn set_power_plan(app: tauri::AppHandle, mode: i32) -> Result<(), String> {
     let wcf = match UniwillWcfEc::new() {
         Ok(wcf) => wcf,
@@ -1017,6 +1037,7 @@ pub fn run() {
             start_fan_control,
             stop_fan_control,
             set_performance_mode,
+            get_performance_mode,
             get_tdp,
             set_tdp,
             get_fan_control_status,
