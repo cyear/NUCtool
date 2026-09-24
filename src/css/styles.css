@@ -33,7 +33,7 @@
   --radius-md: 10px;
   --radius-lg: 14px;
 
-  --sidebar-width: 210px;
+  --sidebar-width: 240px;
 }
 
 html,
@@ -194,17 +194,14 @@ body {
 
 .nav-icon {
   width: 24px;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   margin-right: 7px;
-
   color: currentColor;
-
   font-size: 14px;
   opacity: 0.9;
+  flex-shrink: 0;
 }
 
 .nav-text {
@@ -495,7 +492,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-
+  gap: 8px;
+  
   min-height: 50px;
 
   margin-bottom: 16px;
@@ -794,6 +792,11 @@ body {
     --sidebar-width: 170px;
   }
 
+  .nav-btn {
+    hyphens: auto;
+    height: fit-content;
+    min-height: 42px;
+  }
   .sidebar {
     padding-left: 10px;
     padding-right: 10px;
@@ -822,8 +825,12 @@ body {
     width: 100%;
   }
 
-  .control-right {
-    justify-content: flex-end;
+  .control-left > button {
+    width: 100%;
+  }
+
+  .control-right > button {
+    width: 100%;  
   }
 }
 
@@ -846,6 +853,8 @@ body {
 
   .logo {
     font-size: 0;
+    display: flex;
+    justify-content: center;
   }
 
   .logo::after {
@@ -996,6 +1005,7 @@ body {
   font-size: 15px;
   font-weight: 600;
   line-height: 1.4;
+  hyphens: auto;
 }
 
 .tuning-btn-description {

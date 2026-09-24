@@ -1,8 +1,8 @@
 {
   "fanControl": "Управление вентиляторами",
-  "startMainPriority": "Приоритет основного вентилятора",
-  "startSplitPriority": "Раздельное управление вентиляторами",
-  "startIndependent": "Независимый режим",
+  "startMainPriority": "Вентиляторы по Главной кривой",
+  "startSplitPriority": "Вентиляторы по Доп. кривой",
+  "startIndependent": "Индивидуальный режим работы",
 
   "stopFanControl": "Остановить",
 
@@ -12,14 +12,14 @@
   "powerSavingMode": "Энергосберегающий режим",
   "balancedMode": "Сбалансированный режим",
   "performanceMode": "Производительный режим",
-  "benchmarkMode": "Режим максимальной производительности",
+  "benchmarkMode": "Режим для бенчмарков",
 
   "powerPlan": "План электропитания",
   "powerPlanOff": "Отключен",
   "powerPlanHighPerformance": "Высокая производительность",
   "powerPlanBalanced": "Сбалансированный",
   "powerPlanPowerSaving": "Энергосбережение",
-  "powerPlanBenchmark": "Режим максимальной производительности",
+  "powerPlanBenchmark": "Режим для бенчмарков",
 
   "displaySettings": "Настройки дисплея",
   "displaySettingsOn": "ВКЛ.",
