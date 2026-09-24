@@ -53,8 +53,9 @@ body {
     left: 0;
     top: 0;
 
-    /* 固定尺寸 */
-    width: 300px;
+    /* Adaptive width, capped at 400px */
+    width: fit-content;
+    max-width: 400px;
     height: 64px;
 
     box-sizing: border-box;
