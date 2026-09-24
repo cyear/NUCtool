@@ -18,6 +18,43 @@ pub struct NativePerformanceState {
     pub selected_profile_index: c_int,
 }
 
+pub struct NativeRgb {
+    pub b: u8,
+    pub g: u8,
+    pub r: u8,
+    pub reserved: u8,
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy, Default)]
+pub struct NativeKeyboardLedProfile {
+    pub brightness_ac: c_int,
+    pub brightness_dc: c_int,
+    pub direction: c_int,
+    pub effect: c_int,
+    pub speed: c_int,
+    pub color_count: c_int,
+    pub key_color_count: c_int,
+}
+
+pub enum RGBKeyboardEffect {
+    // 单色 √
+    Monocolor = 0,
+    Breathing = 1,
+    Wave = 2,
+    Reactive = 3,
+    // 彩虹 √
+    Rainbow = 4,
+	Ripple = 5,
+	Raindrop = 6,
+	Marquee = 7,
+	Aurora = 8,
+	Spark = 9,
+	Music = 10,
+	UserMode = 11,
+	GamingMode = 12,
+}
+
 type WcfConnectFn = unsafe extern "system" fn(key: *const std::os::raw::c_char) -> c_int;
 type WcfDisconnectFn = unsafe extern "system" fn();
 type WcfIsConnectedFn = unsafe extern "system" fn() -> c_int;
