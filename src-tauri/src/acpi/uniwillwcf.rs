@@ -40,19 +40,30 @@ pub struct NativeKeyboardLedProfile {
 pub enum RGBKeyboardEffect {
     // 单色 √
     Monocolor = 0,
+    // 呼吸
     Breathing = 1,
+    // 波浪
     Wave = 2,
+    // 反应
     Reactive = 3,
     // 彩虹 √
     Rainbow = 4,
-	Ripple = 5,
-	Raindrop = 6,
-	Marquee = 7,
-	Aurora = 8,
-	Spark = 9,
-	Music = 10,
-	UserMode = 11,
-	GamingMode = 12,
+    // 波纹
+    Ripple = 5,
+    // 雨滴
+    Raindrop = 6,
+    // 活动字幕
+    Marquee = 7,
+    // 极光
+    Aurora = 8,
+    // 火花
+    Spark = 9,
+    // 音乐
+    Music = 10,
+    // ???
+    UserMode = 11,
+    // 游戏模式
+    GamingMode = 12,
 }
 
 type WcfConnectFn = unsafe extern "system" fn(key: *const std::os::raw::c_char) -> c_int;
