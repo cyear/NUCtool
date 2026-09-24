@@ -36,7 +36,6 @@ pub fn get_windows_language() -> Result<String, String> {
         .filter(|part| !part.is_empty())
         .filter_map(|part| String::from_utf16(part).ok())
         .collect::<Vec<_>>();
-
     languages
         .into_iter()
         .next()

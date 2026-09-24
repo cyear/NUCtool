@@ -243,7 +243,7 @@ const jaJP = {
     fanModeDescription: "2つのファンの制御方法を設定します",
     independent: "独立",
     mainPriority: "メインファン優先",
-    splitPriority: "個別ファン優先"
+    secondaryPriority: "個別ファン優先"
   
   },
 

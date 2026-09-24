@@ -229,7 +229,7 @@ const zhCN = {
     fanModeDescription: "设置两个风扇的控制方式",
     independent: "独立",
     mainPriority: "主风扇优先",
-    splitPriority: "分风扇优先",
+    secondaryPriority: "分风扇优先",
   },
 
   // ==========================================================

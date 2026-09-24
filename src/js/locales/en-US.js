@@ -241,7 +241,7 @@ const enUS = {
     fanModeDescription: "Configure how the two fans are controlled",
     independent: "Independent",
     mainPriority: "Main Fan Priority",
-    splitPriority: "Separate Fan Priority",
+    secondaryPriority: "Secondary Fan Priority",
 
   },
 
