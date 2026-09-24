@@ -1,8 +1,8 @@
 {
   "fanControl": "Управление вентиляторами",
-  "startMainPriority": "Запуск: приоритет основного вентилятора",
-  "startSplitPriority": "Запуск: раздельное управление вентиляторами",
-  "startIndependent": "Запуск: независимый режим",
+  "startMainPriority": "Приоритет основного вентилятора",
+  "startSplitPriority": "Раздельное управление вентиляторами",
+  "startIndependent": "Независимый режим",
 
   "stopFanControl": "Остановить",
 
@@ -12,14 +12,14 @@
   "powerSavingMode": "Энергосберегающий режим",
   "balancedMode": "Сбалансированный режим",
   "performanceMode": "Производительный режим",
-  "benchmarkMode": "Режим тестирования",
+  "benchmarkMode": "Режим максимальной производительности",
 
   "powerPlan": "План электропитания",
   "powerPlanOff": "Отключен",
   "powerPlanHighPerformance": "Высокая производительность",
   "powerPlanBalanced": "Сбалансированный",
   "powerPlanPowerSaving": "Энергосбережение",
-  "powerPlanBenchmark": "Тестовый",
+  "powerPlanBenchmark": "Режим максимальной производительности",
 
   "displaySettings": "Настройки дисплея",
   "displaySettingsOn": "ВКЛ.",
@@ -43,7 +43,7 @@
   "psysPl1": "PSYS PL1 = {value}W",
 
   "batterySettings": "Настройки батареи",
-  "batteryChargingLimit": "Лимит зарядки батареи = {value}%",
+  "batteryChargingLimit": "Лимит заряда батареи = {value}%",
 
   "autostartCreateFailed": "Не удалось создать автозапуск",
   "autostartCreateSuccess": "Автозапуск успешно создан",
