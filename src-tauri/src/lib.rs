@@ -185,18 +185,20 @@ fn start_fan_control_internal(
         // 0 = 独立
         // 1 = 主风扇优先
         // 2 = 分风扇优先
+        let mut fan_mode: i32 = 1;
         match config::load_fan_mode() {
             Ok(1) => {
-                fan_data_set.right_fan = fan_data_set.left_fan.clone();
+                fan_mode = 1;
                 println!("主风扇优先");
                 let _ = show_osd_i18n(&app_handle, "fanControl", "startMainPriority");
             }
             Ok(2) => {
-                fan_data_set.left_fan = fan_data_set.right_fan.clone();
+                fan_mode = 2;
                 println!("分风扇优先");
                 let _ = show_osd_i18n(&app_handle, "fanControl", "startSplitPriority");
             }
             Ok(_) => {
+                fan_mode = 0;
                 println!("独立");
                 let _ = show_osd_i18n(&app_handle, "fanControl", "startIndependent");
             }
@@ -219,10 +221,15 @@ fn start_fan_control_internal(
             // &fan_data.right_fan S
 
             // CPU 风扇 主 => 右
-            let right_speed = calculate_speed(&fan_data_set.left_fan, cpu_temp);
+            let mut right_speed = calculate_speed(&fan_data_set.left_fan, cpu_temp);
 
             // GPU 风扇 分 => 左
-            let left_speed = calculate_speed(&fan_data_set.right_fan, gpu_temp);
+            let mut left_speed = calculate_speed(&fan_data_set.right_fan, gpu_temp);
+
+            if fan_mode == 0 {}
+            else if fan_mode == 1 { left_speed = right_speed; } 
+            else if fan_mode == 2 { right_speed = left_speed; }
+            else {}
 
             // ========================================
             // 3. 模式检查
