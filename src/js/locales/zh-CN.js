@@ -142,6 +142,17 @@ const zhCN = {
     currentValue: "当前值",
 
     write: "写入",
+    gsc: {
+      title: "检查驱动程序是否存在卡顿问题",
+      description: "验证图形系统控制器固件接口驱动程序版本",
+      installed: "已安装",
+      recommended: "推荐版本",
+      howToFix: "如何修复",
+      ok: "驱动正常",
+      warning: "可能会出现音频/视频卡顿",
+      notFound: "未找到设备",
+      error: "读取驱动版本失败",
+    }
   },
 
   // ==========================================================
