@@ -100,4 +100,46 @@
 
   </div>
 
+  <!-- =========================================================
+     GSC Driver Check
+     ========================================================= -->
+<div class="settings-card gsc-settings-card" id="gsc-check">
+  <div class="settings-card-header">
+    <div class="settings-card-info">
+      <h3 class="settings-card-title" data-i18n="system.gsc.title">
+        Stutter-free Driver Check
+      </h3>
+      <p class="settings-card-description" data-i18n="system.gsc.description">
+        Verifies the Graphics System Controller Firmware Interface driver version
+      </p>
+    </div>
+  </div>
+  <span class="settings-status" id="gsc-badge" hidden></span>
+  <div class="gsc-versions" id="gsc-versions" hidden>
+    <div class="gsc-version-row">
+      <span class="gsc-version-label" data-i18n="system.gsc.installed">
+        Installed
+      </span>
+      <span class="gsc-version-value" id="gsc-installed">—</span>
+    </div>
+
+    <div class="gsc-version-row">
+      <span class="gsc-version-label" data-i18n="system.gsc.recommended">
+        Recommended
+      </span>
+      <span class="gsc-version-value gsc-version-value--ok" id="gsc-recommended">
+        31.0.101.5590
+      </span>
+    </div>
+  </div>
+
+  <div class="gsc-actions" id="gsc-actions" hidden>
+    <button type="button" class="action-btn primary" id="gsc-how-to-fix"
+            data-i18n="system.gsc.howToFix">
+      How to fix
+    </button>
+  </div>
+</div>
+
+
 </section>

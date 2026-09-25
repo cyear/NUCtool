@@ -8,6 +8,8 @@ import {
   t,
 } from "./i18n.js";
 
+import { initGscCheck } from "./gsc-check.js";
+
 // ==============================================
 // 禁止右键菜单
 document.addEventListener("contextmenu", (e) => {
@@ -2423,6 +2425,7 @@ async function init() {
   loadKeyboardLedState();
   loadFanMode();
   loadAutostartState();
+  await initGscCheck();
   if (model != "LAPAC71H" && model != "LAPAC71G") {
     await initLightbar();
   }
