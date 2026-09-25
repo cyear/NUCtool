@@ -277,6 +277,21 @@ const enUS = {
 
     saved: "Saved ✓",
   },
+
+  // ==========================================================
+  // GSC
+  // ==========================================================
+  gsc: {
+    title: "Stutter-free Driver Check",
+    description: "Verifies the Graphics System Controller Firmware Interface driver version",
+    installed: "Installed",
+    recommended: "Recommended",
+    howToFix: "How to fix",
+    ok: "Driver is fine",
+    warning: "Audio/video stutter may occur",
+    notFound: "Device not found",
+    error: "Failed to read driver version",
+  },
 };
 
 export default enUS;
