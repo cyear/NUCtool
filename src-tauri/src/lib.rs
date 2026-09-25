@@ -49,7 +49,6 @@ pub struct TdpConfig {
     pub cpu_pl4: u8,
     pub gpu_pl1: u8,
     pub gpu_pl2: u8,
-    pub battery_charglimit: u8,
     pub psys_pl1: u8,
 }
 
@@ -661,31 +660,14 @@ async fn get_tdp() -> Result<TdpConfig, String> {
     let gpu_pl2 = ec.gpu_read_pl2().expect("Error");
 
     // =================================================
-    // Battery
-    // =================================================
-    let wcf = match UniwillWcfEc::new() {
-        Ok(wcf) => wcf,
-        Err(e) => {
-            eprintln!("加载 NUCtool DLL 失败: {}", e);
-            None
-        }
-        .expect("加载 NUCtool DLL 失败"),
-    };
-    let ret = wcf.connect();
-    println!("connect: {}", ret);
-
-    let battery_charglimit = wcf.battery_get_charging_level() as u8;
-    wcf.disconnect();
-
-    // =================================================
     // PSYS PL1
     // =================================================
 
     let psys_pl1 = ec.psys_read_pl1().expect("Error");
 
     println!(
-        "TDP 读取: CPU PL1={}W PL2={}W PL4={}W, GPU PL1={}W PL2={}W, Battery_Charging_limit={}%, PSYS_PL1={}W",
-        cpu_pl1, cpu_pl2, cpu_pl4, gpu_pl1, gpu_pl2, battery_charglimit, psys_pl1
+        "TDP 读取: CPU PL1={}W PL2={}W PL4={}W, GPU PL1={}W PL2={}W, PSYS_PL1={}W",
+        cpu_pl1, cpu_pl2, cpu_pl4, gpu_pl1, gpu_pl2, psys_pl1
     );
 
     Ok(TdpConfig {
@@ -694,7 +676,6 @@ async fn get_tdp() -> Result<TdpConfig, String> {
         cpu_pl4,
         gpu_pl1,
         gpu_pl2,
-        battery_charglimit,
         psys_pl1,
     })
 }
@@ -753,26 +734,6 @@ async fn set_tdp(app: tauri::AppHandle, tdp_type: String, value: u8) -> Result<(
         }
 
         // =============================================
-        // Battery
-        // =============================================
-        "battery_charglimit" => {
-            let wcf = match UniwillWcfEc::new() {
-                Ok(wcf) => wcf,
-                Err(e) => {
-                    eprintln!("加载 NUCtool DLL 失败: {}", e);
-                    None
-                }
-                .expect("加载 NUCtool DLL 失败"),
-            };
-            let ret = wcf.connect();
-            println!("connect: {}", ret);
-            wcf.battery_set_charging_level(value as i32);
-            println!("写入Battery Charging limit： {}%", value);
-            let _ = show_osd_i18n_value(&app, "batterySettings", "batteryChargingLimit", value);
-            wcf.disconnect();
-        }
-
-        // =============================================
         // PSYS PL1
         // =============================================
         "psys_pl1" => {
@@ -791,6 +752,95 @@ async fn set_tdp(app: tauri::AppHandle, tdp_type: String, value: u8) -> Result<(
 
     Ok(())
 }
+
+
+// =================================================
+// Battery
+// =================================================    
+#[tauri::command]
+async fn get_battery_charging_level() -> i32 {
+    let wcf = match UniwillWcfEc::new() {
+        Ok(wcf) => wcf,
+        Err(e) => {
+            eprintln!("加载 NUCtool DLL 失败: {}", e);
+            None
+        }
+        .expect("加载 NUCtool DLL 失败"),
+    };
+    let ret = wcf.connect();
+    println!("connect: {}", ret);
+
+    let battery_charglimit = wcf.battery_get_charging_level();
+    wcf.disconnect();
+    battery_charglimit
+}
+
+#[tauri::command]
+async fn set_battery_charging_level(app: tauri::AppHandle, level: i32) {
+    let wcf = match UniwillWcfEc::new() {
+        Ok(wcf) => wcf,
+        Err(e) => {
+            eprintln!("加载 NUCtool DLL 失败: {}", e);
+            None
+        }
+        .expect("加载 NUCtool DLL 失败"),
+    };
+    let ret = wcf.connect();
+    println!("connect: {}", ret);
+    wcf.battery_set_charging_level(level);
+    println!("写入Battery Charging limit： {}%", level);
+    let _ = show_osd_i18n_value(&app, "batterySettings", "batteryChargingLimit", level);
+    wcf.disconnect();
+}
+
+#[tauri::command]
+async fn get_battery_mode() -> i32 {
+    let wcf = match UniwillWcfEc::new() {
+        Ok(wcf) => wcf,
+        Err(e) => {
+            eprintln!("加载 NUCtool DLL 失败: {}", e);
+            None
+        }
+        .expect("加载 NUCtool DLL 失败"),
+    };
+    let ret = wcf.connect();
+    println!("connect: {}", ret);
+
+    let mode = wcf.battery_get_mode();
+    wcf.disconnect();
+    mode
+}
+
+#[tauri::command]
+async fn set_battery_mode(app: tauri::AppHandle, mode: i32) {
+    let wcf = match UniwillWcfEc::new() {
+        Ok(wcf) => wcf,
+        Err(e) => {
+            eprintln!("加载 NUCtool DLL 失败: {}", e);
+            None
+        }
+        .expect("加载 NUCtool DLL 失败"),
+    };
+    let ret = wcf.connect();
+    println!("connect: {}", ret);
+    match mode {
+        0 => {
+            let _ = show_osd_i18n_value(&app, "batterySettings", "batteryHealthFull", mode);
+        }
+        1 => {
+            let _ = show_osd_i18n_value(&app, "batterySettings", "batteryHealthCustom", mode);
+        }
+        2 => {
+            let _ = show_osd_i18n_value(&app, "batterySettings", "batteryHealthBest", mode);
+        }
+        _ => {
+            let _ = show_osd_i18n_value(&app, "batterySettings", "error", mode);
+        }
+    }
+    let _ = wcf.battery_set_mode(mode);
+    wcf.disconnect();
+}
+
 
 #[tauri::command]
 async fn get_autostart() -> Result<bool, String> {
@@ -1152,6 +1202,10 @@ pub fn run() {
             get_sys_model,
             get_sys_arc_gpu_driver,
             get_sys_gsc_driver,
+            get_battery_charging_level,
+            set_battery_charging_level,
+            get_battery_mode,
+            set_battery_mode,
         ])
         .setup(setup)
         .build(tauri::generate_context!())

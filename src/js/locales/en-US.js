@@ -142,13 +142,22 @@ const enUS = {
     title: "System Configuration",
     subtitle: "Adjust system-related settings",
 
+    // Battery
     battery: "Battery",
     batteryDescription: "Adjust battery charging settings",
 
+    // Battery Health Optimizer
+    batteryHealthOptimizer: "Battery Health Optimizer",
+    batteryHealthDescription: "Choose a charging strategy",
+    batteryHealthFull: "Charge to 100%",
+    batteryHealthCustom: "Custom",
+    batteryHealthBest: "Best Battery Health",
+
+    // Battery Charging Limit
     chargingLimit: "Charging Limit",
     currentValue: "Current Value",
-
     write: "Write",
+    
     // ==========================================================
     // GSC
     // ==========================================================

@@ -44,6 +44,9 @@
 
   "batterySettings": "Настройки батареи",
   "batteryChargingLimit": "Лимит заряда батареи = {value}%",
+  "batteryHealthFull": "Зарядка до 100%",
+  "batteryHealthCustom": "Пользовательский",
+  "batteryHealthBest": "Оптимальное состояние батареи",
 
   "autostartCreateFailed": "Не удалось создать автозапуск",
   "autostartCreateSuccess": "Автозапуск успешно создан",

@@ -38,59 +38,68 @@
       </div>
 
     </div>
+    <!-- 电池健康优化器 -->
+    <div class="settings-option fan-mode-option">
 
+      <div class="settings-option-info">
 
-    <div class="tdp-section">
+        <div class="settings-option-title" data-i18n="system.batteryHealthOptimizer">
+          电池健康优化器
+        </div>
 
-      <div class="tdp-section-title" data-i18n="system.battery">
-        Battery
+        <div class="settings-option-description" data-i18n="system.batteryHealthDescription">
+          选择电池充电策略
+        </div>
+
       </div>
 
-      <div class="tdp-grid">
 
-        <!-- Charging Limit -->
-        <div class="tdp-item">
+      <select id="battery-health-mode" class="settings-language-select">
 
-          <div class="tdp-item-header">
+        <option value="0" data-i18n="system.batteryHealthFull">
+          充电达到 100% 电量
+        </option>
 
-            <span class="tdp-label" data-i18n="system.chargingLimit">
-              充电限制
-            </span>
+        <option value="1" data-i18n="system.batteryHealthCustom">
+          定制
+        </option>
 
-            <span
-              class="tdp-current"
-              data-i18n="system.currentValue">
-              当前值
-            </span>
+        <option value="2" data-i18n="system.batteryHealthBest">
+          最佳电池健康
+        </option>
 
-          </div>
+      </select>
 
-          <div class="tdp-input-row">
+    </div>
 
-            <input
-              id="battery_charglimit"
-              class="tdp-input"
-              type="number"
-              min="0"
-              max="100"
-              step="1"
-              placeholder="--" />
+    <div id="battery-custom-limit" class="battery-custom-limit">
 
-            <span
-              class="tdp-unit"
-              data-i18n="common.percent">
-              %
-            </span>
+      <div class="battery-limit-item">
 
-            <button
-              class="tdp-set-btn"
-              data-tdp="battery_charglimit"
-              type="button"
-              data-i18n="system.write">
-              写入
-            </button>
+        <div class="battery-limit-header">
 
-          </div>
+          <span class="battery-limit-label" data-i18n="system.chargingLimit">
+            充电限制
+          </span>
+
+          <span class="battery-limit-current" data-i18n="system.currentValue">
+            当前值
+          </span>
+
+        </div>
+
+        <div class="battery-limit-input-row">
+
+          <input id="battery_charglimit" class="battery-limit-input" type="number" min="0" max="100" step="1"
+            placeholder="--" />
+
+          <span class="battery-limit-unit" data-i18n="common.percent">
+            %
+          </span>
+
+          <button id="battery-charging-limit-set" class="battery-limit-set-btn" type="button" data-i18n="system.write">
+            写入
+          </button>
 
         </div>
 
@@ -103,43 +112,42 @@
   <!-- =========================================================
      GSC Driver Check
      ========================================================= -->
-<div class="settings-card gsc-settings-card" id="gsc-check">
-  <div class="settings-card-header">
-    <div class="settings-card-info">
-      <h3 class="settings-card-title" data-i18n="system.gsc.title">
-        Stutter-free Driver Check
-      </h3>
-      <p class="settings-card-description" data-i18n="system.gsc.description">
-        Verifies the Graphics System Controller Firmware Interface driver version
-      </p>
+  <div class="settings-card gsc-settings-card" id="gsc-check">
+    <div class="settings-card-header">
+      <div class="settings-card-info">
+        <h3 class="settings-card-title" data-i18n="system.gsc.title">
+          Stutter-free Driver Check
+        </h3>
+        <p class="settings-card-description" data-i18n="system.gsc.description">
+          Verifies the Graphics System Controller Firmware Interface driver version
+        </p>
+      </div>
     </div>
-  </div>
-  <span class="settings-status" id="gsc-badge" hidden></span>
-  <div class="gsc-versions" id="gsc-versions" hidden>
-    <div class="gsc-version-row">
-      <span class="gsc-version-label" data-i18n="system.gsc.installed">
-        Installed
-      </span>
-      <span class="gsc-version-value" id="gsc-installed">—</span>
+    <span class="settings-status" id="gsc-badge" hidden></span>
+    <div class="gsc-versions" id="gsc-versions" hidden>
+      <div class="gsc-version-row">
+        <span class="gsc-version-label" data-i18n="system.gsc.installed">
+          Installed
+        </span>
+        <span class="gsc-version-value" id="gsc-installed">—</span>
+      </div>
+
+      <div class="gsc-version-row">
+        <span class="gsc-version-label" data-i18n="system.gsc.recommended">
+          Recommended
+        </span>
+        <span class="gsc-version-value gsc-version-value--ok" id="gsc-recommended">
+          31.0.101.5590
+        </span>
+      </div>
     </div>
 
-    <div class="gsc-version-row">
-      <span class="gsc-version-label" data-i18n="system.gsc.recommended">
-        Recommended
-      </span>
-      <span class="gsc-version-value gsc-version-value--ok" id="gsc-recommended">
-        31.0.101.5590
-      </span>
+    <div class="gsc-actions" id="gsc-actions" hidden>
+      <button type="button" class="action-btn primary" id="gsc-how-to-fix" data-i18n="system.gsc.howToFix">
+        How to fix
+      </button>
     </div>
   </div>
-
-  <div class="gsc-actions" id="gsc-actions" hidden>
-    <button type="button" class="action-btn primary" id="gsc-how-to-fix"
-            data-i18n="system.gsc.howToFix">
-      How to fix
-    </button>
-  </div>
-</div>
 
 
 </section>

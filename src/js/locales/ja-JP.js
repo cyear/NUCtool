@@ -144,13 +144,22 @@ const jaJP = {
     title: "システム設定",
     subtitle: "システム関連の設定を調整します",
 
+    // バッテリー
     battery: "バッテリー",
     batteryDescription: "バッテリーの充電設定を調整します",
 
-    chargingLimit: "充電制限",
-    currentValue: "現在値",
+    // バッテリー健康最適化
+    batteryHealthOptimizer: "バッテリー健康最適化",
+    batteryHealthDescription: "充電方式を選択します",
+    batteryHealthFull: "100%まで充電",
+    batteryHealthCustom: "カスタム",
+    batteryHealthBest: "バッテリー健康を優先",
 
+    // 充電上限
+    chargingLimit: "充電上限",
+    currentValue: "現在値",
     write: "書き込み",
+    
     gsc: {
       title: "カクつき防止ドライバーの確認",
       description: "グラフィックスシステムコントローラー・ファームウェアインターフェースドライバーのバージョンを確認します",

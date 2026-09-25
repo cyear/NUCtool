@@ -5,6 +5,8 @@
 ## v1.0.8-Beta [2026年9月25日]
 
 1. 修复错误的风扇模式(不再是同步曲线了)
+2. 添加"检查驱动程序是否存在卡顿问题"(报错为The Intel(R) Graphics System Controller Firmware Interface is being reset.)
+
 
 ## v1.0.7-Beta [2026年9月25日]
 

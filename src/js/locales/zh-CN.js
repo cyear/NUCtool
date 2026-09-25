@@ -135,13 +135,22 @@ const zhCN = {
     title: "系统配置",
     subtitle: "调整系统相关配置",
 
+    // 电池
     battery: "电池",
     batteryDescription: "调整电池充电相关设置",
 
+    // 电池健康优化器
+    batteryHealthOptimizer: "电池健康优化器",
+    batteryHealthDescription: "选择电池充电策略",
+    batteryHealthFull: "充电达到 100% 电量",
+    batteryHealthCustom: "定制",
+    batteryHealthBest: "最佳电池健康",
+
+    // 电池充电限制
     chargingLimit: "充电限制",
     currentValue: "当前值",
-
     write: "写入",
+    
     gsc: {
       title: "检查驱动程序是否存在卡顿问题",
       description: "验证图形系统控制器固件接口驱动程序版本",

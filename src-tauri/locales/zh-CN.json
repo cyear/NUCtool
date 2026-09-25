@@ -42,6 +42,9 @@
 
   "batterySettings": "电池设置",
   "batteryChargingLimit": "电池充电上限 = {value}%",
+  "batteryHealthFull": "充电达到 100% 电量",
+  "batteryHealthCustom": "定制",
+  "batteryHealthBest": "最佳电池健康",
 
   "autostartCreateFailed": "自启动创建失败",
   "autostartCreateSuccess": "自启动创建成功",

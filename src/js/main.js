@@ -973,11 +973,6 @@ async function loadTdp() {
       tdp.gpu_pl2;
 
     document.getElementById(
-      "battery_charglimit"
-    ).value =
-      tdp.battery_charglimit;
-
-    document.getElementById(
       "psys_pl1"
     ).value =
       tdp.psys_pl1;
@@ -2410,6 +2405,309 @@ if (model === "LAPAC71H" || model == "LAPAC71G") {
   }
 }
 
+
+// =====================================================
+// 电池健康优化器
+// =====================================================
+
+const batteryHealthModeSelect =
+  document.getElementById(
+    "battery-health-mode"
+  );
+
+const batteryCustomLimit =
+  document.getElementById(
+    "battery-custom-limit"
+  );
+
+const batteryChargingLevelInput =
+  document.getElementById(
+    "battery_charglimit"
+  );
+
+const batteryChargingLimitSetButton =
+  document.getElementById(
+    "battery-charging-limit-set"
+  );
+
+
+// -----------------------------------------------------
+// 更新电池健康 UI
+// -----------------------------------------------------
+
+function updateBatteryHealthUI(mode) {
+
+  if (!batteryHealthModeSelect) {
+    return;
+  }
+
+  const batteryMode = Number(mode);
+
+  batteryHealthModeSelect.value =
+    String(batteryMode);
+
+
+  // 只有“定制”模式显示充电限制
+  if (batteryCustomLimit) {
+
+    if (batteryMode === 1) {
+      batteryCustomLimit.style.display = "";
+    } else {
+      batteryCustomLimit.style.display = "none";
+    }
+
+  }
+
+}
+
+
+// -----------------------------------------------------
+// 读取充电限制
+// -----------------------------------------------------
+
+async function loadBatteryChargingLevel() {
+
+  if (!batteryChargingLevelInput) {
+    return;
+  }
+
+  try {
+
+    const level =
+      await invoke(
+        "get_battery_charging_level"
+      );
+
+
+    console.log(
+      "电池充电限制:",
+      level
+    );
+
+
+    batteryChargingLevelInput.value =
+      Number(level);
+
+  } catch (error) {
+
+    console.error(
+      "读取电池充电限制失败:",
+      error
+    );
+
+  }
+
+}
+
+
+// -----------------------------------------------------
+// 设置充电限制
+// -----------------------------------------------------
+
+async function setBatteryChargingLevel() {
+
+  if (!batteryChargingLevelInput) {
+    return;
+  }
+
+
+  const level =
+    Number(
+      batteryChargingLevelInput.value
+    );
+
+
+  if (
+    !Number.isInteger(level) ||
+    level < 0 ||
+    level > 100
+  ) {
+
+    console.error(
+      "无效的电池充电限制:",
+      level
+    );
+
+    return;
+  }
+
+
+  try {
+
+    await invoke(
+      "set_battery_charging_level",
+      {
+        level: level
+      }
+    );
+
+
+    console.log(
+      "电池充电限制设置为:",
+      level
+    );
+
+  } catch (error) {
+
+    console.error(
+      "设置电池充电限制失败:",
+      error
+    );
+
+
+    // 设置失败，重新读取实际值
+    await loadBatteryChargingLevel();
+
+  }
+
+}
+
+
+// -----------------------------------------------------
+// 读取电池健康模式
+// -----------------------------------------------------
+
+async function loadBatteryHealthMode() {
+
+  if (!batteryHealthModeSelect) {
+    return;
+  }
+
+  try {
+
+    const mode =
+      Number(
+        await invoke("get_battery_mode")
+      );
+
+    console.log(
+      "电池健康模式:",
+      mode
+    );
+
+    updateBatteryHealthUI(mode);
+
+    // 只有定制模式读取充电限制
+    if (mode === 1) {
+      await loadBatteryChargingLevel();
+    }
+
+  } catch (error) {
+
+    console.error(
+      "读取电池健康模式失败:",
+      error
+    );
+
+  }
+
+}
+
+
+// -----------------------------------------------------
+// 设置电池健康模式
+// -----------------------------------------------------
+
+async function setBatteryHealthMode(mode) {
+
+  if (!batteryHealthModeSelect) {
+    return;
+  }
+
+  const batteryMode = Number(mode);
+
+  try {
+
+    await invoke("set_battery_mode", {
+      mode: batteryMode
+    });
+
+    console.log(
+      "电池健康模式:",
+      batteryMode
+    );
+
+    updateBatteryHealthUI(batteryMode);
+
+    // 只有切换到定制模式才读取充电限制
+    if (batteryMode === 1) {
+      await loadBatteryChargingLevel();
+    }
+
+  } catch (error) {
+
+    console.error(
+      "设置电池健康模式失败:",
+      error
+    );
+
+    // 设置失败，恢复真实状态
+    await loadBatteryHealthMode();
+
+  }
+
+}
+
+
+// -----------------------------------------------------
+// 电池健康模式下拉框
+// -----------------------------------------------------
+
+if (batteryHealthModeSelect) {
+
+  batteryHealthModeSelect.addEventListener(
+    "change",
+    async () => {
+
+      const mode =
+        Number(
+          batteryHealthModeSelect.value
+        );
+
+
+      if (
+        !Number.isInteger(mode) ||
+        mode < 0 ||
+        mode > 2
+      ) {
+
+        console.error(
+          "无效的电池健康模式:",
+          mode
+        );
+
+        return;
+      }
+
+
+      await setBatteryHealthMode(
+        mode
+      );
+
+    }
+  );
+
+}
+
+
+// -----------------------------------------------------
+// 充电限制写入按钮
+// -----------------------------------------------------
+
+if (batteryChargingLimitSetButton) {
+
+  batteryChargingLimitSetButton.addEventListener(
+    "click",
+    async () => {
+
+      await setBatteryChargingLevel();
+
+    }
+  );
+
+}
+
+
 /* =========================================================
    初始化
    ========================================================= */
@@ -2423,6 +2721,7 @@ async function init() {
   updateControlState();
   loadPerformanceMode();
   loadKeyboardLedState();
+  await loadBatteryHealthMode();
   loadFanMode();
   loadAutostartState();
   await initGscCheck();

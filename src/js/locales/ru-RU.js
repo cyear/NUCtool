@@ -144,7 +144,12 @@ const ruRU = {
 
     battery: "Батарея",
     batteryDescription: "Настройка параметров зарядки батареи",
-
+    // Оптимизация состояния батареи
+    batteryHealthOptimizer: "Оптимизация состояния батареи",
+    batteryHealthDescription: "Выберите режим зарядки",
+    batteryHealthFull: "Зарядка до 100%",
+    batteryHealthCustom: "Пользовательский",
+    batteryHealthBest: "Оптимальное состояние батареи",
     chargingLimit: "Лимит зарядки",
     currentValue: "Текущее значение",
 

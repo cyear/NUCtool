@@ -44,6 +44,9 @@
 
   "batterySettings": "バッテリー設定",
   "batteryChargingLimit": "バッテリー充電上限 = {value}%",
+  "batteryHealthFull": "100%まで充電",
+  "batteryHealthCustom": "カスタム",
+  "batteryHealthBest": "バッテリーの健康を優先",
 
   "autostartCreateFailed": "自動起動の作成に失敗しました",
   "autostartCreateSuccess": "自動起動を作成しました",

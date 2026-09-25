@@ -43,6 +43,9 @@
 
   "batterySettings": "Battery Settings",
   "batteryChargingLimit": "Battery Charging Limit = {value}%",
+  "batteryHealthFull": "Charge to 100%",
+  "batteryHealthCustom": "Custom",
+  "batteryHealthBest": "Best Battery Health",
 
   "autostartCreateFailed": "Failed to Create Startup Task",
   "autostartCreateSuccess": "Startup Task Created Successfully",

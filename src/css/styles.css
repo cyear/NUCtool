@@ -2491,3 +2491,176 @@ body {
 .gsc-actions[hidden] {
   display: none;
 }
+
+/* =========================================================
+   电池充电限制
+   ========================================================= */
+
+.battery-custom-limit {
+  margin-top: 18px;
+  padding-top: 18px;
+
+  border-top: 1px solid var(--border);
+}
+
+
+/* =========================================================
+   电池充电限制项目
+   ========================================================= */
+
+.battery-limit-item {
+  padding: 16px;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+
+/* =========================================================
+   电池充电限制标题
+   ========================================================= */
+
+.battery-limit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 12px;
+}
+
+.battery-limit-label {
+  color: var(--text-primary);
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.battery-limit-current {
+  color: var(--text-muted);
+
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   电池充电限制输入区域
+   ========================================================= */
+
+.battery-limit-input-row {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+
+/* =========================================================
+   电池充电限制输入框
+   ========================================================= */
+
+.battery-limit-input {
+  width: 0;
+  flex: 1;
+
+  min-width: 0;
+  height: 36px;
+
+  padding: 0 10px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  background: rgba(255, 255, 255, 0.04);
+
+  color: var(--text-primary);
+
+  font-family: inherit;
+  font-size: 13px;
+
+  outline: none;
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.battery-limit-input:focus {
+  background: rgba(255, 255, 255, 0.06);
+
+  border-color: var(--accent-border);
+}
+
+.battery-limit-input::placeholder {
+  color: var(--text-muted);
+}
+
+
+/* =========================================================
+   电池充电限制单位
+   ========================================================= */
+
+.battery-limit-unit {
+  color: var(--text-secondary);
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   电池充电限制写入按钮
+   ========================================================= */
+
+.battery-limit-set-btn {
+  height: 36px;
+
+  padding: 0 12px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  background: rgba(255, 255, 255, 0.04);
+
+  color: var(--text-primary);
+
+  font-family: inherit;
+  font-size: 12px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.battery-limit-set-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+
+  border-color: var(--border-hover);
+
+  color: var(--text-primary);
+}
+
+.battery-limit-set-btn:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+
+/* =========================================================
+   电池充电限制响应式
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  .battery-custom-limit {
+    margin-top: 16px;
+    padding-top: 16px;
+  }
+
+  .battery-limit-item {
+    padding: 14px;
+  }
+
+}

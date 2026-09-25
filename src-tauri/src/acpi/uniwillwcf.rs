@@ -120,6 +120,8 @@ type WcfSetPowerPlanFn = unsafe extern "system" fn(mode: c_int) -> c_int;
 type WcfApplyBenchmarkModeFn = unsafe extern "system" fn(enable: c_int) -> c_int;
 type WcfGetBatteryChargingLevelFn = unsafe extern "system" fn() -> c_int;
 type WcfSetBatteryChargingLevelFn = unsafe extern "system" fn(level: c_int) -> c_int;
+type WcfSetBatteryModeFn = unsafe extern "system" fn(mode: c_int) -> c_int;
+type WcfGetBatteryModeFn = unsafe extern "system" fn() -> c_int;
 type WcfEnableDisplayModeMgmtFn = unsafe extern "system" fn(enable: c_int) -> c_int;
 type WcfSetDisplayModeFn = unsafe extern "system" fn(index: c_int) -> c_int;
 type WcfEnableKeyboardLedsFn = unsafe extern "system" fn(enable: c_int) -> c_int;
@@ -162,6 +164,8 @@ pub struct UniwillWcfEc {
     // wcf_get_supported_features_count: Symbol<'static, WcfGetSupportedFeaturesCountFn>,
     wcf_get_battery_charging_level: Symbol<'static, WcfGetBatteryChargingLevelFn>,
     wcf_set_battery_charging_level: Symbol<'static, WcfSetBatteryChargingLevelFn>,
+    wcf_set_battery_mode: Symbol<'static, WcfSetBatteryModeFn>,
+    wcf_get_battery_mode: Symbol<'static, WcfGetBatteryModeFn>,
     wcf_enable_display_mode_mgmt: Symbol<'static, WcfEnableDisplayModeMgmtFn>,
     wcf_set_display_mode: Symbol<'static, WcfSetDisplayModeFn>,
     wcf_enable_keyboard_leds: Symbol<'static, WcfEnableKeyboardLedsFn>,
@@ -215,6 +219,8 @@ impl UniwillWcfEc {
                 wcf_apply_benchmark_mode: lib_ref.get(b"wcf_apply_benchmark_mode")?,
                 wcf_get_battery_charging_level: lib_ref.get(b"wcf_get_battery_charging_level")?,
                 wcf_set_battery_charging_level: lib_ref.get(b"wcf_set_battery_charging_level")?,
+                wcf_set_battery_mode: lib_ref.get(b"wcf_set_battery_mode")?,
+                wcf_get_battery_mode: lib_ref.get(b"wcf_get_battery_mode")?,
                 wcf_enable_display_mode_mgmt: lib_ref.get(b"wcf_enable_display_mode_mgmt")?,
                 wcf_set_display_mode: lib_ref.get(b"wcf_set_display_mode")?,
                 wcf_enable_keyboard_leds: lib_ref.get(b"wcf_enable_keyboard_leds")?,
@@ -327,6 +333,14 @@ impl UniwillWcfEc {
 
     pub fn battery_set_charging_level(&self, value: i32) -> i32 {
         unsafe { (self.wcf_set_battery_charging_level)(value) }
+    }
+
+    pub fn battery_get_mode(&self) -> i32 {
+        unsafe { (self.wcf_get_battery_mode)() }
+    }
+
+    pub fn battery_set_mode(&self, mode: i32) -> i32 {
+        unsafe { (self.wcf_set_battery_mode)(mode) }
     }
 
     // ========================================================
