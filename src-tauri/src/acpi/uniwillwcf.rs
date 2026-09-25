@@ -26,6 +26,24 @@ pub struct NativeRgb {
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy, Default)]
+pub struct NativeLimitedRgb {
+    pub blue: c_int,
+    pub green: c_int,
+    pub red: c_int,
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy, Default)]
+pub struct NativeKeyboardLedProfileSingleColor {
+    pub ac_color: NativeLimitedRgb,
+    pub brightness_ac: c_int,
+    pub brightness_dc: c_int,
+    pub dc_color: NativeLimitedRgb,
+    pub effect: c_int,
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct NativeKeyboardLedProfile {
     pub brightness_ac: c_int,
     pub brightness_dc: c_int,
@@ -82,10 +100,10 @@ pub struct NativeLightbarProfile {
     pub breathing_enable: c_int,
 }
 
-pub enum LightBarEffect {
-    Monocolor = 0,
-    Rainbow = 1,
-}
+// pub enum LightBarEffect {
+//     Monocolor = 0,
+//     Rainbow = 1,
+// }
 
 type WcfGetLastErrorFn = unsafe extern "system" fn(
     buffer: *mut u8,
@@ -107,6 +125,21 @@ type WcfSetDisplayModeFn = unsafe extern "system" fn(index: c_int) -> c_int;
 type WcfEnableKeyboardLedsFn = unsafe extern "system" fn(enable: c_int) -> c_int;
 type WcfGetKeyboardLedsPowerFn = unsafe extern "system" fn() -> c_int;
 type WcfSetKeyboardBrightnessFn = unsafe extern "system" fn(brightness: c_int, ac: c_int) -> c_int;
+type WcfGetCurrentKeyboardLedProfileSingleColorFn = unsafe extern "system" fn(profile: *mut NativeKeyboardLedProfileSingleColor) -> c_int;
+type WcfGetCurrentKeyboardLedProfileFn = unsafe extern "system" fn(profile: *mut NativeKeyboardLedProfile) -> c_int;
+type WcfGetCurrentKeyboardLedProfileColorFn = unsafe extern "system" fn(index: c_int, color: *mut NativeRgb) -> c_int;
+type WcfGetCurrentKeyboardLedProfileKeyColorFn = unsafe extern "system" fn(index: c_int, color: *mut NativeRgb) -> c_int;
+type WcfApplyKeyboardLedProfileFn = unsafe extern "system" fn(
+    brightnessAc: c_int,
+    brightnessDc: c_int,
+    direction: c_int,
+    effect: c_int,
+    speed: c_int,
+    colors: *mut NativeRgb,
+    colorCount: c_int,
+    keyColors: *mut NativeRgb,
+    keyColorCount: c_int,
+) -> c_int;
 type WcfGetCurrentLightbarProfileFn = unsafe extern "system" fn(profile: *mut NativeLightbarProfile) -> c_int;
 type WcfSetLightbarProfileFn = unsafe extern "system" fn(profile: *mut NativeLightbarProfile) -> c_int;
 
@@ -134,6 +167,11 @@ pub struct UniwillWcfEc {
     wcf_enable_keyboard_leds: Symbol<'static, WcfEnableKeyboardLedsFn>,
     wcf_get_keyboard_leds_power: Symbol<'static, WcfGetKeyboardLedsPowerFn>,
     wcf_set_keyboard_brightness: Symbol<'static, WcfSetKeyboardBrightnessFn>,
+    wcf_get_current_keyboard_led_profile_single_color: Symbol<'static, WcfGetCurrentKeyboardLedProfileSingleColorFn>,
+    wcf_get_current_keyboard_led_profile: Symbol<'static, WcfGetCurrentKeyboardLedProfileFn>,
+    wcf_get_current_keyboard_led_profile_color: Symbol<'static, WcfGetCurrentKeyboardLedProfileColorFn>,
+    wcf_get_current_keyboard_led_profile_key_color: Symbol<'static, WcfGetCurrentKeyboardLedProfileKeyColorFn>,
+    wcf_apply_keyboard_led_profile: Symbol<'static, WcfApplyKeyboardLedProfileFn>,
     wcf_get_current_lightbar_profile: Symbol<'static, WcfGetCurrentLightbarProfileFn>,
     wcf_set_lightbar_profile: Symbol<'static, WcfSetLightbarProfileFn>,
 }
@@ -182,6 +220,11 @@ impl UniwillWcfEc {
                 wcf_enable_keyboard_leds: lib_ref.get(b"wcf_enable_keyboard_leds")?,
                 wcf_get_keyboard_leds_power: lib_ref.get(b"wcf_get_keyboard_leds_power")?,
                 wcf_set_keyboard_brightness: lib_ref.get(b"wcf_set_keyboard_brightness")?,
+                wcf_get_current_keyboard_led_profile_single_color: lib_ref.get(b"wcf_get_current_keyboard_led_profile_single_color")?,
+                wcf_get_current_keyboard_led_profile: lib_ref.get(b"wcf_get_current_keyboard_led_profile")?,
+                wcf_get_current_keyboard_led_profile_color: lib_ref.get(b"wcf_get_current_keyboard_led_profile_color")?,
+                wcf_get_current_keyboard_led_profile_key_color: lib_ref.get(b"wcf_get_current_keyboard_led_profile_key_color")?,
+                wcf_apply_keyboard_led_profile: lib_ref.get(b"wcf_apply_keyboard_led_profile")?,
                 wcf_get_current_lightbar_profile: lib_ref.get(b"wcf_get_current_lightbar_profile")?,
                 wcf_set_lightbar_profile: lib_ref.get(b"wcf_set_lightbar_profile")?,
                 lib,
@@ -313,6 +356,41 @@ impl UniwillWcfEc {
     pub fn keyboard_set_brightness(&self, value: i32, ac: i32) -> i32 {
         unsafe { (self.wcf_set_keyboard_brightness)(value, ac) }
     }
+
+    /// NativeKeyboardLedProfileSingleColor {
+    ///     ac_color: NativeLimitedRgb {
+    ///         blue: 48,
+    ///         green: 46,
+    ///         red: 94,
+    ///     },
+    ///     brightness_ac: 4,
+    ///     brightness_dc: 4,
+    ///     dc_color: NativeLimitedRgb {
+    ///         blue: 100,
+    ///         green: 0,
+    ///         red: 0,
+    ///     },
+    ///     effect: 0,
+    /// }
+    pub fn keyboard_get_profile_single(&self) -> NativeKeyboardLedProfileSingleColor {
+        let mut single_color = NativeKeyboardLedProfileSingleColor::default();
+        let ret = unsafe { (self.wcf_get_current_keyboard_led_profile_single_color)(&mut single_color) };
+        if ret == 0 {
+            println!("failed: {}", self.last_error().expect("keyboard_get_profile_single error"));
+        }
+        single_color
+    }
+
+    pub fn keyboard_get_profile(&self) -> NativeKeyboardLedProfile {
+        let mut profile = NativeKeyboardLedProfile::default();
+        let ret = unsafe { (self.wcf_get_current_keyboard_led_profile)(&mut profile) };
+        if ret == 0 {
+            println!("failed: {}", self.last_error().expect("keyboard_get_profile error"));
+        }
+        profile
+    }
+
+    pub fn keyboard_get_profile_key_color(&self, profile: NativeKeyboardLedProfile) {}
 
     // ========================================================
     // 灯条设置
