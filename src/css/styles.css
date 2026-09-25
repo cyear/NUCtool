@@ -2356,3 +2356,138 @@ body {
 .lightbar-card + .lightbar-card {
   margin-top: 16px;
 }
+
+/* =========================================================
+   GSC Driver Check
+   ========================================================= */
+
+.gsc-settings-card {
+  display: grid;
+  grid-template-columns: 1fr min-content;
+  grid-template-areas:
+    "header   badge"
+    "versions actions";
+  column-gap: 8px;
+  row-gap: 4px;
+  margin-top: 1rem;
+}
+
+.gsc-settings-card > .settings-card-header { grid-area: header; }
+.gsc-settings-card > .settings-status      { grid-area: badge; }
+.gsc-settings-card > .gsc-versions         { grid-area: versions; }
+.gsc-settings-card > .gsc-actions          { grid-area: actions; }
+
+.gsc-settings-card:has(.gsc-actions[hidden]) {
+  grid-template-areas:
+    "header   badge"
+    "versions badge";
+}
+
+.gsc-settings-card > .settings-status {
+  align-self: center;
+  justify-self: end;
+  text-align: center;
+  height: min-content;
+}
+
+.gsc-actions {
+  align-self: center;
+  justify-self: end;
+  display: flex;
+  gap: 8px;
+}
+
+/* =========================================================
+   Driver versions
+   ========================================================= */
+
+.gsc-versions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: fit-content;
+
+  padding: 12px 14px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+
+  background: rgba(15, 17, 21, 0.4);
+
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.gsc-version-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.gsc-version-label {
+  color: var(--text-muted);
+}
+
+.gsc-version-value {
+  color: var(--text-primary);
+}
+
+.gsc-version-value--ok {
+  color: var(--success);
+}
+
+.gsc-version-value--warn {
+  color: #d29922;
+}
+
+/* =========================================================
+   Warning-variant badge
+   ========================================================= */
+
+.settings-status.warning {
+  border-color: rgba(210, 153, 34, 0.25);
+  background: rgba(210, 153, 34, 0.08);
+  color: #d29922;
+}
+
+/* =========================================================
+   Adaptive layout for small width
+   ========================================================= */
+
+@media (max-width: 720px) {
+  .gsc-settings-card,
+  .gsc-settings-card:has(.gsc-actions[hidden]) {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "badge"
+      "versions"
+      "actions";
+    gap: 8px;
+  }
+
+  .gsc-settings-card > .settings-status {
+    justify-self: start;
+    width: 100%;
+    display: inline-flex;
+    justify-content: center;
+  }
+
+  .gsc-versions {
+    width: 100%;
+  }
+
+  .gsc-actions {
+    width: 100%;
+    justify-self: start;
+  }
+
+  .gsc-actions > button {
+    width: 100%;
+  }
+}
+.gsc-actions[hidden] {
+  display: none;
+}
