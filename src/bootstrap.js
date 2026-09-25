@@ -1,3 +1,6 @@
+const tauri = window.__TAURI__;
+const { invoke } = tauri.core;
+
 const pages = [
   "monitor",
   "tuning",
@@ -25,8 +28,11 @@ async function loadPages() {
   if (!content) {
     throw new Error("Main content container not found");
   }
-
+  const model = await invoke("get_sys_model");
   for (const page of pages) {
+    if (page === "lightbar" && (model === "LAPAC71H" || model == "LAPAC71G")) {
+      continue;
+    }
     const html = await loadPage(page);
 
     content.insertAdjacentHTML("beforeend", html);

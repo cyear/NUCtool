@@ -2399,6 +2399,17 @@ async function initLightbar() {
 }
 
 
+const model = await invoke("get_sys_model");
+if (model === "LAPAC71H" || model == "LAPAC71G") {
+  const lightbarNav = document.querySelector(
+    '.nav-btn[data-page="lightbar"]'
+  );
+
+  if (lightbarNav) {
+    lightbarNav.remove();
+  }
+}
+
 /* =========================================================
    初始化
    ========================================================= */
@@ -2414,8 +2425,10 @@ async function init() {
   loadKeyboardLedState();
   loadFanMode();
   loadAutostartState();
-  await initLightbar();
   await initGscCheck();
+  if (model != "LAPAC71H" && model != "LAPAC71G") {
+    await initLightbar();
+  }
 }
 
 init();
