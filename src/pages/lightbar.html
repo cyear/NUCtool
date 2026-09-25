@@ -1,0 +1,355 @@
+<!-- ===================================================
+     灯条设置
+     =================================================== -->
+<section id="page-lightbar" class="page">
+
+  <header class="page-header">
+
+    <div class="page-heading">
+
+      <h1 data-i18n="lightbar.title">
+        灯条设置
+      </h1>
+
+      <p
+        class="page-subtitle"
+        data-i18n="lightbar.subtitle">
+        配置 AC 和 DC 状态下的灯条
+      </p>
+
+    </div>
+
+  </header>
+
+
+  <!-- ===================================================
+       AC
+       =================================================== -->
+  <div class="lightbar-card">
+
+    <div class="lightbar-header">
+
+      <div>
+
+        <div class="lightbar-title">
+          <span data-i18n="lightbar.ac">
+            外接电源
+          </span>
+        </div>
+
+        <div
+          class="lightbar-description"
+          data-i18n="lightbar.acDescription">
+          AC Power
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- 灯条预览 -->
+    <div
+      class="lightbar-preview"
+      id="lightbar-ac-preview">
+    </div>
+
+
+    <!-- Blue -->
+    <div class="lightbar-slider">
+
+      <div class="lightbar-slider-header">
+
+        <div class="lightbar-slider-label">
+          <span data-i18n="lightbar.blue">
+            Blue
+          </span>
+
+          <span
+            class="lightbar-slider-value"
+            id="lightbar-ac-blue-value">
+            0
+          </span>
+        </div>
+
+      </div>
+
+      <input
+        type="range"
+        id="lightbar-ac-blue"
+        min="0"
+        max="100"
+        value="0">
+
+    </div>
+
+
+    <!-- Green -->
+    <div class="lightbar-slider">
+
+      <div class="lightbar-slider-header">
+
+        <div class="lightbar-slider-label">
+          <span data-i18n="lightbar.green">
+            Green
+          </span>
+
+          <span
+            class="lightbar-slider-value"
+            id="lightbar-ac-green-value">
+            0
+          </span>
+        </div>
+
+      </div>
+
+      <input
+        type="range"
+        id="lightbar-ac-green"
+        min="0"
+        max="100"
+        value="0">
+
+    </div>
+
+
+    <!-- Red -->
+    <div class="lightbar-slider">
+
+      <div class="lightbar-slider-header">
+
+        <div class="lightbar-slider-label">
+          <span data-i18n="lightbar.red">
+            Red
+          </span>
+
+          <span
+            class="lightbar-slider-value"
+            id="lightbar-ac-red-value">
+            0
+          </span>
+        </div>
+
+      </div>
+
+      <input
+        type="range"
+        id="lightbar-ac-red"
+        min="0"
+        max="100"
+        value="0">
+
+    </div>
+
+
+    <!-- Effect -->
+    <div class="lightbar-effect">
+
+      <button
+        class="lightbar-effect-btn active"
+        data-lightbar-effect="0"
+        data-power="ac"
+        type="button"
+        data-i18n="lightbar.monocolor">
+        单色
+      </button>
+
+      <button
+        class="lightbar-effect-btn"
+        data-lightbar-effect="1"
+        data-power="ac"
+        type="button"
+        data-i18n="lightbar.rainbow">
+        彩虹
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================
+       DC
+       =================================================== -->
+  <div class="lightbar-card">
+
+    <div class="lightbar-header">
+
+      <div>
+
+        <div class="lightbar-title">
+          <span data-i18n="lightbar.dc">
+            电池
+          </span>
+        </div>
+
+        <div
+          class="lightbar-description"
+          data-i18n="lightbar.dcDescription">
+          Battery
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- 灯条预览 -->
+    <div
+      class="lightbar-preview"
+      id="lightbar-dc-preview">
+    </div>
+
+
+    <!-- Blue -->
+    <div class="lightbar-slider">
+
+      <div class="lightbar-slider-header">
+
+        <div class="lightbar-slider-label">
+          <span data-i18n="lightbar.blue">
+            Blue
+          </span>
+
+          <span
+            class="lightbar-slider-value"
+            id="lightbar-dc-blue-value">
+            0
+          </span>
+        </div>
+
+      </div>
+
+      <input
+        type="range"
+        id="lightbar-dc-blue"
+        min="0"
+        max="100"
+        value="0">
+
+    </div>
+
+
+    <!-- Green -->
+    <div class="lightbar-slider">
+
+      <div class="lightbar-slider-header">
+
+        <div class="lightbar-slider-label">
+          <span data-i18n="lightbar.green">
+            Green
+          </span>
+
+          <span
+            class="lightbar-slider-value"
+            id="lightbar-dc-green-value">
+            0
+          </span>
+        </div>
+
+      </div>
+
+      <input
+        type="range"
+        id="lightbar-dc-green"
+        min="0"
+        max="100"
+        value="0">
+
+    </div>
+
+
+    <!-- Red -->
+    <div class="lightbar-slider">
+
+      <div class="lightbar-slider-header">
+
+        <div class="lightbar-slider-label">
+          <span data-i18n="lightbar.red">
+            Red
+          </span>
+
+          <span
+            class="lightbar-slider-value"
+            id="lightbar-dc-red-value">
+            0
+          </span>
+        </div>
+
+      </div>
+
+      <input
+        type="range"
+        id="lightbar-dc-red"
+        min="0"
+        max="100"
+        value="0">
+
+    </div>
+
+
+    <!-- Effect -->
+    <div class="lightbar-effect">
+
+      <button
+        class="lightbar-effect-btn active"
+        data-lightbar-effect="0"
+        data-power="dc"
+        type="button"
+        data-i18n="lightbar.monocolor">
+        单色
+      </button>
+
+      <button
+        class="lightbar-effect-btn"
+        data-lightbar-effect="1"
+        data-power="dc"
+        type="button"
+        data-i18n="lightbar.rainbow">
+        彩虹
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================
+       呼吸
+       =================================================== -->
+  <div class="lightbar-card">
+
+    <div class="keyboard-header">
+
+      <div>
+
+        <div class="lightbar-title">
+          <span data-i18n="lightbar.breathing">
+            呼吸效果
+          </span>
+        </div>
+
+        <div
+          class="lightbar-description"
+          data-i18n="lightbar.breathingDescription">
+          启用灯条呼吸效果
+        </div>
+
+      </div>
+
+
+      <label class="keyboard-switch">
+
+        <input
+          type="checkbox"
+          id="lightbar-breathing">
+
+        <span class="keyboard-slider"></span>
+
+      </label>
+
+    </div>
+
+  </div>
+
+</section>

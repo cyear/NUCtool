@@ -17,6 +17,7 @@ const jaJP = {
     system: "システム設定",
     display: "ディスプレイ設定",
     keyboard: "キーボード設定",
+    lightbar: "ライト設定",
     settings: "設定",
   },
 
@@ -182,7 +183,22 @@ const jaJP = {
     custom: "Custom",
     customDescription: "カスタム表示モード",
   },
-
+  lightbar: {
+    title: "ライトバー設定",
+    subtitle: "デバイスのライトバーを設定",
+    ac: "ACモード",
+    acDescription: "電源接続時のライトバー効果を設定",
+    dc: "DCモード",
+    dcDescription: "バッテリー使用時のライトバー効果を設定",
+    red: "赤",
+    green: "緑",
+    blue: "青",
+    effect: "ライト効果",
+    monocolor: "単色",
+    rainbow: "レインボー",
+    breathing: "ブリージングモード（スリープ）",
+    breathingDescription: ""
+  },
   // ==========================================================
   // キーボード
   // ==========================================================

@@ -1674,29 +1674,771 @@ fanModeSelect.addEventListener(
 
 
 /* =========================================================
+   灯条设置
+   ========================================================= */
+
+let lightbarProfile = null;
+
+
+/* =========================================================
+   获取当前灯条设置
+   ========================================================= */
+
+async function loadLightbarProfile() {
+
+  try {
+
+    const profile =
+      await invoke(
+        "get_lightbar_profile"
+      );
+
+    lightbarProfile =
+      profile;
+
+    console.log(
+      "Lightbar Profile:",
+      lightbarProfile
+    );
+
+    updateLightbarUI();
+
+  } catch (error) {
+
+    console.error(
+      "读取灯条配置失败:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   更新整个灯条 UI
+   ========================================================= */
+
+function updateLightbarUI() {
+
+  if (!lightbarProfile) {
+    return;
+  }
+
+
+  /* =====================================================
+     AC
+     ===================================================== */
+
+  updateLightbarSettingUI(
+    "ac",
+    lightbarProfile.ac
+  );
+
+
+  /* =====================================================
+     DC
+     ===================================================== */
+
+  updateLightbarSettingUI(
+    "dc",
+    lightbarProfile.dc
+  );
+
+
+  /* =====================================================
+     灯效
+     ===================================================== */
+
+  updateLightbarEffectUI(
+    "ac",
+    lightbarProfile.ac.effect
+  );
+
+  updateLightbarEffectUI(
+    "dc",
+    lightbarProfile.dc.effect
+  );
+
+
+  /* =====================================================
+     呼吸
+     ===================================================== */
+
+  updateLightbarBreathingUI(
+    lightbarProfile.breathing_enable
+  );
+
+}
+
+
+/* =========================================================
+   更新 AC / DC
+   ========================================================= */
+
+function updateLightbarSettingUI(
+  power,
+  setting
+) {
+
+  if (!setting) {
+    return;
+  }
+
+
+  const blue =
+    document.getElementById(
+      `lightbar-${power}-blue`
+    );
+
+  const green =
+    document.getElementById(
+      `lightbar-${power}-green`
+    );
+
+  const red =
+    document.getElementById(
+      `lightbar-${power}-red`
+    );
+
+
+  /* =====================================================
+     更新滑块
+     ===================================================== */
+
+  if (blue) {
+
+    blue.value =
+      setting.blue_brightness;
+
+  }
+
+  if (green) {
+
+    green.value =
+      setting.green_brightness;
+
+  }
+
+  if (red) {
+
+    red.value =
+      setting.red_brightness;
+
+  }
+
+
+  /* =====================================================
+     更新数字
+     ===================================================== */
+
+  updateLightbarValue(
+    power,
+    "blue",
+    setting.blue_brightness
+  );
+
+  updateLightbarValue(
+    power,
+    "green",
+    setting.green_brightness
+  );
+
+  updateLightbarValue(
+    power,
+    "red",
+    setting.red_brightness
+  );
+
+
+  /* =====================================================
+     更新预览
+     ===================================================== */
+
+  updateLightbarPreview(
+    power,
+    setting
+  );
+
+}
+
+
+/* =========================================================
+   更新数值
+   ========================================================= */
+
+function updateLightbarValue(
+  power,
+  color,
+  value
+) {
+
+  const element =
+    document.getElementById(
+      `lightbar-${power}-${color}-value`
+    );
+
+  if (!element) {
+    return;
+  }
+
+
+  element.textContent =
+    value;
+
+}
+
+
+/* =========================================================
+   亮度百分比 → CSS RGB
+   ========================================================= */
+
+function lightbarBrightnessToRgb(
+  value
+) {
+
+  const brightness =
+    Number(value);
+
+
+  if (!Number.isFinite(
+    brightness
+  )) {
+
+    return 0;
+
+  }
+
+
+  return Math.round(
+    Math.max(
+      0,
+      Math.min(
+        100,
+        brightness
+      )
+    ) * 2.55
+  );
+
+}
+
+
+/* =========================================================
+   更新灯条预览
+   ========================================================= */
+
+function updateLightbarPreview(
+  power,
+  setting
+) {
+
+  const preview =
+    document.getElementById(
+      `lightbar-${power}-preview`
+    );
+
+  if (!preview) {
+    return;
+  }
+
+
+  const effect =
+    Number(
+      setting.effect
+    );
+
+
+  /* =====================================================
+     彩虹模式
+     ===================================================== */
+
+  if (effect === 1) {
+
+    preview.classList.add(
+      "rainbow"
+    );
+
+
+    /*
+     * 清除单色模式的行内样式，
+     * 让 CSS .rainbow 接管显示
+     */
+
+    preview.style.background =
+      "";
+
+    preview.style.backgroundColor =
+      "";
+
+    preview.style.boxShadow =
+      "";
+
+    return;
+  }
+
+
+  /* =====================================================
+     单色模式
+     ===================================================== */
+
+  preview.classList.remove(
+    "rainbow"
+  );
+
+
+  /*
+   * 硬件亮度是 0~100，
+   * CSS RGB 是 0~255
+   */
+
+  const red =
+    lightbarBrightnessToRgb(
+      setting.red_brightness
+    );
+
+  const green =
+    lightbarBrightnessToRgb(
+      setting.green_brightness
+    );
+
+  const blue =
+    lightbarBrightnessToRgb(
+      setting.blue_brightness
+    );
+
+
+  /* =====================================================
+     背景颜色
+     ===================================================== */
+
+  preview.style.background =
+    `rgb(${red}, ${green}, ${blue})`;
+
+
+  preview.style.backgroundColor =
+    "";
+
+
+  /* =====================================================
+     发光效果
+     ===================================================== */
+
+  preview.style.boxShadow =
+    `
+      0 0 18px rgba(
+        ${red},
+        ${green},
+        ${blue},
+        0.50
+      ),
+      0 0 36px rgba(
+        ${red},
+        ${green},
+        ${blue},
+        0.22
+      )
+    `;
+
+}
+
+
+/* =========================================================
+   更新灯效按钮
+   ========================================================= */
+
+function updateLightbarEffectUI(
+  power,
+  effect
+) {
+
+  document
+    .querySelectorAll(
+      `.lightbar-effect-btn[data-power="${power}"]`
+    )
+    .forEach(
+      (button) => {
+
+        const buttonEffect =
+          Number(
+            button.dataset.lightbarEffect
+          );
+
+
+        button.classList.toggle(
+          "active",
+          buttonEffect ===
+          Number(effect)
+        );
+
+      }
+    );
+
+}
+
+
+/* =========================================================
+   更新呼吸效果
+   ========================================================= */
+
+function updateLightbarBreathingUI(
+  enabled
+) {
+
+  const checkbox =
+    document.getElementById(
+      "lightbar-breathing"
+    );
+
+  if (!checkbox) {
+    return;
+  }
+
+
+  checkbox.checked =
+    Number(enabled) !== 0;
+
+}
+
+
+/* =========================================================
+   修改呼吸效果
+   ========================================================= */
+
+function bindLightbarBreathing() {
+
+  const checkbox =
+    document.getElementById(
+      "lightbar-breathing"
+    );
+
+  if (!checkbox) {
+    return;
+  }
+
+
+  checkbox.addEventListener(
+    "change",
+    async () => {
+
+      if (!lightbarProfile) {
+        return;
+      }
+
+
+      lightbarProfile.breathing_enable =
+        checkbox.checked
+          ? 1
+          : 0;
+
+
+      await saveLightbarProfile();
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   写入完整 Lightbar Profile
+   ========================================================= */
+
+async function saveLightbarProfile() {
+
+  if (!lightbarProfile) {
+    return;
+  }
+
+
+  try {
+
+    await invoke(
+      "set_lightbar_profile",
+      {
+        profile:
+          lightbarProfile
+      }
+    );
+
+
+    console.log(
+      "Lightbar Profile 已写入:",
+      lightbarProfile
+    );
+
+  } catch (error) {
+
+    console.error(
+      "写入灯条配置失败:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   修改 RGB
+   ========================================================= */
+
+function bindLightbarSlider(
+  power,
+  color
+) {
+
+  const slider =
+    document.getElementById(
+      `lightbar-${power}-${color}`
+    );
+
+  if (!slider) {
+    return;
+  }
+
+
+  /* =====================================================
+     拖动时
+     ===================================================== */
+
+  slider.addEventListener(
+    "input",
+    (event) => {
+
+      if (!lightbarProfile) {
+        return;
+      }
+
+
+      const value =
+        Number(
+          event.target.value
+        );
+
+
+      /*
+       * 修改 Profile
+       */
+
+      lightbarProfile[
+        power
+      ][
+        `${color}_brightness`
+      ] = value;
+
+
+      /*
+       * 更新数字
+       */
+
+      updateLightbarValue(
+        power,
+        color,
+        value
+      );
+
+
+      /*
+       * 更新预览
+       */
+
+      updateLightbarPreview(
+        power,
+        lightbarProfile[power]
+      );
+
+    }
+  );
+
+
+  /* =====================================================
+     松开滑块后写入
+     ===================================================== */
+
+  slider.addEventListener(
+    "change",
+    async () => {
+
+      if (!lightbarProfile) {
+        return;
+      }
+
+
+      await saveLightbarProfile();
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   修改灯效
+   ========================================================= */
+
+function bindLightbarEffect(
+  power
+) {
+
+  document
+    .querySelectorAll(
+      `.lightbar-effect-btn[data-power="${power}"]`
+    )
+    .forEach(
+      (button) => {
+
+        button.addEventListener(
+          "click",
+          async () => {
+
+            if (!lightbarProfile) {
+              return;
+            }
+
+
+            const effect =
+              Number(
+                button.dataset.lightbarEffect
+              );
+
+
+            /* =================================================
+               修改 Profile
+               ================================================= */
+
+            lightbarProfile[
+              power
+            ].effect =
+              effect;
+
+
+            /* =================================================
+               更新按钮
+               ================================================= */
+
+            updateLightbarEffectUI(
+              power,
+              effect
+            );
+
+
+            /* =================================================
+               更新预览
+               ================================================= */
+
+            updateLightbarPreview(
+              power,
+              lightbarProfile[power]
+            );
+
+
+            /* =================================================
+               写入完整 Profile
+               ================================================= */
+
+            await saveLightbarProfile();
+
+          }
+        );
+
+      }
+    );
+
+}
+
+
+/* =========================================================
+   初始化灯条
+   ========================================================= */
+
+async function initLightbar() {
+
+
+  /* =====================================================
+     AC
+     ===================================================== */
+
+  bindLightbarSlider(
+    "ac",
+    "blue"
+  );
+
+  bindLightbarSlider(
+    "ac",
+    "green"
+  );
+
+  bindLightbarSlider(
+    "ac",
+    "red"
+  );
+
+
+  /* =====================================================
+     DC
+     ===================================================== */
+
+  bindLightbarSlider(
+    "dc",
+    "blue"
+  );
+
+  bindLightbarSlider(
+    "dc",
+    "green"
+  );
+
+  bindLightbarSlider(
+    "dc",
+    "red"
+  );
+
+
+  /* =====================================================
+     灯效
+     ===================================================== */
+
+  bindLightbarEffect(
+    "ac"
+  );
+
+  bindLightbarEffect(
+    "dc"
+  );
+
+
+  /* =====================================================
+     呼吸效果
+     ===================================================== */
+
+  bindLightbarBreathing();
+
+
+  /* =====================================================
+     读取配置
+     ===================================================== */
+
+  await loadLightbarProfile();
+
+}
+
+
+/* =========================================================
    初始化
    ========================================================= */
 
 async function init() {
-
   // 初始化语言
   initI18n();
-
   await loadConfig();
-
   // 初始化风扇控制状态
   await initFanControlStatus();
-
   updateControlState();
-
   loadPerformanceMode();
-
   loadKeyboardLedState();
-
   loadFanMode();
-
   loadAutostartState();
-
+  await initLightbar();
 }
 
 init();

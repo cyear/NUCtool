@@ -5,6 +5,7 @@ const pages = [
   "system",
   "display",
   "keyboard",
+  "lightbar",
   "settings",
 ];
 

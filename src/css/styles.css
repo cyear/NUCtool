@@ -1937,3 +1937,414 @@ body {
   padding-top: 0;
   border-top: none;
 }
+
+
+/* =========================================================
+   灯条设置
+   ========================================================= */
+
+.lightbar-card {
+  width: 100%;
+
+  padding: 24px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+
+  background: var(--bg-card);
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.lightbar-card:hover {
+  border-color: var(--border-hover);
+}
+
+
+/* =========================================================
+   灯条卡片标题
+   ========================================================= */
+
+.lightbar-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  min-height: 24px;
+
+  margin-bottom: 20px;
+}
+
+.lightbar-title {
+  color: var(--text-primary);
+
+  font-size: 15px;
+  font-weight: 600;
+
+  line-height: 1.4;
+}
+
+.lightbar-description {
+  margin-top: 5px;
+
+  color: var(--text-muted);
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   灯条预览
+   ========================================================= */
+
+.lightbar-preview {
+  position: relative;
+
+  width: 90%;
+  height: 34px;
+
+  margin: 0 auto 22px;
+
+  border: 1px solid var(--border);
+  border-radius: 999px;
+
+  background: rgb(0, 0, 0);
+
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.06),
+    0 0 16px rgba(0, 0, 0, 0.28);
+
+  overflow: hidden;
+
+  transition:
+    background-color 0.08s linear,
+    box-shadow 0.08s linear;
+}
+
+/* =========================================================
+   彩虹灯效预览
+   ========================================================= */
+
+.lightbar-preview.rainbow {
+  background:
+    linear-gradient(
+      90deg,
+      #ff0000,
+      #ff7a00,
+      #ffff00,
+      #00ff00,
+      #00ffff,
+      #0080ff,
+      #8000ff,
+      #ff00ff,
+      #ff0000
+    );
+
+  background-size: 300% 100%;
+
+  animation: lightbar-rainbow 5s linear infinite;
+
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.08),
+    0 0 18px rgba(255, 255, 255, 0.12);
+}
+
+@keyframes lightbar-rainbow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+/* =========================================================
+   RGB 滑块
+   ========================================================= */
+
+.lightbar-slider {
+  margin-top: 18px;
+}
+
+.lightbar-slider:first-of-type {
+  margin-top: 0;
+}
+
+
+/* =========================================================
+   滑块标题
+   ========================================================= */
+
+.lightbar-slider-header {
+  display: flex;
+  align-items: center;
+
+  margin-bottom: 8px;
+}
+
+.lightbar-slider-label {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+
+  color: var(--text-secondary);
+
+  font-size: 12px;
+  font-weight: 500;
+
+  line-height: 1.4;
+}
+
+.lightbar-slider-value {
+  color: var(--text-muted);
+
+  font-size: 11px;
+  font-weight: 500;
+
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* =========================================================
+   RGB Range
+   ========================================================= */
+
+.lightbar-slider input[type="range"] {
+  width: 100%;
+  height: 5px;
+
+  display: block;
+
+  margin: 0;
+
+  appearance: none;
+
+  border: 0;
+  border-radius: 999px;
+
+  background: #252b35;
+
+  outline: none;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   Range - WebKit
+   ========================================================= */
+
+.lightbar-slider input[type="range"]::-webkit-slider-runnable-track {
+  height: 5px;
+
+  border-radius: 999px;
+
+  background: #252b35;
+}
+
+.lightbar-slider input[type="range"]::-webkit-slider-thumb {
+  width: 15px;
+  height: 15px;
+
+  margin-top: -5px;
+
+  appearance: none;
+
+  border: 2px solid var(--bg-card);
+  border-radius: 50%;
+
+  background: var(--accent);
+
+  box-shadow:
+    0 0 0 1px var(--accent-border);
+
+  cursor: pointer;
+
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+.lightbar-slider input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+
+  box-shadow:
+    0 0 0 2px var(--accent-border);
+}
+
+
+/* =========================================================
+   Range - Firefox
+   ========================================================= */
+
+.lightbar-slider input[type="range"]::-moz-range-track {
+  height: 5px;
+
+  border-radius: 999px;
+
+  background: #252b35;
+}
+
+.lightbar-slider input[type="range"]::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+
+  border: 2px solid var(--bg-card);
+  border-radius: 50%;
+
+  background: var(--accent);
+
+  box-shadow:
+    0 0 0 1px var(--accent-border);
+
+  cursor: pointer;
+
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+
+/* =========================================================
+   RGB 滑块颜色
+   ========================================================= */
+
+.lightbar-slider.blue input[type="range"]::-webkit-slider-thumb {
+  background: #4d8dff;
+}
+
+.lightbar-slider.green input[type="range"]::-webkit-slider-thumb {
+  background: #3dd68c;
+}
+
+.lightbar-slider.red input[type="range"]::-webkit-slider-thumb {
+  background: #ff5c5c;
+}
+
+.lightbar-slider.blue input[type="range"]::-moz-range-thumb {
+  background: #4d8dff;
+}
+
+.lightbar-slider.green input[type="range"]::-moz-range-thumb {
+  background: #3dd68c;
+}
+
+.lightbar-slider.red input[type="range"]::-moz-range-thumb {
+  background: #ff5c5c;
+}
+
+
+/* =========================================================
+   灯效
+   ========================================================= */
+
+.lightbar-effect {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+
+  margin-top: 22px;
+
+  padding-top: 18px;
+
+  border-top: 1px solid var(--border);
+}
+
+
+/* =========================================================
+   灯效按钮
+   ========================================================= */
+
+.lightbar-effect-btn {
+  min-height: 42px;
+
+  padding: 0 12px;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+
+  background: #1a1f27;
+
+  color: var(--text-secondary);
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.lightbar-effect-btn:hover {
+  background: #202630;
+
+  border-color: var(--border-hover);
+
+  color: var(--text-primary);
+
+  transform: translateY(-1px);
+}
+
+.lightbar-effect-btn:active {
+  transform: translateY(0);
+}
+
+.lightbar-effect-btn.active {
+  background: var(--accent-soft);
+
+  border-color: var(--accent-border);
+
+  color: var(--accent);
+}
+
+
+/* =========================================================
+   AC / DC 灯条布局
+   ========================================================= */
+
+.lightbar-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 16px;
+}
+
+
+/* =========================================================
+   灯条页面响应式
+   ========================================================= */
+
+@media (max-width: 1000px) {
+  .lightbar-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .lightbar-card {
+    padding: 20px;
+  }
+
+  .lightbar-preview {
+    width: 94%;
+    height: 30px;
+  }
+
+  .lightbar-effect {
+    grid-template-columns: 1fr;
+  }
+}

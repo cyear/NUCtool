@@ -1,10 +1,7 @@
 use libloading::{Library, Symbol};
-use std::{
-    fs,
-    ffi::CString,
-    os::raw::c_int
-};
 use sha2::{Digest, Sha256};
+use std::{ffi::CString, fs, os::raw::c_int};
+use serde::{Deserialize, Serialize};
 
 const EXPECTED_HASH_V2: &str = "838E83709F1E2C45A470868F210EEF1A3A48EAE10E13DBA896905E6DAA387497";
 const KEY: &str = "NUCtool@cyear";
@@ -18,6 +15,8 @@ pub struct NativePerformanceState {
     pub selected_profile_index: c_int,
 }
 
+#[repr(C)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct NativeRgb {
     pub b: u8,
     pub g: u8,
@@ -66,6 +65,34 @@ pub enum RGBKeyboardEffect {
     GamingMode = 12,
 }
 
+#[repr(C)]
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
+pub struct NativeLightbarSetting {
+    pub blue_brightness: c_int,
+    pub green_brightness: c_int,
+    pub red_brightness: c_int,
+    pub effect: c_int,
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
+pub struct NativeLightbarProfile {
+    pub ac: NativeLightbarSetting,
+    pub dc: NativeLightbarSetting,
+    pub breathing_enable: c_int,
+}
+
+pub enum LightBarEffect {
+    Monocolor = 0,
+    Rainbow = 1,
+}
+
+type WcfGetLastErrorFn = unsafe extern "system" fn(
+    buffer: *mut u8,
+    capacity: c_int,
+    requiredLength: *mut c_int,
+) -> c_int;
+type WcfClearLastErrorFn = unsafe extern "system" fn() -> ();
 type WcfConnectFn = unsafe extern "system" fn(key: *const std::os::raw::c_char) -> c_int;
 type WcfDisconnectFn = unsafe extern "system" fn();
 type WcfIsConnectedFn = unsafe extern "system" fn() -> c_int;
@@ -75,11 +102,13 @@ type WcfSetPowerPlanFn = unsafe extern "system" fn(mode: c_int) -> c_int;
 type WcfApplyBenchmarkModeFn = unsafe extern "system" fn(enable: c_int) -> c_int;
 type WcfGetBatteryChargingLevelFn = unsafe extern "system" fn() -> c_int;
 type WcfSetBatteryChargingLevelFn = unsafe extern "system" fn(level: c_int) -> c_int;
-type WcfEnableDisplayModeMgmtFn  = unsafe extern "system" fn(enable: c_int) -> c_int;
-type WcfSetDisplayModeFn         = unsafe extern "system" fn(index: c_int) -> c_int;
-type WcfEnableKeyboardLedsFn     = unsafe extern "system" fn(enable: c_int) -> c_int;
-type WcfGetKeyboardLedsPowerFn   = unsafe extern "system" fn() -> c_int;
-type WcfSetKeyboardBrightnessFn  = unsafe extern "system" fn(brightness: c_int, ac: c_int) -> c_int;
+type WcfEnableDisplayModeMgmtFn = unsafe extern "system" fn(enable: c_int) -> c_int;
+type WcfSetDisplayModeFn = unsafe extern "system" fn(index: c_int) -> c_int;
+type WcfEnableKeyboardLedsFn = unsafe extern "system" fn(enable: c_int) -> c_int;
+type WcfGetKeyboardLedsPowerFn = unsafe extern "system" fn() -> c_int;
+type WcfSetKeyboardBrightnessFn = unsafe extern "system" fn(brightness: c_int, ac: c_int) -> c_int;
+type WcfGetCurrentLightbarProfileFn = unsafe extern "system" fn(profile: *mut NativeLightbarProfile) -> c_int;
+type WcfSetLightbarProfileFn = unsafe extern "system" fn(profile: *mut NativeLightbarProfile) -> c_int;
 
 // ============================================================
 // Uniwill WCF interface
@@ -87,7 +116,8 @@ type WcfSetKeyboardBrightnessFn  = unsafe extern "system" fn(brightness: c_int, 
 
 pub struct UniwillWcfEc {
     lib: Library,
-
+    wcf_get_last_error: Symbol<'static, WcfGetLastErrorFn>,
+    wcf_clear_last_error: Symbol<'static, WcfClearLastErrorFn>,
     wcf_connect: Symbol<'static, WcfConnectFn>,
     wcf_disconnect: Symbol<'static, WcfDisconnectFn>,
     wcf_is_connected: Symbol<'static, WcfIsConnectedFn>,
@@ -104,10 +134,11 @@ pub struct UniwillWcfEc {
     wcf_enable_keyboard_leds: Symbol<'static, WcfEnableKeyboardLedsFn>,
     wcf_get_keyboard_leds_power: Symbol<'static, WcfGetKeyboardLedsPowerFn>,
     wcf_set_keyboard_brightness: Symbol<'static, WcfSetKeyboardBrightnessFn>,
+    wcf_get_current_lightbar_profile: Symbol<'static, WcfGetCurrentLightbarProfileFn>,
+    wcf_set_lightbar_profile: Symbol<'static, WcfSetLightbarProfileFn>,
 }
 
 impl UniwillWcfEc {
-
     // ========================================================
     // 加载 DLL
     // ========================================================
@@ -125,7 +156,8 @@ impl UniwillWcfEc {
         if !hash.eq_ignore_ascii_case(EXPECTED_HASH_V2) {
             return Err(std::io::Error::other(
                 "NUCtool.dll 完整性校验失败，文件可能已被修改或替换",
-            ).into());
+            )
+            .into());
         } else {
             println!("NUCtool.dll 完整性校验成功");
         }
@@ -134,6 +166,8 @@ impl UniwillWcfEc {
         let lib_ref: &'static Library = unsafe { std::mem::transmute(&lib) };
         unsafe {
             Ok(Self {
+                wcf_get_last_error: lib_ref.get(b"wcf_get_last_error")?,
+                wcf_clear_last_error: lib_ref.get(b"wcf_clear_last_error")?,
                 wcf_connect: lib_ref.get(b"wcf_connect")?,
                 wcf_disconnect: lib_ref.get(b"wcf_disconnect")?,
                 wcf_is_connected: lib_ref.get(b"wcf_is_connected")?,
@@ -148,6 +182,8 @@ impl UniwillWcfEc {
                 wcf_enable_keyboard_leds: lib_ref.get(b"wcf_enable_keyboard_leds")?,
                 wcf_get_keyboard_leds_power: lib_ref.get(b"wcf_get_keyboard_leds_power")?,
                 wcf_set_keyboard_brightness: lib_ref.get(b"wcf_set_keyboard_brightness")?,
+                wcf_get_current_lightbar_profile: lib_ref.get(b"wcf_get_current_lightbar_profile")?,
+                wcf_set_lightbar_profile: lib_ref.get(b"wcf_set_lightbar_profile")?,
                 lib,
             })
         }
@@ -169,6 +205,25 @@ impl UniwillWcfEc {
 
     pub fn is_connected(&self) -> bool {
         unsafe { (self.wcf_is_connected)() != 0 }
+    }
+
+    pub fn last_error(&self) -> Result<String, Box<dyn std::error::Error>> {
+        unsafe {
+            let mut required: c_int = 0;
+            if (self.wcf_get_last_error)(std::ptr::null_mut(), 0, &mut required) == 0 {
+                return Ok(String::new());
+            }
+
+            let mut buf = vec![0u8; (required.max(0) as usize) + 1];
+            let mut required2: c_int = 0;
+            if (self.wcf_get_last_error)(buf.as_mut_ptr(), buf.len() as c_int, &mut required2) == 0
+            {
+                return Ok(String::new());
+            }
+
+            let len = buf.iter().position(|&b| b == 0).unwrap_or(buf.len());
+            Ok(String::from_utf8_lossy(&buf[..len]).into_owned())
+        }
     }
 
     // ========================================================
@@ -222,41 +277,65 @@ impl UniwillWcfEc {
     // ========================================================
     // 电池设置
     // ========================================================
-    
-    pub fn wcf_get_battery_charging_level(&self) -> i32 {
+
+    pub fn battery_get_charging_level(&self) -> i32 {
         unsafe { (self.wcf_get_battery_charging_level)() }
     }
 
-    pub fn wcf_set_battery_charging_level(&self, value: i32) -> i32 {
+    pub fn battery_set_charging_level(&self, value: i32) -> i32 {
         unsafe { (self.wcf_set_battery_charging_level)(value) }
     }
 
     // ========================================================
     // 显示设置
-    // ======================================================== 
+    // ========================================================
 
-    pub fn wcf_enable_display_mode_mgmt(&self, enabled: i32) -> i32 {
+    pub fn display_enable_mode_mgmt(&self, enabled: i32) -> i32 {
         unsafe { (self.wcf_enable_display_mode_mgmt)(enabled) }
     }
 
-    pub fn wcf_set_display_mode(&self, mode: i32) -> i32 {
+    pub fn display_set_mode(&self, mode: i32) -> i32 {
         unsafe { (self.wcf_set_display_mode)(mode) }
     }
 
     // ========================================================
     // 键盘设置
-    // ======================================================== 
+    // ========================================================
 
-    pub fn wcf_enable_keyboard_leds(&self, enabled: i32) -> i32 {
+    pub fn keyboard_set_leds_power(&self, enabled: i32) -> i32 {
         unsafe { (self.wcf_enable_keyboard_leds)(enabled) }
     }
 
-    pub fn wcf_get_keyboard_leds_power(&self) -> i32 {
+    pub fn keyboard_get_leds_power(&self) -> i32 {
         unsafe { (self.wcf_get_keyboard_leds_power)() }
     }
 
-    pub fn wcf_set_keyboard_brightness(&self, value: i32, ac: i32) -> i32 {
+    pub fn keyboard_set_brightness(&self, value: i32, ac: i32) -> i32 {
         unsafe { (self.wcf_set_keyboard_brightness)(value, ac) }
+    }
+
+    // ========================================================
+    // 灯条设置
+    // ========================================================
+
+    pub fn lightbar_get_profile(&self) -> NativeLightbarProfile {
+        let mut profile = NativeLightbarProfile::default();
+        let ret = unsafe { (self.wcf_get_current_lightbar_profile)(&mut profile) };
+        if ret == 0 {
+            println!("lightbar_get_profile 读取失败: {}", self.last_error().expect("lightbar_get_profile error"));
+        }
+        profile
+    }
+
+    pub fn lightbar_set_profile(&self, profile: NativeLightbarProfile) -> i32 {
+        let mut profile = profile;
+        let ret = unsafe { (self.wcf_set_lightbar_profile)(&mut profile) };
+        println!("set lightbar profile ret = {ret}");
+
+        if ret == 0 {
+            println!("lightbar_set_profile 写入失败: {}", self.last_error().expect("lightbar_set_profile error"));
+        }
+        ret
     }
 
 }

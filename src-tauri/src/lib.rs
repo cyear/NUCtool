@@ -26,6 +26,8 @@ use windows::Win32::{
     },
 };
 
+use crate::acpi::uniwillwcf::NativeLightbarProfile;
+
 #[derive(Clone, Serialize)]
 struct SensorData {
     cpu_temp: u8,
@@ -502,32 +504,32 @@ async fn set_display_mode(app: tauri::AppHandle, mode: i32) {
     println!("connect: {}", ret);
     println!("显示设置: {}", mode);
     if mode != 5 {
-        wcf.wcf_enable_display_mode_mgmt(1);
+        wcf.display_enable_mode_mgmt(1);
         let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsOn");
     }
     match mode {
         0 => {
-            wcf.wcf_set_display_mode(mode);
+            wcf.display_set_mode(mode);
             let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsStandard");
         }
         1 => {
-            wcf.wcf_set_display_mode(mode);
+            wcf.display_set_mode(mode);
             let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsGaming");
         }
         2 => {
-            wcf.wcf_set_display_mode(mode);
+            wcf.display_set_mode(mode);
             let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsVideo");
         }
         3 => {
-            wcf.wcf_set_display_mode(mode);
+            wcf.display_set_mode(mode);
             let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsReading");
         }
         4 => {
-            wcf.wcf_set_display_mode(mode);
+            wcf.display_set_mode(mode);
             let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsCustom");
         }
         5 => {
-            wcf.wcf_enable_display_mode_mgmt(0);
+            wcf.display_enable_mode_mgmt(0);
             let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsOff");
         }
         _ => {
@@ -548,7 +550,7 @@ fn get_keyboard_led() -> bool {
         .expect("加载 NUCtool DLL 失败"),
     };
     let ret = wcf.connect();
-    let g = wcf.wcf_get_keyboard_leds_power();
+    let g = wcf.keyboard_get_leds_power();
     println!("connect: {} wcf_get_keyboard_leds_power: {}", ret, g);
     wcf.disconnect();
     if g == 1 {
@@ -571,13 +573,44 @@ fn set_keyboard_led(app: tauri::AppHandle, enabled: bool) {
     let ret = wcf.connect();
     println!("connect: {} set_keyboard_led: {}", ret, enabled);
     if enabled {
-        wcf.wcf_enable_keyboard_leds(1);
+        wcf.keyboard_set_leds_power(1);
         let _ = show_osd_i18n(&app, "keyboardLed", "keyboardLedOn");
     } else {
-        wcf.wcf_enable_keyboard_leds(0);
+        wcf.keyboard_set_leds_power(0);
         let _ = show_osd_i18n(&app, "keyboardLed", "keyboardLedOff");
     }
     wcf.disconnect();
+}
+
+#[tauri::command]
+async fn get_lightbar_profile() -> NativeLightbarProfile {
+    let wcf = match UniwillWcfEc::new() {
+        Ok(wcf) => wcf,
+        Err(e) => {
+            eprintln!("加载 NUCtool DLL 失败: {}", e);
+            None
+        }
+        .expect("加载 NUCtool DLL 失败"),
+    };
+    let ret = wcf.connect();
+    let profile = wcf.lightbar_get_profile();
+    println!("connect: {} get_lightbar_profile: {:?}", ret, &profile);
+    profile
+}
+
+#[tauri::command]
+async fn set_lightbar_profile(app: tauri::AppHandle, profile: NativeLightbarProfile) {
+    let wcf = match UniwillWcfEc::new() {
+        Ok(wcf) => wcf,
+        Err(e) => {
+            eprintln!("加载 NUCtool DLL 失败: {}", e);
+            None
+        }
+        .expect("加载 NUCtool DLL 失败"),
+    };
+    let ret = wcf.connect();
+    let profile = wcf.lightbar_set_profile(profile);
+    println!("connect: {} set_lightbar_profile: {:?}", ret, &profile);
 }
 
 // =====================================================
@@ -628,7 +661,7 @@ async fn get_tdp() -> Result<TdpConfig, String> {
     let ret = wcf.connect();
     println!("connect: {}", ret);
 
-    let battery_charglimit = wcf.wcf_get_battery_charging_level() as u8;
+    let battery_charglimit = wcf.battery_get_charging_level() as u8;
     wcf.disconnect();
 
     // =================================================
@@ -720,7 +753,7 @@ async fn set_tdp(app: tauri::AppHandle, tdp_type: String, value: u8) -> Result<(
             };
             let ret = wcf.connect();
             println!("connect: {}", ret);
-            wcf.wcf_set_battery_charging_level(value as i32);
+            wcf.battery_set_charging_level(value as i32);
             println!("写入Battery Charging limit： {}%", value);
             let _ = show_osd_i18n_value(&app, "batterySettings", "batteryChargingLimit", value);
             wcf.disconnect();
@@ -1073,7 +1106,9 @@ pub fn run() {
             osd_ready,
             show_osd_command,
             set_fan_mode,
-            get_fan_mode
+            get_fan_mode,
+            get_lightbar_profile,
+            set_lightbar_profile,
         ])
         .setup(setup)
         .build(tauri::generate_context!())

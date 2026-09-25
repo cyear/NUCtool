@@ -17,6 +17,7 @@ const enUS = {
     system: "System Config",
     display: "Display",
     keyboard: "Keyboard",
+    lightbar: "Lightbar",
     settings: "Settings",
   },
 
@@ -198,7 +199,22 @@ const enUS = {
     reading: "Reading...",
     readFailed: "Read failed",
   },
-
+  lightbar: {
+    title: "Light Bar Settings",
+    subtitle: "Configure the device light bar",
+    ac: "AC Mode",
+    acDescription: "Configure the light bar effect when connected to power",
+    dc: "DC Mode",
+    dcDescription: "Configure the light bar effect when running on battery",
+    red: "Red",
+    green: "Green",
+    blue: "Blue",
+    effect: "Effect",
+    monocolor: "Monochrome",
+    rainbow: "Rainbow",
+    breathing: "Breathing Mode (Sleep)",
+    breathingDescription: ""
+  },
   // ==========================================================
   // Settings
   // ==========================================================
