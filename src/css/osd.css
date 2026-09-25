@@ -11,18 +11,6 @@ body {
     background: transparent;
 }
 
-/* body {
-    font-family:
-        "Segoe UI",
-        "Microsoft YaHei UI",
-        "Microsoft YaHei",
-        sans-serif;
-
-    user-select: none;
-    -webkit-user-select: none;
-} */
-
-
 @font-face {
     font-family: "ziti";
 
@@ -53,9 +41,7 @@ body {
     left: 0;
     top: 0;
 
-    /* Adaptive width, capped at 400px */
-    width: fit-content;
-    max-width: 400px;
+    width: 100%;
     height: 64px;
 
     box-sizing: border-box;
@@ -109,7 +95,7 @@ body {
    ============================== */
 
 #osd-content {
-    flex: 1 1 0;
+    flex: 1 1 auto;
 
     min-width: 0;
 
@@ -146,11 +132,7 @@ body {
    ============================== */
 
 #osd-brand {
-    /*
-     * 不允许品牌区域被 flex 压缩
-     */
     flex: 0 0 auto;
-
     /*
      * 给 NUCtool 留出确定空间
      */
@@ -197,7 +179,7 @@ body {
 /* ==============================
    标题
    ============================== */
-
+   
 #osd-title {
     font-size: 16px;
     line-height: 21px;

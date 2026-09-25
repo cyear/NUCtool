@@ -207,7 +207,8 @@ const zhCN = {
     monocolor: "单色",
     rainbow: "彩虹",
     breathing: "闪烁模式(睡眠)",
-    breathingDescription: ""
+    breathingDescription: "",
+    quickOff: "快速关闭"
   },
   // ==========================================================
   // 设置

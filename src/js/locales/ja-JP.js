@@ -197,7 +197,8 @@ const jaJP = {
     monocolor: "単色",
     rainbow: "レインボー",
     breathing: "ブリージングモード（スリープ）",
-    breathingDescription: ""
+    breathingDescription: "",
+    quickOff: "クイックオフ"
   },
   // ==========================================================
   // キーボード

@@ -2347,79 +2347,53 @@ function bindLightbarEffect(
 }
 
 
+function bindLightbarQuickOff(power) {
+  const button = document.getElementById(`lightbar-${power}-quick-off`);
+  if (!button) return;
+
+  button.addEventListener("click", async () => {
+    if (!lightbarProfile || !lightbarProfile[power]) return;
+
+    const setting = lightbarProfile[power];
+
+    // 快速关闭灯条
+    setting.red_brightness = 0;
+    setting.green_brightness = 0;
+    setting.blue_brightness = 0;
+    setting.effect = 0;
+
+    // 更新界面
+    updateLightbarSettingUI(power, setting);
+    updateLightbarEffectUI(power, 0);
+
+    // 写入硬件
+    await saveLightbarProfile();
+  });
+}
+
+
 /* =========================================================
    初始化灯条
    ========================================================= */
 
 async function initLightbar() {
+  bindLightbarSlider("ac", "blue");
+  bindLightbarSlider("ac", "green");
+  bindLightbarSlider("ac", "red");
 
+  bindLightbarSlider("dc", "blue");
+  bindLightbarSlider("dc", "green");
+  bindLightbarSlider("dc", "red");
 
-  /* =====================================================
-     AC
-     ===================================================== */
-
-  bindLightbarSlider(
-    "ac",
-    "blue"
-  );
-
-  bindLightbarSlider(
-    "ac",
-    "green"
-  );
-
-  bindLightbarSlider(
-    "ac",
-    "red"
-  );
-
-
-  /* =====================================================
-     DC
-     ===================================================== */
-
-  bindLightbarSlider(
-    "dc",
-    "blue"
-  );
-
-  bindLightbarSlider(
-    "dc",
-    "green"
-  );
-
-  bindLightbarSlider(
-    "dc",
-    "red"
-  );
-
-
-  /* =====================================================
-     灯效
-     ===================================================== */
-
-  bindLightbarEffect(
-    "ac"
-  );
-
-  bindLightbarEffect(
-    "dc"
-  );
-
-
-  /* =====================================================
-     呼吸效果
-     ===================================================== */
+  bindLightbarEffect("ac");
+  bindLightbarEffect("dc");
 
   bindLightbarBreathing();
 
-
-  /* =====================================================
-     读取配置
-     ===================================================== */
+  bindLightbarQuickOff("ac");
+  bindLightbarQuickOff("dc");
 
   await loadLightbarProfile();
-
 }
 
 

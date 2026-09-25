@@ -213,7 +213,8 @@ const enUS = {
     monocolor: "Monochrome",
     rainbow: "Rainbow",
     breathing: "Breathing Mode (Sleep)",
-    breathingDescription: ""
+    breathingDescription: "",
+    quickOff: "Quick Off"
   },
   // ==========================================================
   // Settings

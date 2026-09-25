@@ -213,7 +213,8 @@ const ruRU = {
     monocolor: "Одноцветный",
     rainbow: "Радуга",
     breathing: "Дыхание",
-    breathingDescription: ""
+    breathingDescription: "",
+    quickOff: "Быстрое выключение"
   },
   // ==========================================================
   // Settings
