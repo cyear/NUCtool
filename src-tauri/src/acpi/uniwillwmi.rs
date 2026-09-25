@@ -160,3 +160,73 @@ impl UniwillWmiEc {
     //     Ok(())
     // }
 }
+
+pub fn get_model() -> Result<String, Box<dyn Error>> {
+    let wmi = WMIConnection::with_namespace_path(
+        r"ROOT\CIMV2"
+    )?;
+
+    let mut objects = wmi.exec_query(
+        "SELECT Name FROM Win32_ComputerSystemProduct"
+    )?;
+
+    let object = objects
+        .next()
+        .ok_or("ComputerSystemProduct not found")??;
+
+    let model: String =
+        object.get_property("Name")?.try_into()?;
+
+    Ok(model)
+}
+
+pub fn get_gpu_driver() -> Result<Vec<(String, String)>, Box<dyn Error>> {
+    let wmi = WMIConnection::with_namespace_path(
+        r"ROOT\CIMV2"
+    )?;
+
+    let mut objects = wmi.exec_query(
+        "SELECT DeviceName, DriverVersion \
+         FROM Win32_PnPSignedDriver \
+         WHERE DeviceClass = 'DISPLAY'"
+    )?;
+
+    let mut result = Vec::new();
+
+    while let Some(object) = objects.next() {
+        let object = object?;
+
+        let name: String =
+            object.get_property("DeviceName")?.try_into()?;
+
+        let version: String =
+            object.get_property("DriverVersion")?.try_into()?;
+
+        result.push((name, version));
+    }
+
+    Ok(result)
+}
+
+pub fn get_gsc_driver() -> Result<Option<String>, Box<dyn Error>> {
+    let wmi = WMIConnection::with_namespace_path(
+        r"ROOT\CIMV2"
+    )?;
+
+    let mut objects = wmi.exec_query(
+        "SELECT DeviceName, DriverVersion \
+         FROM Win32_PnPSignedDriver \
+         WHERE DeviceName = 'Intel(R) Graphics System Controller Firmware Interface'"
+    )?;
+
+    if let Some(object) = objects.next() {
+        let object = object?;
+
+        let version: String =
+            object.get_property("DriverVersion")?.try_into()?;
+
+        return Ok(Some(version));
+    }
+
+    Ok(None)
+}

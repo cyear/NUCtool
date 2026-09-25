@@ -6,3 +6,6 @@ pub use uniwillfnhook::uniwillfnkeyhook;
 pub use uniwillacpi::UniwillAcpiEc;
 pub use uniwillwcf::UniwillWcfEc;
 pub use uniwillwmi::UniwillWmiEc;
+pub use uniwillwmi::get_model;
+pub use uniwillwmi::get_gpu_driver;
+pub use uniwillwmi::get_gsc_driver;

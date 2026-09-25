@@ -3,7 +3,7 @@ mod config;
 mod fan_control;
 mod osd;
 mod win;
-use acpi::{uniwillfnkeyhook, UniwillAcpiEc, UniwillWcfEc, UniwillWmiEc};
+use acpi::{uniwillfnkeyhook, UniwillAcpiEc, UniwillWcfEc, UniwillWmiEc, get_model, get_gpu_driver, get_gsc_driver};
 use config::FanData;
 use fan_control::{calculate_speed, FanControlState};
 use osd::{create_osd, osd_ready, show_osd_command, show_osd_i18n, show_osd_i18n_value};
@@ -51,6 +51,12 @@ pub struct TdpConfig {
     pub gpu_pl2: u8,
     pub battery_charglimit: u8,
     pub psys_pl1: u8,
+}
+
+#[derive(Debug, Serialize)]
+pub struct GpuDriverInfo {
+    pub name: String,
+    pub version: String,
 }
 
 struct AppState {
@@ -780,7 +786,7 @@ async fn set_tdp(app: tauri::AppHandle, tdp_type: String, value: u8) -> Result<(
 }
 
 #[tauri::command]
-fn get_autostart() -> Result<bool, String> {
+async fn get_autostart() -> Result<bool, String> {
     match is_startup_task_exists() {
         Ok(b) => {
             println!("自启动状态: {}", b);
@@ -794,7 +800,7 @@ fn get_autostart() -> Result<bool, String> {
 }
 
 #[tauri::command]
-fn set_autostart(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
+async fn set_autostart(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
     if enabled {
         if let Err(e) = create_startup_task() {
             println!("创建开机自启动任务计划失败: {}", e);
@@ -815,7 +821,35 @@ fn set_autostart(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
     Ok(())
 }
 
-pub fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+#[tauri::command]
+async fn get_sys_model() -> String {
+    let model = get_model().expect("get_model error");
+    println!("get_model Model: {}", model);
+    model
+}
+
+#[tauri::command]
+async fn get_sys_arc_gpu_driver() -> Result<Option<GpuDriverInfo>, String> {
+    get_gpu_driver()
+        .map_err(|e| e.to_string())
+        .map(|items| {
+            items
+                .into_iter()
+                .find(|(name, _)| name.contains("Arc"))
+                .map(|(name, version)| GpuDriverInfo {
+                    name,
+                    version,
+                })
+        })
+}
+
+#[tauri::command]
+async fn get_sys_gsc_driver() -> Result<Option<String>, String> {
+    get_gsc_driver()
+        .map_err(|e| e.to_string())
+}
+
+fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
 
     // OSD
@@ -1079,7 +1113,6 @@ pub fn run() {
     thread::spawn(|| loop {
         fnhook();
     });
-
     let app = tauri::Builder::default()
         // .plugin(tauri_plugin_autostart::Builder::new().build())
         .manage(AppState {
@@ -1109,6 +1142,9 @@ pub fn run() {
             get_fan_mode,
             get_lightbar_profile,
             set_lightbar_profile,
+            get_sys_model,
+            get_sys_arc_gpu_driver,
+            get_sys_gsc_driver,
         ])
         .setup(setup)
         .build(tauri::generate_context!())
