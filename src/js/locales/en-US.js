@@ -156,7 +156,7 @@ const enUS = {
     // Battery Charging Limit
     chargingLimit: "Charging Limit",
     currentValue: "Current Value",
-    write: "Write",
+    write: "Apply",
     
     // ==========================================================
     // GSC
