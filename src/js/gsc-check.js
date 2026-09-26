@@ -103,7 +103,7 @@ function bindFixButton() {
     if (!btn) return;
 
     btn.addEventListener('click', async () => {
-        const url = '/'; // TODO: actual URL to the fix instructions
+        const url = 'https://github.com/cyear/NUCtool/blob/main/docs/gsc-stutter-fix.md';
 
         try {
             if (window.__TAURI__.opener?.openUrl) {

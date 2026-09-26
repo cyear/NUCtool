@@ -1171,6 +1171,7 @@ pub fn run() {
         fnhook();
     });
     let app = tauri::Builder::default()
+        .plugin(tauri_plugin_opener::init()) // opener plugin
         // .plugin(tauri_plugin_autostart::Builder::new().build())
         .manage(AppState {
             running: Arc::new(AtomicBool::new(false)),
