@@ -2,9 +2,9 @@
 
 ## v*.*.*-Beta [----年--月--日]
 
-## v1.0.8-Beta [2026年9月25日]
+## v1.0.8-Beta [2026年9月27日]
 
-1. 修复错误的风扇模式(不再是同步曲线了)
+1. 修复错误的风扇模式
 2. 修复电池设置
 3. 添加电池健康优化器
 4. 添加"检查驱动程序是否存在卡顿问题"(报错为The Intel(R) Graphics System Controller Firmware Interface is being reset.)

@@ -103,8 +103,8 @@ function bindFixButton() {
     if (!btn) return;
 
     btn.addEventListener('click', async () => {
-        const url = 'https://github.com/cyear/NUCtool/blob/main/docs/gsc-stutter-fix.md';
-
+        // const url = 'https://github.com/cyear/NUCtool/blob/main/docs/gsc-stutter-fix.md';
+        const url = 'https://cyear.github.io/NUCtool/gsc-driver-stutter-fix.html';
         try {
             if (window.__TAURI__.opener?.openUrl) {
                 await window.__TAURI__.opener.openUrl(url);
