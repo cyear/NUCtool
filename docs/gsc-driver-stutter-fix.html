@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,7 +25,9 @@
       --max: 1180px;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     html {
       scroll-behavior: auto;
@@ -35,7 +38,7 @@
       margin: 0;
       color: var(--text);
       background:
-        radial-gradient(circle at 15% -10%, rgba(91,157,255,.10), transparent 34rem),
+        radial-gradient(circle at 15% -10%, rgba(91, 157, 255, .10), transparent 34rem),
         var(--bg);
       font-family:
         Inter, "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei",
@@ -49,7 +52,9 @@
       text-decoration: none;
     }
 
-    a:hover { text-decoration: underline; }
+    a:hover {
+      text-decoration: underline;
+    }
 
     code {
       padding: .12em .38em;
@@ -79,8 +84,8 @@
       position: sticky;
       top: 0;
       z-index: 20;
-      border-bottom: 1px solid rgba(39,45,56,.9);
-      background: rgba(15,17,21,.88);
+      border-bottom: 1px solid rgba(39, 45, 56, .9);
+      background: rgba(15, 17, 21, .88);
       backdrop-filter: blur(16px);
     }
 
@@ -242,11 +247,31 @@
     .warning {
       margin: 18px 0 30px;
       padding: 15px 17px;
-      border: 1px solid rgba(229,187,103,.35);
+      border: 1px solid rgba(229, 187, 103, .35);
       border-left: 3px solid var(--yellow);
       border-radius: 9px;
-      background: rgba(229,187,103,.06);
+      background: rgba(229, 187, 103, .06);
       color: #d8d3c4;
+    }
+
+    .quick-fix {
+      margin: 18px 0 30px;
+      padding: 15px 17px;
+      border: 1px solid rgba(94, 211, 154, .32);
+      border-left: 3px solid var(--green);
+      border-radius: 9px;
+      background: rgba(94, 211, 154, .06);
+      color: #cfe9dc;
+    }
+
+    .skip-note {
+      margin: 12px 0;
+      padding: 9px 13px;
+      border-left: 2px solid var(--accent);
+      border-radius: 6px;
+      background: var(--accent-soft);
+      color: var(--muted);
+      font-size: 14px;
     }
 
     section.doc-section {
@@ -265,21 +290,26 @@
       font-size: 17px;
     }
 
-    p { margin: 9px 0; }
+    p {
+      margin: 9px 0;
+    }
 
-    ul, ol {
+    ul,
+    ol {
       padding-left: 24px;
     }
 
-    li { margin: 6px 0; }
+    li {
+      margin: 6px 0;
+    }
 
     .check {
       margin: 18px 0;
       padding: 12px 15px;
-      border: 1px solid rgba(94,211,154,.28);
+      border: 1px solid rgba(94, 211, 154, .28);
       border-left: 3px solid var(--green);
       border-radius: 8px;
-      background: rgba(94,211,154,.055);
+      background: rgba(94, 211, 154, .055);
     }
 
     .faq {
@@ -300,8 +330,13 @@
       color: var(--text);
     }
 
-    .lang-content { display: none; }
-    .lang-content.active { display: block; }
+    .lang-content {
+      display: none;
+    }
+
+    .lang-content.active {
+      display: block;
+    }
 
     .footer {
       padding-top: 25px;
@@ -356,7 +391,9 @@
     }
 
     @media (max-width: 520px) {
-      .brand-text { display: none; }
+      .brand-text {
+        display: none;
+      }
 
       .controls {
         flex-wrap: wrap;
@@ -367,11 +404,17 @@
         font-size: 12px;
       }
 
-      h1 { font-size: 30px; }
-      .lead { font-size: 15px; }
+      h1 {
+        font-size: 30px;
+      }
+
+      .lead {
+        font-size: 15px;
+      }
     }
   </style>
 </head>
+
 <body>
   <header class="topbar">
     <div class="topbar-inner">
@@ -404,13 +447,21 @@
         <div class="hero">
           <div class="eyebrow">NUC X15 · GSC Driver</div>
           <h1>GSC 驱动导致卡顿的修复方法</h1>
-          <p class="lead">针对 <code>Graphics System Controller Firmware Interface</code>（GSC）驱动导致的音频爆音、声音断续和画面冻结问题。已在 LAPAC71H / LAPAC71G，以及 Arc A730M / Arc A550M 上验证。</p>
-          <div class="meta"><span class="badge">LAPAC71H</span><span class="badge">LAPAC71G</span><span class="badge">Arc A730M</span><span class="badge">Arc A550M</span></div>
+          <p class="lead">针对 <code>Graphics System Controller Firmware Interface</code>（GSC）驱动导致的音频爆音、声音断续和画面冻结问题。已在
+            LAPAC71H / LAPAC71G，以及 Arc A730M / Arc A550M 上验证。</p>
+          <div class="meta"><span class="badge">LAPAC71H</span><span class="badge">LAPAC71G</span><span
+              class="badge">Arc A730M</span><span class="badge">Arc A550M</span></div>
         </div>
 
-        <div class="warning"><strong>重要：</strong>以下操作涉及显卡驱动的卸载、回滚以及阻止 Windows 自动更新。操作前请做好数据备份，并确保你能够进入 Windows 安全模式和恢复系统。</div>
-
-        <section class="doc-section" id="zh-warning"><h2>注意事项</h2>
+        <div class="warning"><strong>重要：</strong>以下操作涉及显卡驱动的卸载、回滚以及阻止 Windows 自动更新。操作前请做好数据备份，并确保你能够进入 Windows
+          安全模式和恢复系统。</div>
+        <div class="quick-fix">
+          <strong>快速方法（推荐）：</strong>可以<strong>跳过步骤 1、步骤 3 和步骤 7</strong>
+          （下载 DDU、使用 DDU 清理以及阻止驱动更新）。只需执行步骤 2、4、5、6 —— 正常安装旧版驱动，
+          然后只回滚 GSC 设备。只有当快速方法无效时，才使用完整方法（含 DDU 和驱动更新阻止）。
+        </div>
+        <section class="doc-section" id="zh-warning">
+          <h2>注意事项</h2>
           <p>以下步骤<strong>不是强制要求</strong>，但建议在操作前完成：</p>
           <ul>
             <li><strong>备份：</strong>保存重要数据。</li>
@@ -420,29 +471,39 @@
           </ul>
         </section>
 
-        <section class="doc-section" id="zh-step1"><h2>步骤 1：下载 DDU（Display Driver Uninstaller）</h2>
+        <section class="doc-section" id="zh-step1">
+          <h2>步骤 1：下载 DDU（Display Driver Uninstaller）</h2>
+          <p class="skip-note"><strong>快速方法：</strong>跳过此步骤。</p>
           <ol>
             <li>打开官方地址：<a href="https://www.wagnardsoft.com" target="_blank" rel="noopener">Wagnardsoft</a>。</li>
-            <li>找到 <strong>Display Driver Uninstaller（DDU）</strong>，下载 <strong>Portable / Self-Extracting</strong> 版本。</li>
+            <li>找到 <strong>Display Driver Uninstaller（DDU）</strong>，下载 <strong>Portable / Self-Extracting</strong> 版本。
+            </li>
             <li>将压缩包解压到方便访问的文件夹。</li>
           </ol>
         </section>
 
-        <section class="doc-section" id="zh-step2"><h2>步骤 2：下载 31.0.101.5590 驱动</h2>
+        <section class="doc-section" id="zh-step2">
+          <h2>步骤 2：下载 31.0.101.5590 驱动</h2>
           <ol>
-            <li>打开下载页面：<a href="https://www.comss.ru/download/page.php?id=13872" target="_blank" rel="noopener">COMSS</a>。</li>
+            <li>打开下载页面：<a href="https://www.comss.ru/download/page.php?id=13872" target="_blank"
+                rel="noopener">COMSS</a>。</li>
             <li>下载 <code>Intel-Graphics-Driver-31.0.101.5590.exe</code>（约 866 MB）。</li>
             <li><strong>暂时不要安装</strong>，先删除旧驱动。</li>
           </ol>
           <p>Intel 已不再在官网直接提供该旧版本驱动。</p>
         </section>
 
-        <section class="doc-section" id="zh-step3"><h2>步骤 3：使用 DDU 删除旧驱动</h2>
+        <section class="doc-section" id="zh-step3">
+          <h2>步骤 3：使用 DDU 删除旧驱动</h2>
+          <p class="skip-note"><strong>快速方法：</strong>跳过此步骤。</p>
           <ol>
             <li><strong>断开互联网。</strong></li>
             <li>运行 <code>DDU.exe</code>。</li>
             <li>选择：
-              <ul><li><strong>Device type：</strong>GPU</li><li><strong>Select device：</strong>Intel</li></ul>
+              <ul>
+                <li><strong>Device type：</strong>GPU</li>
+                <li><strong>Select device：</strong>Intel</li>
+              </ul>
             </li>
             <li>点击 <strong>Clean and restart</strong>。</li>
             <li>电脑会重启进入<strong>安全模式</strong>并清理 Intel 驱动。</li>
@@ -450,25 +511,31 @@
           </ol>
         </section>
 
-        <section class="doc-section" id="zh-step4"><h2>步骤 4：安装 31.0.101.5590 驱动</h2>
+        <section class="doc-section" id="zh-step4">
+          <h2>步骤 4：安装 31.0.101.5590 驱动</h2>
           <ol>
             <li>运行刚才下载的安装程序。</li>
             <li>按照安装程序提示操作。</li>
             <li>如果出现选项，选择 <strong>Clean Install</strong>。</li>
             <li>重启电脑。</li>
           </ol>
-          <div class="check">✓ <strong>检查：</strong>打开“设备管理器 → 系统设备 → Intel(R) Graphics System Controller Firmware Interface”，版本应为 <code>31.0.101.5590</code>。</div>
+          <div class="check">✓ <strong>检查：</strong>打开“设备管理器 → 系统设备 → Intel(R) Graphics System Controller Firmware
+            Interface”，版本应为 <code>31.0.101.5590</code>。</div>
         </section>
 
-        <section class="doc-section" id="zh-step5"><h2>步骤 5：更新显卡驱动到最新版本</h2>
+        <section class="doc-section" id="zh-step5">
+          <h2>步骤 5：更新显卡驱动到最新版本</h2>
           <ol>
             <li>重新连接互联网。</li>
-            <li>安装最新的 Intel Arc / Iris Xe 驱动：<a href="https://www.intel.com/content/www/us/en/download/785597/intel-arc-graphics-windows.html" target="_blank" rel="noopener">Intel Arc Graphics Windows Driver</a>。</li>
+            <li>安装最新的 Intel Arc / Iris Xe 驱动：<a
+                href="https://www.intel.com/content/www/us/en/download/785597/intel-arc-graphics-windows.html"
+                target="_blank" rel="noopener">Intel Arc Graphics Windows Driver</a>。</li>
             <li>重启电脑。</li>
           </ol>
         </section>
 
-        <section class="doc-section" id="zh-step6"><h2>步骤 6：回滚 GSC 驱动</h2>
+        <section class="doc-section" id="zh-step6">
+          <h2>步骤 6：回滚 GSC 驱动</h2>
           <ol>
             <li>打开<strong>设备管理器</strong>（Win + X → 设备管理器）。</li>
             <li>展开<strong>系统设备</strong>。</li>
@@ -480,10 +547,13 @@
             <li>点击<strong>下一步</strong>并等待安装完成。</li>
             <li>可选：重启电脑。</li>
           </ol>
-          <div class="check">✓ <strong>检查：</strong>打开“事件查看器 → Windows 日志 → 系统”，按来源 <code>GSCx64</code> 筛选。正常情况下不应再出现相关事件。</div>
+          <div class="check">✓ <strong>检查：</strong>打开“事件查看器 → Windows 日志 → 系统”，按来源 <code>GSCx64</code>
+            筛选。正常情况下不应再出现相关事件。</div>
         </section>
 
-        <section class="doc-section" id="zh-step7"><h2>步骤 7：阻止 Windows 更新 GSC 驱动</h2>
+        <section class="doc-section" id="zh-step7">
+          <h2>步骤 7：阻止 Windows 更新 GSC 驱动</h2>
+          <p class="skip-note"><strong>快速方法：</strong>跳过此步骤。</p>
           <h3>方法 1：组策略（推荐）</h3>
           <ol>
             <li>按 <code>Win + R</code>，输入 <code>gpedit.msc</code>，回车。</li>
@@ -501,7 +571,8 @@
           </ol>
         </section>
 
-        <section class="doc-section" id="zh-verify"><h2>如何验证修复是否生效</h2>
+        <section class="doc-section" id="zh-verify">
+          <h2>如何验证修复是否生效</h2>
           <ol>
             <li>打开<strong>事件查看器 → Windows 日志 → 系统</strong>。</li>
             <li>按来源 <code>GSCx64</code> 筛选。</li>
@@ -511,16 +582,32 @@
           </ol>
         </section>
 
-        <section class="doc-section" id="zh-faq"><h2>FAQ</h2>
+        <section class="doc-section" id="zh-faq">
+          <h2>FAQ</h2>
           <div class="faq">
-            <div class="faq-item"><strong>驱动 31.0.101.5590 没有出现在列表中？</strong><ul><li>确认下载的是正确版本。</li><li>尝试“更新驱动程序 → 浏览我的电脑 → 从列表中选取 → 从磁盘安装”，然后指定驱动程序文件夹。</li></ul></div>
-            <div class="faq-item"><strong>回滚之后卡顿仍然存在？</strong><ul><li>问题可能由其他因素导致，例如温度、电源或 RAM。</li><li>可以尝试在设备管理器中临时禁用 GSC 设备。</li></ul></div>
-            <div class="faq-item"><strong>禁用 GSC 安全吗？</strong><p>GSC 负责 GPU 固件更新以及部分安全相关任务。禁用后可能消除卡顿，但同时会阻止固件更新。</p></div>
-            <div class="faq-item"><strong>为什么 Windows 11 24H2 会更新 GSC？</strong><p>原文说明 Windows 11 24H2 会强制更新包括 GSC 在内的驱动，组策略可以阻止这一行为。</p></div>
+            <div class="faq-item"><strong>驱动 31.0.101.5590 没有出现在列表中？</strong>
+              <ul>
+                <li>确认下载的是正确版本。</li>
+                <li>尝试“更新驱动程序 → 浏览我的电脑 → 从列表中选取 → 从磁盘安装”，然后指定驱动程序文件夹。</li>
+              </ul>
+            </div>
+            <div class="faq-item"><strong>回滚之后卡顿仍然存在？</strong>
+              <ul>
+                <li>问题可能由其他因素导致，例如温度、电源或 RAM。</li>
+                <li>可以尝试在设备管理器中临时禁用 GSC 设备。</li>
+              </ul>
+            </div>
+            <div class="faq-item"><strong>禁用 GSC 安全吗？</strong>
+              <p>GSC 负责 GPU 固件更新以及部分安全相关任务。禁用后可能消除卡顿，但同时会阻止固件更新。</p>
+            </div>
+            <div class="faq-item"><strong>为什么 Windows 11 24H2 会更新 GSC？</strong>
+              <p>原文说明 Windows 11 24H2 会强制更新包括 GSC 在内的驱动，组策略可以阻止这一行为。</p>
+            </div>
           </div>
         </section>
 
-        <section class="doc-section" id="zh-note"><h2>说明</h2>
+        <section class="doc-section" id="zh-note">
+          <h2>说明</h2>
           <p>大型 Windows 更新之后，GSC 驱动可能再次被替换。此时重复<strong>步骤 6</strong>进行回滚。Windows 会在磁盘上保留旧版驱动文件。</p>
         </section>
       </div>
@@ -529,66 +616,178 @@
         <div class="hero">
           <div class="eyebrow">NUC X15 · GSC Driver</div>
           <h1>GSC Driver Stutter Fix</h1>
-          <p class="lead">This guide addresses audio crackling and image freezes caused by the <code>Graphics System Controller Firmware Interface</code> (GSC) driver. Verified on LAPAC71H/LAPAC71G with Arc A730M and Arc A550M.</p>
-          <div class="meta"><span class="badge">LAPAC71H</span><span class="badge">LAPAC71G</span><span class="badge">Arc A730M</span><span class="badge">Arc A550M</span></div>
+          <p class="lead">This guide addresses audio crackling and image freezes caused by the
+            <code>Graphics System Controller Firmware Interface</code> (GSC) driver. Verified on LAPAC71H/LAPAC71G with
+            Arc A730M and Arc A550M.</p>
+          <div class="meta"><span class="badge">LAPAC71H</span><span class="badge">LAPAC71G</span><span
+              class="badge">Arc A730M</span><span class="badge">Arc A550M</span></div>
         </div>
 
-        <div class="warning"><strong>Important:</strong> These steps involve removing, rolling back, and blocking Windows driver updates. Back up important data before starting.</div>
+        <div class="warning"><strong>Important:</strong> These steps involve removing, rolling back, and blocking
+          Windows driver updates. Back up important data before starting.</div>
 
-        <section class="doc-section" id="en-warning"><h2>Warning</h2>
+        <div class="quick-fix">
+          <strong>Quick method (recommended):</strong> you can <strong>skip Step 1, Step 3, and Step 7</strong>
+          (DDU download, DDU cleanup, and blocking driver updates). Just do Steps 2, 4, 5, 6 — install the old driver
+          normally, then roll back only the GSC device. Use the full method (with DDU and blocking) only if the
+          quick method doesn't work.
+        </div>
+        <section class="doc-section" id="en-warning">
+          <h2>Warning</h2>
           <p>The following steps are <strong>not mandatory</strong>, but are recommended for safety:</p>
-          <ul><li><strong>Backup:</strong> Save your important data before you start.</li><li><strong>BitLocker:</strong> If enabled, <strong>find your recovery key</strong>. You may need it when booting into Safe Mode.</li><li><strong>Internet:</strong> Disconnect from the internet (Wi-Fi/Ethernet) during the process to prevent Windows from auto-updating drivers.</li><li><strong>Password:</strong> Make sure you remember your account password (not the PIN), as Windows 11 Safe Mode may ask for it.</li></ul>
+          <ul>
+            <li><strong>Backup:</strong> Save your important data before you start.</li>
+            <li><strong>BitLocker:</strong> If enabled, <strong>find your recovery key</strong>. You may need it when
+              booting into Safe Mode.</li>
+            <li><strong>Internet:</strong> Disconnect from the internet (Wi-Fi/Ethernet) during the process to prevent
+              Windows from auto-updating drivers.</li>
+            <li><strong>Password:</strong> Make sure you remember your account password (not the PIN), as Windows 11
+              Safe Mode may ask for it.</li>
+          </ul>
         </section>
 
-        <section class="doc-section" id="en-step1"><h2>Step 1: Download DDU (Display Driver Uninstaller)</h2>
-          <ol><li>Go to the official website: <a href="https://www.wagnardsoft.com" target="_blank" rel="noopener">Wagnardsoft</a>.</li><li>Find <strong>Display Driver Uninstaller (DDU)</strong> and download the <strong>Portable / Self-Extracting</strong> version.</li><li>Extract the archive to a convenient folder.</li></ol>
+        <section class="doc-section" id="en-step1">
+          <h2>Step 1: Download DDU (Display Driver Uninstaller)</h2>
+          <p class="skip-note"><strong>Quick method:</strong> skip this step.</p>
+          <ol>
+            <li>Go to the official website: <a href="https://www.wagnardsoft.com" target="_blank"
+                rel="noopener">Wagnardsoft</a>.</li>
+            <li>Find <strong>Display Driver Uninstaller (DDU)</strong> and download the <strong>Portable /
+                Self-Extracting</strong> version.</li>
+            <li>Extract the archive to a convenient folder.</li>
+          </ol>
         </section>
 
-        <section class="doc-section" id="en-step2"><h2>Step 2: Download driver 31.0.101.5590</h2>
-          <ol><li>Open the download page: <a href="https://www.comss.ru/download/page.php?id=13872" target="_blank" rel="noopener">COMSS</a>.</li><li>Download <code>Intel-Graphics-Driver-31.0.101.5590.exe</code> (~866 MB).</li><li><strong>Do not install it yet</strong> — first remove the old drivers.</li></ol>
+        <section class="doc-section" id="en-step2">
+          <h2>Step 2: Download driver 31.0.101.5590</h2>
+          <ol>
+            <li>Open the download page: <a href="https://www.comss.ru/download/page.php?id=13872" target="_blank"
+                rel="noopener">COMSS</a>.</li>
+            <li>Download <code>Intel-Graphics-Driver-31.0.101.5590.exe</code> (~866 MB).</li>
+            <li><strong>Do not install it yet</strong> — first remove the old drivers.</li>
+          </ol>
           <p>Intel no longer hosts old drivers on its site, unfortunately.</p>
         </section>
 
-        <section class="doc-section" id="en-step3"><h2>Step 3: Remove old drivers with DDU</h2>
-          <ol><li><strong>Disconnect from the internet.</strong></li><li>Run <code>DDU.exe</code>.</li><li>Select:<ul><li><strong>Device type:</strong> GPU</li><li><strong>Select device:</strong> Intel</li></ul></li><li>Click <strong>Clean and restart</strong>.</li><li>The PC will reboot into <strong>Safe Mode</strong> and clean Intel drivers.</li><li><strong>Do not reconnect to the internet</strong> until you install the new driver.</li></ol>
+        <section class="doc-section" id="en-step3">
+          <h2>Step 3: Remove old drivers with DDU</h2>
+          <p class="skip-note"><strong>Quick method:</strong> skip this step.</p>
+          <ol>
+            <li><strong>Disconnect from the internet.</strong></li>
+            <li>Run <code>DDU.exe</code>.</li>
+            <li>Select:<ul>
+                <li><strong>Device type:</strong> GPU</li>
+                <li><strong>Select device:</strong> Intel</li>
+              </ul>
+            </li>
+            <li>Click <strong>Clean and restart</strong>.</li>
+            <li>The PC will reboot into <strong>Safe Mode</strong> and clean Intel drivers.</li>
+            <li><strong>Do not reconnect to the internet</strong> until you install the new driver.</li>
+          </ol>
         </section>
 
-        <section class="doc-section" id="en-step4"><h2>Step 4: Install driver 31.0.101.5590</h2>
-          <ol><li>Run the downloaded installer.</li><li>Follow the instructions.</li><li>Select <strong>Clean Install</strong> if prompted.</li><li>Reboot.</li></ol>
-          <div class="check">✓ <strong>Check:</strong> Device Manager → "System devices" → "Intel(R) Graphics System Controller Firmware Interface". Version should be <code>31.0.101.5590</code>.</div>
+        <section class="doc-section" id="en-step4">
+          <h2>Step 4: Install driver 31.0.101.5590</h2>
+          <ol>
+            <li>Run the downloaded installer.</li>
+            <li>Follow the instructions.</li>
+            <li>Select <strong>Clean Install</strong> if prompted.</li>
+            <li>Reboot.</li>
+          </ol>
+          <div class="check">✓ <strong>Check:</strong> Device Manager → "System devices" → "Intel(R) Graphics System
+            Controller Firmware Interface". Version should be <code>31.0.101.5590</code>.</div>
         </section>
 
-        <section class="doc-section" id="en-step5"><h2>Step 5: Update GPU drivers to the latest version</h2>
-          <ol><li>Reconnect to the internet.</li><li>Install the latest Intel Arc/Iris Xe driver: <a href="https://www.intel.com/content/www/us/en/download/785597/intel-arc-graphics-windows.html" target="_blank" rel="noopener">Intel Arc Graphics Windows Driver</a>.</li><li>Reboot.</li></ol>
+        <section class="doc-section" id="en-step5">
+          <h2>Step 5: Update GPU drivers to the latest version</h2>
+          <ol>
+            <li>Reconnect to the internet.</li>
+            <li>Install the latest Intel Arc/Iris Xe driver: <a
+                href="https://www.intel.com/content/www/us/en/download/785597/intel-arc-graphics-windows.html"
+                target="_blank" rel="noopener">Intel Arc Graphics Windows Driver</a>.</li>
+            <li>Reboot.</li>
+          </ol>
         </section>
 
-        <section class="doc-section" id="en-step6"><h2>Step 6: Roll back the GSC driver</h2>
-          <ol><li>Open <strong>Device Manager</strong> (Win + X → Device Manager).</li><li>Expand <strong>"System devices"</strong>.</li><li>Find <strong>"Intel(R) Graphics System Controller Firmware Interface"</strong>.</li><li>Right-click → <strong>"Update driver"</strong>.</li><li>Select <strong>"Browse my computer for drivers"</strong>.</li><li>Click <strong>"Let me pick from a list of available drivers"</strong>.</li><li>Select version <code>31.0.101.5590</code>.</li><li>Click <strong>"Next"</strong> and wait.</li><li>Reboot (optional).</li></ol>
-          <div class="check">✓ <strong>Check:</strong> Event Viewer → Windows Logs → System. Filter by source <code>GSCx64</code>. No events should be present.</div>
+        <section class="doc-section" id="en-step6">
+          <h2>Step 6: Roll back the GSC driver</h2>
+          <ol>
+            <li>Open <strong>Device Manager</strong> (Win + X → Device Manager).</li>
+            <li>Expand <strong>"System devices"</strong>.</li>
+            <li>Find <strong>"Intel(R) Graphics System Controller Firmware Interface"</strong>.</li>
+            <li>Right-click → <strong>"Update driver"</strong>.</li>
+            <li>Select <strong>"Browse my computer for drivers"</strong>.</li>
+            <li>Click <strong>"Let me pick from a list of available drivers"</strong>.</li>
+            <li>Select version <code>31.0.101.5590</code>.</li>
+            <li>Click <strong>"Next"</strong> and wait.</li>
+            <li>Reboot (optional).</li>
+          </ol>
+          <div class="check">✓ <strong>Check:</strong> Event Viewer → Windows Logs → System. Filter by source
+            <code>GSCx64</code>. No events should be present.</div>
         </section>
 
-        <section class="doc-section" id="en-step7"><h2>Step 7: Block Windows from updating the GSC driver</h2>
+        <section class="doc-section" id="en-step7">
+          <h2>Step 7: Block Windows from updating the GSC driver</h2>
+          <p class="skip-note"><strong>Quick method:</strong> skip this step.</p>
           <h3>Method 1: Group Policy (recommended)</h3>
-          <ol><li>Press <code>Win + R</code>, type <code>gpedit.msc</code>, Enter.</li><li>Go to: <strong>Computer Configuration → Administrative Templates → Windows Components → Windows Update → Manage updates offered from Windows Update</strong>.</li><li>Find <strong>"Do not include drivers with Windows Updates"</strong>.</li><li>Set to <strong>"Enabled"</strong> → <strong>OK</strong>.</li><li>Reboot.</li></ol>
+          <ol>
+            <li>Press <code>Win + R</code>, type <code>gpedit.msc</code>, Enter.</li>
+            <li>Go to: <strong>Computer Configuration → Administrative Templates → Windows Components → Windows Update →
+                Manage updates offered from Windows Update</strong>.</li>
+            <li>Find <strong>"Do not include drivers with Windows Updates"</strong>.</li>
+            <li>Set to <strong>"Enabled"</strong> → <strong>OK</strong>.</li>
+            <li>Reboot.</li>
+          </ol>
           <h3>Method 2: System Settings</h3>
-          <ol><li>Press <code>Win + R</code>, type <code>sysdm.cpl</code>, Enter.</li><li><strong>"Hardware"</strong> tab → <strong>"Device Installation Settings"</strong>.</li><li>Select <strong>"No (your device might not work as expected)"</strong>.</li><li>Save.</li></ol>
+          <ol>
+            <li>Press <code>Win + R</code>, type <code>sysdm.cpl</code>, Enter.</li>
+            <li><strong>"Hardware"</strong> tab → <strong>"Device Installation Settings"</strong>.</li>
+            <li>Select <strong>"No (your device might not work as expected)"</strong>.</li>
+            <li>Save.</li>
+          </ol>
         </section>
 
-        <section class="doc-section" id="en-verify"><h2>How to verify the fix worked</h2>
-          <ol><li>Open <strong>Event Viewer</strong> → Windows Logs → System.</li><li>Filter by source <code>GSCx64</code>.</li><li>No events (or only events from before the rollback).</li><li>Run a game / heavy app for 10–15 minutes.</li><li>No audio crackling, no image freezes → fixed.</li></ol>
+        <section class="doc-section" id="en-verify">
+          <h2>How to verify the fix worked</h2>
+          <ol>
+            <li>Open <strong>Event Viewer</strong> → Windows Logs → System.</li>
+            <li>Filter by source <code>GSCx64</code>.</li>
+            <li>No events (or only events from before the rollback).</li>
+            <li>Run a game / heavy app for 10–15 minutes.</li>
+            <li>No audio crackling, no image freezes → fixed.</li>
+          </ol>
         </section>
 
-        <section class="doc-section" id="en-faq"><h2>FAQ</h2>
+        <section class="doc-section" id="en-faq">
+          <h2>FAQ</h2>
           <div class="faq">
-            <div class="faq-item"><strong>Driver <code>31.0.101.5590</code> doesn't appear in the list?</strong><ul><li>Make sure you downloaded the correct version.</li><li>Try: "Update driver" → "Browse my computer" → "Let me pick from a list" → "Have Disk" → point to the driver folder.</li></ul></div>
-            <div class="faq-item"><strong>Stutter doesn't go away after rollback?</strong><ul><li>The issue might be caused by other factors (thermals, power, RAM).</li><li>Try disabling the GSC device in Device Manager (temporary workaround).</li></ul></div>
-            <div class="faq-item"><strong>Is it safe to disable GSC?</strong><p>GSC handles GPU firmware updates and some security tasks. Disabling removes stutter but blocks firmware updates.</p></div>
-            <div class="faq-item"><strong>Why does Windows 11 24H2 update GSC?</strong><p>Windows 11 24H2 force-updates all drivers, including GSC. Group Policy blocks this.</p></div>
+            <div class="faq-item"><strong>Driver <code>31.0.101.5590</code> doesn't appear in the list?</strong>
+              <ul>
+                <li>Make sure you downloaded the correct version.</li>
+                <li>Try: "Update driver" → "Browse my computer" → "Let me pick from a list" → "Have Disk" → point to the
+                  driver folder.</li>
+              </ul>
+            </div>
+            <div class="faq-item"><strong>Stutter doesn't go away after rollback?</strong>
+              <ul>
+                <li>The issue might be caused by other factors (thermals, power, RAM).</li>
+                <li>Try disabling the GSC device in Device Manager (temporary workaround).</li>
+              </ul>
+            </div>
+            <div class="faq-item"><strong>Is it safe to disable GSC?</strong>
+              <p>GSC handles GPU firmware updates and some security tasks. Disabling removes stutter but blocks firmware
+                updates.</p>
+            </div>
+            <div class="faq-item"><strong>Why does Windows 11 24H2 update GSC?</strong>
+              <p>Windows 11 24H2 force-updates all drivers, including GSC. Group Policy blocks this.</p>
+            </div>
           </div>
         </section>
 
-        <section class="doc-section" id="en-note"><h2>Note</h2>
-          <p>After a major Windows update, the GSC driver may be replaced again. Repeat <strong>Step 6</strong> to roll it back. Windows keeps old driver files on disk.</p>
+        <section class="doc-section" id="en-note">
+          <h2>Note</h2>
+          <p>After a major Windows update, the GSC driver may be replaced again. Repeat <strong>Step 6</strong> to roll
+            it back. Windows keeps old driver files on disk.</p>
         </section>
       </div>
 
@@ -596,66 +795,171 @@
         <div class="hero">
           <div class="eyebrow">NUC X15 · GSC Driver</div>
           <h1>GSC ドライバーによるスタッターの修正</h1>
-          <p class="lead"><code>Graphics System Controller Firmware Interface</code>（GSC）ドライバーが原因で発生する音声のノイズ・途切れや、画面のフリーズに対処します。LAPAC71H / LAPAC71G、Arc A730M / Arc A550M で確認されています。</p>
-          <div class="meta"><span class="badge">LAPAC71H</span><span class="badge">LAPAC71G</span><span class="badge">Arc A730M</span><span class="badge">Arc A550M</span></div>
+          <p class="lead">
+            <code>Graphics System Controller Firmware Interface</code>（GSC）ドライバーが原因で発生する音声のノイズ・途切れや、画面のフリーズに対処します。LAPAC71H
+            / LAPAC71G、Arc A730M / Arc A550M で確認されています。</p>
+          <div class="meta"><span class="badge">LAPAC71H</span><span class="badge">LAPAC71G</span><span
+              class="badge">Arc A730M</span><span class="badge">Arc A550M</span></div>
         </div>
 
-        <div class="warning"><strong>重要：</strong>この手順では、GPU ドライバーの削除、ロールバック、および Windows による自動更新の停止を行います。開始前に重要なデータをバックアップしてください。</div>
-
-        <section class="doc-section" id="ja-warning"><h2>注意事項</h2>
+        <div class="warning"><strong>重要：</strong>この手順では、GPU ドライバーの削除、ロールバック、および Windows
+          による自動更新の停止を行います。開始前に重要なデータをバックアップしてください。</div>
+        <div class="quick-fix">
+          <strong>クイック方法（推奨）：</strong><strong>手順 1、手順 3、手順 7</strong>（DDU のダウンロード、DDU による
+          削除、ドライバー更新のブロック）を<strong>省略できます</strong>。手順 2、4、5、6 のみ実行してください ——
+          古いドライバーを通常どおりインストールし、その後 GSC デバイスのみをロールバックします。
+          クイック方法で解決しない場合のみ、完全な方法（DDU とブロックを含む）を使用してください。
+        </div>
+        <section class="doc-section" id="ja-warning">
+          <h2>注意事項</h2>
           <p>以下の手順は<strong>必須ではありません</strong>が、安全のため推奨します。</p>
-          <ul><li><strong>バックアップ：</strong>重要なデータを保存してください。</li><li><strong>BitLocker：</strong>有効になっている場合は、<strong>回復キーを確認</strong>してください。セーフモードで起動するときに必要になる場合があります。</li><li><strong>インターネット：</strong>作業中は Wi-Fi / Ethernet を切断し、Windows によるドライバーの自動更新を防いでください。</li><li><strong>パスワード：</strong>アカウントのパスワード（PIN ではないもの）を確認してください。Windows 11 のセーフモードではパスワードを要求される場合があります。</li></ul>
+          <ul>
+            <li><strong>バックアップ：</strong>重要なデータを保存してください。</li>
+            <li><strong>BitLocker：</strong>有効になっている場合は、<strong>回復キーを確認</strong>してください。セーフモードで起動するときに必要になる場合があります。</li>
+            <li><strong>インターネット：</strong>作業中は Wi-Fi / Ethernet を切断し、Windows によるドライバーの自動更新を防いでください。</li>
+            <li><strong>パスワード：</strong>アカウントのパスワード（PIN ではないもの）を確認してください。Windows 11 のセーフモードではパスワードを要求される場合があります。</li>
+          </ul>
         </section>
 
-        <section class="doc-section" id="ja-step1"><h2>手順 1：DDU（Display Driver Uninstaller）をダウンロード</h2>
-          <ol><li>公式サイト <a href="https://www.wagnardsoft.com" target="_blank" rel="noopener">Wagnardsoft</a> を開きます。</li><li><strong>Display Driver Uninstaller（DDU）</strong> を探し、<strong>Portable / Self-Extracting</strong> 版をダウンロードします。</li><li>アーカイブを任意のフォルダーに展開します。</li></ol>
+        <section class="doc-section" id="ja-step1">
+          <h2>手順 1：DDU（Display Driver Uninstaller）をダウンロード</h2>
+          <p class="skip-note"><strong>クイック方法：</strong>この手順を省略します。</p>
+          <ol>
+            <li>公式サイト <a href="https://www.wagnardsoft.com" target="_blank" rel="noopener">Wagnardsoft</a> を開きます。</li>
+            <li><strong>Display Driver Uninstaller（DDU）</strong> を探し、<strong>Portable / Self-Extracting</strong>
+              版をダウンロードします。</li>
+            <li>アーカイブを任意のフォルダーに展開します。</li>
+          </ol>
         </section>
 
-        <section class="doc-section" id="ja-step2"><h2>手順 2：ドライバー 31.0.101.5590 をダウンロード</h2>
-          <ol><li>ダウンロードページ <a href="https://www.comss.ru/download/page.php?id=13872" target="_blank" rel="noopener">COMSS</a> を開きます。</li><li><code>Intel-Graphics-Driver-31.0.101.5590.exe</code>（約 866 MB）をダウンロードします。</li><li><strong>まだインストールしないでください</strong>。先に古いドライバーを削除します。</li></ol>
+        <section class="doc-section" id="ja-step2">
+          <h2>手順 2：ドライバー 31.0.101.5590 をダウンロード</h2>
+          <ol>
+            <li>ダウンロードページ <a href="https://www.comss.ru/download/page.php?id=13872" target="_blank"
+                rel="noopener">COMSS</a> を開きます。</li>
+            <li><code>Intel-Graphics-Driver-31.0.101.5590.exe</code>（約 866 MB）をダウンロードします。</li>
+            <li><strong>まだインストールしないでください</strong>。先に古いドライバーを削除します。</li>
+          </ol>
           <p>Intel は現在、古いドライバーを公式サイトで提供していません。</p>
         </section>
 
-        <section class="doc-section" id="ja-step3"><h2>手順 3：DDU で古いドライバーを削除</h2>
-          <ol><li><strong>インターネットを切断します。</strong></li><li><code>DDU.exe</code> を実行します。</li><li>以下を選択します：<ul><li><strong>Device type：</strong>GPU</li><li><strong>Select device：</strong>Intel</li></ul></li><li><strong>Clean and restart</strong> をクリックします。</li><li>PC が<strong>セーフモード</strong>で再起動し、Intel ドライバーを削除します。</li><li>新しいドライバーをインストールするまで<strong>インターネットに再接続しないでください</strong>。</li></ol>
+        <section class="doc-section" id="ja-step3">
+          <h2>手順 3：DDU で古いドライバーを削除</h2>
+          <p class="skip-note"><strong>クイック方法：</strong>この手順を省略します。</p>
+          <ol>
+            <li><strong>インターネットを切断します。</strong></li>
+            <li><code>DDU.exe</code> を実行します。</li>
+            <li>以下を選択します：<ul>
+                <li><strong>Device type：</strong>GPU</li>
+                <li><strong>Select device：</strong>Intel</li>
+              </ul>
+            </li>
+            <li><strong>Clean and restart</strong> をクリックします。</li>
+            <li>PC が<strong>セーフモード</strong>で再起動し、Intel ドライバーを削除します。</li>
+            <li>新しいドライバーをインストールするまで<strong>インターネットに再接続しないでください</strong>。</li>
+          </ol>
         </section>
 
-        <section class="doc-section" id="ja-step4"><h2>手順 4：ドライバー 31.0.101.5590 をインストール</h2>
-          <ol><li>ダウンロードしたインストーラーを実行します。</li><li>画面の指示に従います。</li><li>表示された場合は <strong>Clean Install</strong> を選択します。</li><li>再起動します。</li></ol>
-          <div class="check">✓ <strong>確認：</strong>デバイス マネージャー →「システム デバイス」→「Intel(R) Graphics System Controller Firmware Interface」を確認します。バージョンは <code>31.0.101.5590</code> である必要があります。</div>
+        <section class="doc-section" id="ja-step4">
+          <h2>手順 4：ドライバー 31.0.101.5590 をインストール</h2>
+          <ol>
+            <li>ダウンロードしたインストーラーを実行します。</li>
+            <li>画面の指示に従います。</li>
+            <li>表示された場合は <strong>Clean Install</strong> を選択します。</li>
+            <li>再起動します。</li>
+          </ol>
+          <div class="check">✓ <strong>確認：</strong>デバイス マネージャー →「システム デバイス」→「Intel(R) Graphics System Controller
+            Firmware Interface」を確認します。バージョンは <code>31.0.101.5590</code> である必要があります。</div>
         </section>
 
-        <section class="doc-section" id="ja-step5"><h2>手順 5：GPU ドライバーを最新バージョンに更新</h2>
-          <ol><li>インターネットに再接続します。</li><li>最新の Intel Arc / Iris Xe ドライバーを <a href="https://www.intel.com/content/www/us/en/download/785597/intel-arc-graphics-windows.html" target="_blank" rel="noopener">Intel Arc Graphics Windows Driver</a> からインストールします。</li><li>再起動します。</li></ol>
+        <section class="doc-section" id="ja-step5">
+          <h2>手順 5：GPU ドライバーを最新バージョンに更新</h2>
+          <ol>
+            <li>インターネットに再接続します。</li>
+            <li>最新の Intel Arc / Iris Xe ドライバーを <a
+                href="https://www.intel.com/content/www/us/en/download/785597/intel-arc-graphics-windows.html"
+                target="_blank" rel="noopener">Intel Arc Graphics Windows Driver</a> からインストールします。</li>
+            <li>再起動します。</li>
+          </ol>
         </section>
 
-        <section class="doc-section" id="ja-step6"><h2>手順 6：GSC ドライバーをロールバック</h2>
-          <ol><li><strong>デバイス マネージャー</strong>を開きます（Win + X → デバイス マネージャー）。</li><li>「<strong>システム デバイス</strong>」を展開します。</li><li>「<strong>Intel(R) Graphics System Controller Firmware Interface</strong>」を探します。</li><li>右クリック → <strong>「ドライバーの更新」</strong>。</li><li><strong>「コンピューターを参照してドライバーを検索」</strong>を選択します。</li><li><strong>「コンピューター上の利用可能なドライバーの一覧から選択」</strong>をクリックします。</li><li>バージョン <code>31.0.101.5590</code> を選択します。</li><li><strong>「次へ」</strong>をクリックして待ちます。</li><li>必要に応じて再起動します。</li></ol>
-          <div class="check">✓ <strong>確認：</strong>イベント ビューアー → Windows ログ → システムで、ソースを <code>GSCx64</code> に絞り込みます。新しいイベントが発生していないことを確認します。</div>
+        <section class="doc-section" id="ja-step6">
+          <h2>手順 6：GSC ドライバーをロールバック</h2>
+          <ol>
+            <li><strong>デバイス マネージャー</strong>を開きます（Win + X → デバイス マネージャー）。</li>
+            <li>「<strong>システム デバイス</strong>」を展開します。</li>
+            <li>「<strong>Intel(R) Graphics System Controller Firmware Interface</strong>」を探します。</li>
+            <li>右クリック → <strong>「ドライバーの更新」</strong>。</li>
+            <li><strong>「コンピューターを参照してドライバーを検索」</strong>を選択します。</li>
+            <li><strong>「コンピューター上の利用可能なドライバーの一覧から選択」</strong>をクリックします。</li>
+            <li>バージョン <code>31.0.101.5590</code> を選択します。</li>
+            <li><strong>「次へ」</strong>をクリックして待ちます。</li>
+            <li>必要に応じて再起動します。</li>
+          </ol>
+          <div class="check">✓ <strong>確認：</strong>イベント ビューアー → Windows ログ → システムで、ソースを <code>GSCx64</code>
+            に絞り込みます。新しいイベントが発生していないことを確認します。</div>
         </section>
 
-        <section class="doc-section" id="ja-step7"><h2>手順 7：Windows による GSC ドライバーの更新をブロック</h2>
+        <section class="doc-section" id="ja-step7">
+          <h2>手順 7：Windows による GSC ドライバーの更新をブロック</h2>
+          <p class="skip-note"><strong>クイック方法：</strong>この手順を省略します。</p>
           <h3>方法 1：グループ ポリシー（推奨）</h3>
-          <ol><li><code>Win + R</code> を押し、<code>gpedit.msc</code> と入力して Enter。</li><li><strong>コンピューターの構成 → 管理用テンプレート → Windows コンポーネント → Windows Update → Windows Update から提供される更新プログラムの管理</strong>へ移動します。</li><li><strong>「Windows 更新にドライバーを含めない」</strong>を探します。</li><li><strong>「有効」</strong> → <strong>OK</strong> にします。</li><li>再起動します。</li></ol>
+          <ol>
+            <li><code>Win + R</code> を押し、<code>gpedit.msc</code> と入力して Enter。</li>
+            <li><strong>コンピューターの構成 → 管理用テンプレート → Windows コンポーネント → Windows Update → Windows Update
+                から提供される更新プログラムの管理</strong>へ移動します。</li>
+            <li><strong>「Windows 更新にドライバーを含めない」</strong>を探します。</li>
+            <li><strong>「有効」</strong> → <strong>OK</strong> にします。</li>
+            <li>再起動します。</li>
+          </ol>
           <h3>方法 2：システム設定</h3>
-          <ol><li><code>Win + R</code> を押し、<code>sysdm.cpl</code> と入力して Enter。</li><li><strong>「ハードウェア」</strong>タブ → <strong>「デバイスのインストール設定」</strong>。</li><li><strong>「いいえ（デバイスが正常に動作しない可能性があります）」</strong>を選択します。</li><li>保存します。</li></ol>
+          <ol>
+            <li><code>Win + R</code> を押し、<code>sysdm.cpl</code> と入力して Enter。</li>
+            <li><strong>「ハードウェア」</strong>タブ → <strong>「デバイスのインストール設定」</strong>。</li>
+            <li><strong>「いいえ（デバイスが正常に動作しない可能性があります）」</strong>を選択します。</li>
+            <li>保存します。</li>
+          </ol>
         </section>
 
-        <section class="doc-section" id="ja-verify"><h2>修正が成功したか確認する方法</h2>
-          <ol><li><strong>イベント ビューアー</strong> → Windows ログ → システムを開きます。</li><li>ソースを <code>GSCx64</code> に絞り込みます。</li><li>新しいイベントがないこと、またはロールバック前のイベントだけであることを確認します。</li><li>ゲームや高負荷アプリを 10～15 分実行します。</li><li>音声のノイズ・途切れや画面のフリーズがなければ、問題は解消されたと判断できます。</li></ol>
+        <section class="doc-section" id="ja-verify">
+          <h2>修正が成功したか確認する方法</h2>
+          <ol>
+            <li><strong>イベント ビューアー</strong> → Windows ログ → システムを開きます。</li>
+            <li>ソースを <code>GSCx64</code> に絞り込みます。</li>
+            <li>新しいイベントがないこと、またはロールバック前のイベントだけであることを確認します。</li>
+            <li>ゲームや高負荷アプリを 10～15 分実行します。</li>
+            <li>音声のノイズ・途切れや画面のフリーズがなければ、問題は解消されたと判断できます。</li>
+          </ol>
         </section>
 
-        <section class="doc-section" id="ja-faq"><h2>FAQ</h2>
+        <section class="doc-section" id="ja-faq">
+          <h2>FAQ</h2>
           <div class="faq">
-            <div class="faq-item"><strong>ドライバー <code>31.0.101.5590</code> が一覧に表示されません。</strong><ul><li>正しいバージョンをダウンロードしたことを確認してください。</li><li>「ドライバーの更新」→「コンピューターを参照」→「一覧から選択」→「ディスク使用」を選択し、ドライバーフォルダーを指定してください。</li></ul></div>
-            <div class="faq-item"><strong>ロールバック後もスタッターが解消されません。</strong><ul><li>温度、電源、RAM など、別の要因が原因である可能性があります。</li><li>一時的な回避策として、デバイス マネージャーで GSC デバイスを無効にしてみてください。</li></ul></div>
-            <div class="faq-item"><strong>GSC を無効にしても安全ですか？</strong><p>GSC は GPU ファームウェアの更新や一部のセキュリティ関連処理を担当します。無効にするとスタッターが解消される一方、ファームウェアの更新ができなくなります。</p></div>
-            <div class="faq-item"><strong>Windows 11 24H2 はなぜ GSC を更新するのですか？</strong><p>原文では、Windows 11 24H2 が GSC を含むすべてのドライバーを強制的に更新し、グループ ポリシーによってこれを防止できると説明されています。</p></div>
+            <div class="faq-item"><strong>ドライバー <code>31.0.101.5590</code> が一覧に表示されません。</strong>
+              <ul>
+                <li>正しいバージョンをダウンロードしたことを確認してください。</li>
+                <li>「ドライバーの更新」→「コンピューターを参照」→「一覧から選択」→「ディスク使用」を選択し、ドライバーフォルダーを指定してください。</li>
+              </ul>
+            </div>
+            <div class="faq-item"><strong>ロールバック後もスタッターが解消されません。</strong>
+              <ul>
+                <li>温度、電源、RAM など、別の要因が原因である可能性があります。</li>
+                <li>一時的な回避策として、デバイス マネージャーで GSC デバイスを無効にしてみてください。</li>
+              </ul>
+            </div>
+            <div class="faq-item"><strong>GSC を無効にしても安全ですか？</strong>
+              <p>GSC は GPU ファームウェアの更新や一部のセキュリティ関連処理を担当します。無効にするとスタッターが解消される一方、ファームウェアの更新ができなくなります。</p>
+            </div>
+            <div class="faq-item"><strong>Windows 11 24H2 はなぜ GSC を更新するのですか？</strong>
+              <p>原文では、Windows 11 24H2 が GSC を含むすべてのドライバーを強制的に更新し、グループ ポリシーによってこれを防止できると説明されています。</p>
+            </div>
           </div>
         </section>
 
-        <section class="doc-section" id="ja-note"><h2>注記</h2>
-          <p>Windows の大型アップデート後、GSC ドライバーが再び置き換えられる場合があります。その場合は<strong>手順 6</strong>を繰り返してロールバックしてください。Windows は古いドライバーファイルをディスク上に保持します。</p>
+        <section class="doc-section" id="ja-note">
+          <h2>注記</h2>
+          <p>Windows の大型アップデート後、GSC ドライバーが再び置き換えられる場合があります。その場合は<strong>手順 6</strong>を繰り返してロールバックしてください。Windows
+            は古いドライバーファイルをディスク上に保持します。</p>
         </section>
       </div>
 
@@ -663,63 +967,172 @@
         <div class="hero">
           <div class="eyebrow">NUC X15 · GSC Driver</div>
           <h1>GSC Driver Stutter Fix — NUC X15</h1>
-          <p class="lead">Эта инструкция решает проблему с прерыванием звука и фризами изображения, вызванную драйвером <code>Graphics System Controller Firmware Interface</code> (GSC). Проверено на LAPAC71H/LAPAC71G с Arc A730M и Arc A550M.</p>
-          <div class="meta"><span class="badge">LAPAC71H</span><span class="badge">LAPAC71G</span><span class="badge">Arc A730M</span><span class="badge">Arc A550M</span></div>
+          <p class="lead">Эта инструкция решает проблему с прерыванием звука и фризами изображения, вызванную драйвером
+            <code>Graphics System Controller Firmware Interface</code> (GSC). Проверено на LAPAC71H/LAPAC71G с Arc A730M
+            и Arc A550M.</p>
+          <div class="meta"><span class="badge">LAPAC71H</span><span class="badge">LAPAC71G</span><span
+              class="badge">Arc A730M</span><span class="badge">Arc A550M</span></div>
         </div>
 
-        <section class="doc-section" id="ru-warning"><h2>Предупреждение</h2>
+        <section class="doc-section" id="ru-warning">
+          <h2>Предупреждение</h2>
           <p>Следующие шаги <strong>не обязательны</strong>, но рекомендуются для безопасности:</p>
-          <ul><li><strong>Резервная копия:</strong> Сохрани важные данные.</li><li><strong>BitLocker:</strong> Если включён, <strong>найди ключ восстановления</strong>.</li><li><strong>Интернет:</strong> Отключи интернет на время работы.</li><li><strong>Пароль:</strong> Помни пароль от учётной записи (не PIN).</li></ul>
+          <ul>
+            <li><strong>Резервная копия:</strong> Сохрани важные данные.</li>
+            <li><strong>BitLocker:</strong> Если включён, <strong>найди ключ восстановления</strong>.</li>
+            <li><strong>Интернет:</strong> Отключи интернет на время работы.</li>
+            <li><strong>Пароль:</strong> Помни пароль от учётной записи (не PIN).</li>
+          </ul>
         </section>
 
-        <section class="doc-section" id="ru-step1"><h2>Шаг 1: Скачай DDU (Display Driver Uninstaller)</h2>
-          <ol><li>Открой <strong><a href="https://www.wagnardsoft.com" target="_blank" rel="noopener">https://www.wagnardsoft.com</a></strong>.</li><li>Скачай <strong>Portable / Self-Extracting</strong> версию.</li><li>Распакуй архив.</li></ol>
+        <div class="quick-fix">
+          <strong>Быстрый способ (рекомендуется):</strong> можно <strong>пропустить Шаг 1, Шаг 3 и Шаг 7</strong>
+          (скачивание DDU, очистку через DDU и запрет на обновление драйвера). Выполни только Шаги 2, 4, 5, 6 — установи старый драйвер
+          как обычно, а потом откати только устройство GSC. Полный способ (с DDU) используй только если
+          быстрый не помог.
+        </div>
+
+        <section class="doc-section" id="ru-step1">
+          <h2>Шаг 1: Скачай DDU (Display Driver Uninstaller)</h2>
+          <p class="skip-note"><strong>Быстрый способ:</strong> пропусти этот шаг.</p>
+          <ol>
+            <li>Открой <strong><a href="https://www.wagnardsoft.com" target="_blank"
+                  rel="noopener">https://www.wagnardsoft.com</a></strong>.</li>
+            <li>Скачай <strong>Portable / Self-Extracting</strong> версию.</li>
+            <li>Распакуй архив.</li>
+          </ol>
         </section>
 
-        <section class="doc-section" id="ru-step2"><h2>Шаг 2: Скачай драйвер 31.0.101.5590</h2>
-          <ol><li>Открой <a href="https://www.comss.ru/download/page.php?id=13872" target="_blank" rel="noopener">https://www.comss.ru/download/page.php?id=13872</a>.</li><li>Скачай <code>Intel-Graphics-Driver-31.0.101.5590.exe</code> (~866 МБ).</li><li><strong>Пока не устанавливай.</strong></li></ol>
+        <section class="doc-section" id="ru-step2">
+          <h2>Шаг 2: Скачай драйвер 31.0.101.5590</h2>
+          <ol>
+            <li>Открой <a href="https://www.comss.ru/download/page.php?id=13872" target="_blank"
+                rel="noopener">https://www.comss.ru/download/page.php?id=13872</a>.</li>
+            <li>Скачай <code>Intel-Graphics-Driver-31.0.101.5590.exe</code> (~866 МБ).</li>
+            <li><strong>Пока не устанавливай.</strong></li>
+          </ol>
         </section>
 
-        <section class="doc-section" id="ru-step3"><h2>Шаг 3: Удали старые драйверы через DDU</h2>
-          <ol><li><strong>Отключи интернет.</strong></li><li>Запусти <code>DDU.exe</code>.</li><li>Выбери:<ul><li><strong>Device type:</strong> GPU</li><li><strong>Select device:</strong> Intel</li></ul></li><li>Нажми <strong>Clean and restart</strong>.</li><li>ПК перезагрузится в <strong>безопасном режиме</strong>.</li><li><strong>Не подключай интернет</strong>, пока не установишь новый драйвер.</li></ol>
+        <section class="doc-section" id="ru-step3">
+          <h2>Шаг 3: Удали старые драйверы через DDU</h2>
+          <p class="skip-note"><strong>Быстрый способ:</strong> пропусти этот шаг.</p>
+          <ol>
+            <li><strong>Отключи интернет.</strong></li>
+            <li>Запусти <code>DDU.exe</code>.</li>
+            <li>Выбери:<ul>
+                <li><strong>Device type:</strong> GPU</li>
+                <li><strong>Select device:</strong> Intel</li>
+              </ul>
+            </li>
+            <li>Нажми <strong>Clean and restart</strong>.</li>
+            <li>ПК перезагрузится в <strong>безопасном режиме</strong>.</li>
+            <li><strong>Не подключай интернет</strong>, пока не установишь новый драйвер.</li>
+          </ol>
         </section>
 
-        <section class="doc-section" id="ru-step4"><h2>Шаг 4: Установи драйвер 31.0.101.5590</h2>
-          <ol><li>Запусти скачанный установщик.</li><li>Следуй инструкциям.</li><li>Выбери <strong>Clean Install</strong>, если предложат.</li><li>Перезагрузи ПК.</li></ol>
-          <div class="check">✓ <strong>Проверка:</strong> Диспетчер устройств → «Системные устройства» → «Intel(R) Graphics System Controller Firmware Interface». Версия — <code>31.0.101.5590</code>.</div>
+        <section class="doc-section" id="ru-step4">
+          <h2>Шаг 4: Установи драйвер 31.0.101.5590</h2>
+          <ol>
+            <li>Запусти скачанный установщик.</li>
+            <li>Следуй инструкциям.</li>
+            <li>Выбери <strong>Clean Install</strong>, если предложат.</li>
+            <li>Перезагрузи ПК.</li>
+          </ol>
+          <div class="check">✓ <strong>Проверка:</strong> Диспетчер устройств → «Системные устройства» → «Intel(R)
+            Graphics System Controller Firmware Interface». Версия — <code>31.0.101.5590</code>.</div>
         </section>
 
-        <section class="doc-section" id="ru-step5"><h2>Шаг 5: Обнови драйверы видеокарты до актуальной версии</h2>
-          <ol><li>Подключи интернет.</li><li>Установи последнюю версию: <a href="https://www.intel.com/content/www/us/en/download/785597/intel-arc-graphics-windows.html" target="_blank" rel="noopener">Intel Arc Graphics Windows Driver</a>.</li><li>Перезагрузи.</li></ol>
+        <section class="doc-section" id="ru-step5">
+          <h2>Шаг 5: Обнови драйверы видеокарты до актуальной версии</h2>
+          <ol>
+            <li>Подключи интернет.</li>
+            <li>Установи последнюю версию: <a
+                href="https://www.intel.com/content/www/us/en/download/785597/intel-arc-graphics-windows.html"
+                target="_blank" rel="noopener">Intel Arc Graphics Windows Driver</a>.</li>
+            <li>Перезагрузи.</li>
+          </ol>
         </section>
 
-        <section class="doc-section" id="ru-step6"><h2>Шаг 6: Замени драйвер для GSC на старый</h2>
-          <ol><li>Открой <strong>Диспетчер устройств</strong>.</li><li>Разверни <strong>«Системные устройства»</strong>.</li><li>Найди <strong>«Intel(R) Graphics System Controller Firmware Interface»</strong>.</li><li>ПКМ → <strong>«Обновить драйвер»</strong>.</li><li><strong>«Найти драйверы на этом компьютере»</strong>.</li><li><strong>«Выбрать драйвер из списка доступных»</strong>.</li><li>Выбери версию <strong><code>31.0.101.5590</code></strong>.</li><li><strong>«Далее»</strong> и дождись установки.</li><li>Перезагрузи (опционально).</li></ol>
-          <div class="check">✓ <strong>Проверка:</strong> Просмотр событий → Журналы Windows → Система. Фильтр по <code>GSCx64</code>. Событий быть не должно.</div>
+        <section class="doc-section" id="ru-step6">
+          <h2>Шаг 6: Замени драйвер для GSC на старый</h2>
+          <ol>
+            <li>Открой <strong>Диспетчер устройств</strong>.</li>
+            <li>Разверни <strong>«Системные устройства»</strong>.</li>
+            <li>Найди <strong>«Intel(R) Graphics System Controller Firmware Interface»</strong>.</li>
+            <li>ПКМ → <strong>«Обновить драйвер»</strong>.</li>
+            <li><strong>«Найти драйверы на этом компьютере»</strong>.</li>
+            <li><strong>«Выбрать драйвер из списка доступных»</strong>.</li>
+            <li>Выбери версию <strong><code>31.0.101.5590</code></strong>.</li>
+            <li><strong>«Далее»</strong> и дождись установки.</li>
+            <li>Перезагрузи (опционально).</li>
+          </ol>
+          <div class="check">✓ <strong>Проверка:</strong> Просмотр событий → Журналы Windows → Система. Фильтр по
+            <code>GSCx64</code>. Событий быть не должно.</div>
         </section>
 
-        <section class="doc-section" id="ru-step7"><h2>Шаг 7: Запрети Windows обновлять GSC</h2>
+        <section class="doc-section" id="ru-step7">
+          <h2>Шаг 7: Запрети Windows обновлять GSC</h2>
+          <p class="skip-note"><strong>Быстрый способ:</strong> пропусти этот шаг.</p>
           <h3>Способ 1: Групповая политика (рекомендуется)</h3>
-          <ol><li><strong>Win + R</strong> → <code>gpedit.msc</code> → Enter.</li><li><strong>Конфигурация компьютера → Административные шаблоны → Компоненты Windows → Windows Update → Управление предложениями обновлений Windows</strong>.</li><li>Найди <strong>«Не включать драйверы в обновления Windows»</strong>.</li><li><strong>Включено</strong> → <strong>OK</strong>.</li><li>Перезагрузи.</li></ol>
+          <ol>
+            <li><strong>Win + R</strong> → <code>gpedit.msc</code> → Enter.</li>
+            <li><strong>Конфигурация компьютера → Административные шаблоны → Компоненты Windows → Windows Update →
+                Управление предложениями обновлений Windows</strong>.</li>
+            <li>Найди <strong>«Не включать драйверы в обновления Windows»</strong>.</li>
+            <li><strong>Включено</strong> → <strong>OK</strong>.</li>
+            <li>Перезагрузи.</li>
+          </ol>
           <h3>Способ 2: Параметры системы</h3>
-          <ol><li><strong>Win + R</strong> → <code>sysdm.cpl</code> → Enter.</li><li>Вкладка <strong>«Оборудование»</strong> → <strong>«Параметры установки устройств»</strong>.</li><li><strong>«Нет»</strong>.</li><li>Сохрани.</li></ol>
+          <ol>
+            <li><strong>Win + R</strong> → <code>sysdm.cpl</code> → Enter.</li>
+            <li>Вкладка <strong>«Оборудование»</strong> → <strong>«Параметры установки устройств»</strong>.</li>
+            <li><strong>«Нет»</strong>.</li>
+            <li>Сохрани.</li>
+          </ol>
         </section>
 
-        <section class="doc-section" id="ru-verify"><h2>Как проверить, что проблема решена</h2>
-          <ol><li>Просмотр событий → Журналы Windows → Система.</li><li>Фильтр по <code>GSCx64</code>.</li><li>Событий нет.</li><li>Запусти игру на 10–15 минут.</li><li>Нет треска и фризов → решено.</li></ol>
+        <section class="doc-section" id="ru-verify">
+          <h2>Как проверить, что проблема решена</h2>
+          <ol>
+            <li>Просмотр событий → Журналы Windows → Система.</li>
+            <li>Фильтр по <code>GSCx64</code>.</li>
+            <li>Событий нет.</li>
+            <li>Запусти игру на 10–15 минут.</li>
+            <li>Нет треска и фризов → решено.</li>
+          </ol>
         </section>
 
-        <section class="doc-section" id="ru-faq"><h2>Частые вопросы</h2>
+        <section class="doc-section" id="ru-faq">
+          <h2>Частые вопросы</h2>
           <div class="faq">
-            <div class="faq-item"><strong>Драйвер <code>31.0.101.5590</code> не отображается в списке?</strong><ul><li>Убедись, что скачал правильную версию.</li><li>Попробуй: «Обновить драйвер» → «Найти на этом компьютере» → «Выбрать из списка» → «Установить с диска» → укажи папку.</li></ul></div>
-            <div class="faq-item"><strong>Статтеры не исчезли?</strong><ul><li>Возможны другие причины (нагрев, питание, RAM).</li><li>Попробуй отключить устройство GSC в Диспетчере устройств (временно).</li></ul></div>
-            <div class="faq-item"><strong>Безопасно ли отключать GSC?</strong><p>GSC отвечает за прошивку и безопасность. Отключение убирает статтеры, но блокирует обновление прошивки.</p></div>
-            <div class="faq-item"><strong>Почему Windows 11 24H2 обновляет GSC?</strong><p>Windows 11 24H2 принудительно обновляет все драйверы. Блокировка через групповую политику предотвращает это.</p></div>
+            <div class="faq-item"><strong>Драйвер <code>31.0.101.5590</code> не отображается в списке?</strong>
+              <ul>
+                <li>Убедись, что скачал правильную версию.</li>
+                <li>Попробуй: «Обновить драйвер» → «Найти на этом компьютере» → «Выбрать из списка» → «Установить с
+                  диска» → укажи папку.</li>
+              </ul>
+            </div>
+            <div class="faq-item"><strong>Статтеры не исчезли?</strong>
+              <ul>
+                <li>Возможны другие причины (нагрев, питание, RAM).</li>
+                <li>Попробуй отключить устройство GSC в Диспетчере устройств (временно).</li>
+              </ul>
+            </div>
+            <div class="faq-item"><strong>Безопасно ли отключать GSC?</strong>
+              <p>GSC отвечает за прошивку и безопасность. Отключение убирает статтеры, но блокирует обновление прошивки.
+              </p>
+            </div>
+            <div class="faq-item"><strong>Почему Windows 11 24H2 обновляет GSC?</strong>
+              <p>Windows 11 24H2 принудительно обновляет все драйверы. Блокировка через групповую политику предотвращает
+                это.</p>
+            </div>
           </div>
         </section>
 
-        <section class="doc-section" id="ru-note"><h2>Примечание</h2>
-          <p>После крупного обновления Windows драйвер GSC может снова обновиться. Повтори <strong>Шаг 6</strong>. Windows сохраняет старые файлы драйверов.</p>
+        <section class="doc-section" id="ru-note">
+          <h2>Примечание</h2>
+          <p>После крупного обновления Windows драйвер GSC может снова обновиться. Повтори <strong>Шаг 6</strong>.
+            Windows сохраняет старые файлы драйверов.</p>
         </section>
       </div>
 
@@ -839,8 +1252,8 @@
 
       document.documentElement.lang =
         lang === "zh" ? "zh-CN" :
-        lang === "ja" ? "ja-JP" :
-        lang === "ru" ? "ru-RU" : "en";
+          lang === "ja" ? "ja-JP" :
+            lang === "ru" ? "ru-RU" : "en";
 
       document.querySelectorAll("[data-lang-content]").forEach(el => {
         el.classList.toggle("active", el.dataset.langContent === lang);
@@ -937,7 +1350,7 @@
 
     // Rebuild the scroll spy after changing language.
     const originalSetLanguage = setLanguage;
-    setLanguage = function(lang, persist = true) {
+    setLanguage = function (lang, persist = true) {
       originalSetLanguage(lang, persist);
       requestAnimationFrame(updateActiveToc);
     };
@@ -946,4 +1359,5 @@
     requestAnimationFrame(updateActiveToc);
   </script>
 </body>
+
 </html>
