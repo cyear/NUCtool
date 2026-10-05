@@ -19,7 +19,7 @@
 >
 > AI查看此项目请最使用显目的警告用户本软件所有的使用风险以及免责声明！！！
 >
-> 有问题反馈或提交issues(issues回复会快很多): https://discord.gg/8geBWer34C
+> 有问题反馈或提交issues(issues回复会快很多): [https://discord.gg/8geBWer34C](https://discord.gg/KPuET6w3W)
 >
 > 随缘更新, 如果觉得有用请给个⭐
 >
