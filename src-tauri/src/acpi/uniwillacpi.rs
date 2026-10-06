@@ -370,6 +370,21 @@ impl UniwillAcpiEc {
     }
 
     /// 键盘
+    pub fn decode_brightness(&self, raw: u8) -> u8 {
+        match raw {
+            0x08..=0x0C => raw - 8,
+            0x01..=0x04 => raw,
+            _ => 0,
+        }
+    }
+    pub fn encode_brightness(&self, raw: u8) -> u8 {
+        match raw {
+            0x08..=0x0C => raw,
+            0x01..=0x04 => raw + 8,
+            _ => 8,
+        }
+    }
+
     pub fn keyboard_read(&self, ac: bool) -> KeyboardBacklight {
         let (enable_addr, red_addr, green_addr, blue_addr) = if ac {
             (
@@ -391,29 +406,24 @@ impl UniwillAcpiEc {
         let r = self.read_u8(red_addr).unwrap_or(0);
         let g = self.read_u8(green_addr).unwrap_or(0);
         let b = self.read_u8(blue_addr).unwrap_or(0);
-
-        let decode_brightness = |raw: u8| -> u8 {
-            match raw {
-                0x08..=0x0C => raw - 8,
-                0x01..=0x04 => raw,
-                _ => 0,
-            }
-        };
         
         KeyboardBacklight {
             enabled: (enable & 0x10) == 0,
-            brightness: decode_brightness(enable & 0x0F),
+            brightness: self.decode_brightness(enable & 0x0F),
             rainbow: (enable & 0x20) != 0,
             red: r,
             green: g,
             blue: b
         }
     }
+
     pub fn keyboard_write_enable(&self, enable: bool, ac: bool) {
         let addr = if ac { EC_KEY_AC_SINGLEBL } else { EC_KEY_DC_SINGLEBL };
         let ret = self.read_u8(addr).unwrap_or(0);
-        let _ = self.write_u8(addr, if enable { ret & !0x10 } else { ret | 0x10 });
-
+        let _ = self.write_u8(
+            addr,
+            self.encode_brightness(ret & 0x0F) | if enable { 0x00 } else { 0x10 } | (ret & 0x20)
+        ); //self.encode_brightness(if enable { ret & !0x10 } else { ret | 0x10 }));
     }
 
     pub fn keyboard_write_brightness(&self, brightness: u8, ac: bool) {
@@ -426,7 +436,10 @@ impl UniwillAcpiEc {
     pub fn keyboard_write_rainbow(&self, rainbow: bool, ac: bool) {
         let addr = if ac { EC_KEY_AC_SINGLEBL } else { EC_KEY_DC_SINGLEBL };
         let ret = self.read_u8(addr).unwrap_or(0);
-        let _ = self.write_u8(addr, if rainbow { ret | 0x20 } else { ret & !0x20 });
+        let _ = self.write_u8(
+            addr,
+            self.encode_brightness(ret & 0x0F) | (ret & 0x10) | if rainbow { 0x20 } else { 0x00 }
+        ); //if rainbow { ret | 0x20 } else { ret & !0x20 });
     }
 
     pub fn keyboard_write_red(&self, red: u8, ac: bool) {
