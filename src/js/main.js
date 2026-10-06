@@ -4341,6 +4341,125 @@ if (batteryChargingLimitSetButton) {
 
 
 /* =========================================================
+   检查更新
+   ========================================================= */
+
+async function checkGithubVersion() {
+  const versionElement = document.getElementById("app-version");
+  const updateBadge = document.getElementById("update-badge");
+
+  if (!versionElement || !updateBadge) {
+    return;
+  }
+  try {
+    const currentVersion = versionElement.textContent
+      .trim()
+      .replace(/^v/i, "");
+    const response = await fetch(
+      "https://api.github.com/repos/cyear/NUCtool/releases/latest",
+      {
+        headers: {
+          Accept: "application/vnd.github+json"
+        }
+      }
+    );
+    if (!response.ok) {
+      throw new Error(
+        `GitHub API returned ${response.status}`
+      );
+    }
+    const release = await response.json();
+    const tagName = String(release.tag_name || "").trim();
+    const match = tagName.match(/v(\d+(?:\.\d+)+)$/i);
+    if (!match) {
+      console.warn(
+        "无法解析 GitHub 版本号:",
+        tagName
+      );
+      return;
+    }
+    const latestVersion = match[1];
+    console.log(
+      `当前版本: ${currentVersion}, GitHub 最新版本: ${latestVersion}`
+    );
+    if (
+      compareVersions(
+        latestVersion,
+        currentVersion
+      ) > 0
+    ) {
+      updateBadge.textContent =
+        `NEW v${latestVersion}`;
+
+      updateBadge.style.display =
+        "inline-flex";
+      console.log(release.html_url);
+      updateBadge.onclick = async () => {
+        if (release.html_url) {
+          try {
+              if (window.__TAURI__.opener?.openUrl) {
+                  await window.__TAURI__.opener.openUrl(release.html_url);
+              } else {
+                  window.open(url, '_blank');
+              }
+          } catch (e) {
+              console.error('[UPDATE] failed to open URL:', e);
+          }
+        }
+      };
+    } else {
+      updateBadge.style.display =
+        "none";
+    }
+  } catch (error) {
+    // 更新检查失败不影响应用正常运行
+    console.warn(
+      "检查 GitHub 最新版本失败:",
+      error
+    );
+    updateBadge.style.display =
+      "none";
+  }
+}
+
+function compareVersions(a, b) {
+  const parseVersion = (version) => {
+    return version
+      .split(".")
+      .map((part) => {
+        const match = part.match(/^\d+/);
+        return match
+          ? Number(match[0])
+          : 0;
+      });
+  };
+
+  const av = parseVersion(a);
+  const bv = parseVersion(b);
+
+  const length = Math.max(
+    av.length,
+    bv.length
+  );
+
+  for (let i = 0; i < length; i++) {
+    const x = av[i] || 0;
+    const y = bv[i] || 0;
+
+    if (x > y) {
+      return 1;
+    }
+
+    if (x < y) {
+      return -1;
+    }
+  }
+
+  return 0;
+}
+
+
+/* =========================================================
    初始化
    ========================================================= */
 
@@ -4360,6 +4479,7 @@ async function init() {
   if (model != "LAPAC71H" && model != "LAPAC71G") {
     await initLightbar();
   }
+  checkGithubVersion();
 }
 
 init();

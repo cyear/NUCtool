@@ -42,26 +42,14 @@ body {
   height: 100%;
 }
 
-@font-face {
-    font-family: "ziti";
-
-    src: url("../fonts/NotoSansSC-Regular.ttf")
-        format("truetype");
-
-    font-weight: 100 900;
-    font-style: normal;
-    font-display: swap;
-}
-
 body {
   font-family:
-    "ziti",
+    sans-serif,
+    system-ui,
     "Segoe UI",
     "Microsoft YaHei",
     "PingFang SC",
-    system-ui,
-    -apple-system,
-    sans-serif;
+    -apple-system;
 
   background: var(--bg-main);
   color: var(--text-primary);
@@ -231,6 +219,41 @@ body {
   white-space: nowrap;
 }
 
+.version-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.update-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 2px 6px;
+
+  border: 1px solid rgba(255, 80, 80, 0.45);
+  border-radius: 5px;
+
+  color: #ff5c5c;
+
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.update-badge:hover {
+  background: rgba(255, 80, 80, 0.08);
+  border-color: rgba(255, 80, 80, 0.7);
+}
 
 /* =========================================================
    主内容
