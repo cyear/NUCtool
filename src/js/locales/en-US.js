@@ -171,7 +171,7 @@ const enUS = {
       warning: "Audio/video stutter may occur",
       notFound: "Device not found",
       error: "Failed to read driver version",
-    }
+    },
   },
 
   // ==========================================================

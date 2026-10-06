@@ -33,6 +33,7 @@ const IOCTL_EC_WRITE: u32 = 0x9C40_A48C;
 // Temperature
 const EC_CPU_TEMP: u16 = 0x043E;
 const EC_GPU_TEMP: u16 = 0x044F;
+const EC_PCH_TEMP: u16 = 0x0E0E;
 
 // Main fan RPM
 const EC_MAIN_FAN_RPM_1: u16 = 0x0464;
@@ -51,6 +52,8 @@ const EC_CPU_PL1: u16 = 0x0783;
 // CPU PL2 (W)
 const EC_CPU_PL2: u16 = 0x0784;
 
+// CPU PL3 (W)
+
 // CPU PL4 (W)
 const EC_CPU_PL4: u16 = 0x0785;
 
@@ -67,10 +70,23 @@ const EC_GPU_PL2: u16 = 0x072e;
 const EC_PSYS_PL1_2: u16 = 0x0721;
 
 // FAN MODE
-const EC_FAN_MODE: u16 = 0x0751;
+const EC_ADDR_MANUAL_FAN_CTRL: u16 = 0x0751;
 
 // System Power (W) 疑似
 const EC_APC_WATT: u16 = 0x044C;
+
+// AC/input 状态
+const _EC_AC_STATUS: u16 = 0x043C;
+
+// Battery Cycle Count
+const _EC_BAT_CYCLE: u16 = 0x04A6;
+
+// 跟外接电源性能方案有关写入无效 疑似
+const _EC_MDOE_STATE: u16 = 0x07AB;
+const _EC_MDOE_STATE_: u16 = 0x07AC;
+
+// 风扇同步 疑似 其他待验证
+const _EC_ADDR_AP_OEM_BYTE: u16 = 0x0741;
 
 // FanModeByte as u8
 #[repr(u8)]
@@ -235,12 +251,12 @@ impl UniwillAcpiEc {
 
     /// 读取 Fan Mode
     pub fn fan_read_mode(&self) -> io::Result<u8> {
-        self.read_u8(EC_FAN_MODE)
+        self.read_u8(EC_ADDR_MANUAL_FAN_CTRL)
     }
 
     /// 写入 Fan Mode
     pub fn fan_write_mode(&self, mode: FanModeByte) -> io::Result<()> {
-        self.write_u8(EC_FAN_MODE, mode as u8)
+        self.write_u8(EC_ADDR_MANUAL_FAN_CTRL, mode as u8)
     }
 
     /// 读取 CPU PL1
