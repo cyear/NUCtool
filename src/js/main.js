@@ -103,8 +103,10 @@ function updateDynamicTranslations() {
   // 键盘 LED
   // --------------------------------------------
 
+  const keyboardLedToggle = document.getElementById("keyboard-led-toggle");
+
   if (keyboardLedToggle) {
-    updateKeyboardLedUI(keyboardLedToggle.checked);
+      updateKeyboardLedUI(keyboardLedToggle.checked);
   }
 }
 
@@ -1422,146 +1424,969 @@ displayButtons.forEach(
 // 键盘设置
 // =====================================================
 
-const keyboardLedToggle =
-  document.getElementById(
-    "keyboard-led-toggle"
+/*
+ * AC / DC 分开保存。
+ *
+ * AC:
+ *   State: 0x7EA
+ *   R:     0x769
+ *   G:     0x76A
+ *   B:     0x76B
+ *
+ * DC:
+ *   State: 0x7EB
+ *   R:     0x7EC
+ *   G:     0x7ED
+ *   B:     0x7EE
+ *
+ * Rust:
+ *   get_keyboard_led(ac)
+ *   set_keyboard_enabled(enable, ac)
+ *   set_keyboard_brightness(brightness, ac)
+ *   set_keyboard_rainbow(rainbow, ac)
+ *   set_keyboard_red(red, ac)
+ *   set_keyboard_green(green, ac)
+ *   set_keyboard_blue(blue, ac)
+ */
+
+
+let keyboardPowerMode = "ac";
+
+
+/*
+ * 初始化的默认值。
+ *
+ * 页面启动以后会立即从 EC 读取 AC / DC，
+ * 所以这里的值只是防止 UI 在读取完成之前出现 undefined。
+ */
+
+const keyboardProfiles = {
+
+  ac: {
+    loaded: false,
+    enabled: false,
+    brightness: 0,
+    rainbow: false,
+    red: 0,
+    green: 0,
+    blue: 0,
+  },
+
+  dc: {
+    loaded: false,
+    enabled: false,
+    brightness: 0,
+    rainbow: false,
+    red: 0,
+    green: 0,
+    blue: 0,
+  },
+
+};
+
+
+/* =========================================================
+   工具：获取当前 Profile
+   ========================================================= */
+
+function getKeyboardProfile() {
+
+  return keyboardProfiles[
+    keyboardPowerMode
+  ];
+
+}
+
+
+/* =========================================================
+   EC RGB 0..50
+   ->
+   CSS RGB 0..255
+   ========================================================= */
+
+function keyboardEcToCss(value) {
+
+  const number =
+    Number(value) || 0;
+
+  const clamped =
+    Math.max(
+      0,
+      Math.min(
+        50,
+        number
+      )
+    );
+
+  return Math.round(
+    clamped * 255 / 50
   );
 
-const keyboardLedDescription =
-  document.getElementById(
-    "keyboard-led-description"
+}
+
+
+/* =========================================================
+   CSS RGB 0..255
+   ->
+   EC RGB 0..50
+   ========================================================= */
+
+function keyboardCssToEc(value) {
+
+  const number =
+    Number(value) || 0;
+
+  const clamped =
+    Math.max(
+      0,
+      Math.min(
+        255,
+        number
+      )
+    );
+
+  return Math.round(
+    clamped * 50 / 255
   );
 
+}
 
 
-// -----------------------------------------------------
-// 更新键盘 LED UI
-// -----------------------------------------------------
+/* =========================================================
+   RGB -> HEX
+   ========================================================= */
+
+function keyboardRgbToHex(
+  red,
+  green,
+  blue
+) {
+
+  const toHex = (value) => {
+
+    return Number(value)
+      .toString(16)
+      .padStart(2, "0");
+
+  };
+
+
+  return (
+    "#"
+    + toHex(red)
+    + toHex(green)
+    + toHex(blue)
+  );
+
+}
+
+
+/* =========================================================
+   HEX -> RGB
+   ========================================================= */
+
+function keyboardHexToRgb(hex) {
+
+  const value =
+    String(hex)
+      .replace("#", "")
+      .trim();
+
+
+  if (value.length !== 6) {
+
+    return {
+      r: 255,
+      g: 255,
+      b: 255,
+    };
+
+  }
+
+
+  return {
+
+    r: parseInt(
+      value.substring(0, 2),
+      16
+    ),
+
+    g: parseInt(
+      value.substring(2, 4),
+      16
+    ),
+
+    b: parseInt(
+      value.substring(4, 6),
+      16
+    ),
+
+  };
+
+}
+
+
+/* =========================================================
+   更新 RGB 预览
+   ========================================================= */
+
+function updateKeyboardColorPreview() {
+
+  const redInput =
+    document.getElementById(
+      "keyboard-red"
+    );
+
+  const greenInput =
+    document.getElementById(
+      "keyboard-green"
+    );
+
+  const blueInput =
+    document.getElementById(
+      "keyboard-blue"
+    );
+
+  const redValue =
+    document.getElementById(
+      "keyboard-red-value"
+    );
+
+  const greenValue =
+    document.getElementById(
+      "keyboard-green-value"
+    );
+
+  const blueValue =
+    document.getElementById(
+      "keyboard-blue-value"
+    );
+
+  const preview =
+    document.getElementById(
+      "keyboard-color-preview"
+    );
+
+  const picker =
+    document.getElementById(
+      "keyboard-color-picker"
+    );
+
+
+  if (
+    !redInput ||
+    !greenInput ||
+    !blueInput
+  ) {
+
+    return;
+
+  }
+
+
+  const red =
+    Number(redInput.value);
+
+  const green =
+    Number(greenInput.value);
+
+  const blue =
+    Number(blueInput.value);
+
+
+  /*
+   * 更新数字
+   */
+
+  if (redValue) {
+    redValue.textContent =
+      red;
+  }
+
+  if (greenValue) {
+    greenValue.textContent =
+      green;
+  }
+
+  if (blueValue) {
+    blueValue.textContent =
+      blue;
+  }
+
+
+  /*
+   * EC 0..50
+   *
+   * ->
+   *
+   * CSS 0..255
+   */
+
+  const cssRed =
+    keyboardEcToCss(red);
+
+  const cssGreen =
+    keyboardEcToCss(green);
+
+  const cssBlue =
+    keyboardEcToCss(blue);
+
+
+  /*
+   * 实时更新颜色预览
+   */
+
+  if (preview) {
+
+    preview.style.backgroundColor =
+      `rgb(${cssRed}, ${cssGreen}, ${cssBlue})`;
+
+  }
+
+
+  /*
+   * 同步 color picker
+   */
+
+  if (picker) {
+
+    picker.value =
+      keyboardRgbToHex(
+        cssRed,
+        cssGreen,
+        cssBlue
+      );
+
+  }
+
+
+  /*
+   * 同步当前内存 Profile
+   */
+
+  const profile =
+    getKeyboardProfile();
+
+  if (profile) {
+
+    profile.red =
+      red;
+
+    profile.green =
+      green;
+
+    profile.blue =
+      blue;
+
+  }
+
+}
+
+
+/* =========================================================
+   更新整个键盘 UI
+   ========================================================= */
 
 function updateKeyboardLedUI(
   enabled
 ) {
 
-  if (!keyboardLedToggle) {
+  const toggle =
+    document.getElementById(
+      "keyboard-led-toggle"
+    );
+
+  if (!toggle) {
     return;
   }
 
 
-  keyboardLedToggle.checked =
-    enabled;
+  /*
+   * 如果只是语言变化，
+   * enabled 参数来自当前 UI。
+   *
+   * 这里不重新读取 EC。
+   */
+
+  toggle.checked =
+    Boolean(enabled);
 
 
-  if (keyboardLedDescription) {
+  updateKeyboardLedSettingsUI();
 
-    keyboardLedDescription.textContent =
-      enabled
-        ? t(
-          "keyboard.ledEnabled"
-        )
-        : t(
-          "keyboard.ledDisabled"
-        );
-  }
 }
 
 
+/* =========================================================
+   更新键盘设置区域
+   ========================================================= */
 
-// -----------------------------------------------------
-// 获取键盘 LED 状态
-// -----------------------------------------------------
+function updateKeyboardLedSettingsUI() {
 
-async function loadKeyboardLedState() {
+  const profile =
+    getKeyboardProfile();
 
-  if (!keyboardLedToggle) {
+  if (!profile) {
     return;
   }
+
+
+  const toggle =
+    document.getElementById(
+      "keyboard-led-toggle"
+    );
+
+  const brightness =
+    document.getElementById(
+      "keyboard-brightness"
+    );
+
+  const brightnessValue =
+    document.getElementById(
+      "keyboard-brightness-value"
+    );
+
+  const staticMode =
+    document.getElementById(
+      "keyboard-mode-static"
+    );
+
+  const rainbowMode =
+    document.getElementById(
+      "keyboard-mode-rainbow"
+    );
+
+  const red =
+    document.getElementById(
+      "keyboard-red"
+    );
+
+  const green =
+    document.getElementById(
+      "keyboard-green"
+    );
+
+  const blue =
+    document.getElementById(
+      "keyboard-blue"
+    );
+
+  const redValue =
+    document.getElementById(
+      "keyboard-red-value"
+    );
+
+  const greenValue =
+    document.getElementById(
+      "keyboard-green-value"
+    );
+
+  const blueValue =
+    document.getElementById(
+      "keyboard-blue-value"
+    );
+
+  const picker =
+    document.getElementById(
+      "keyboard-color-picker"
+    );
+
+  const preview =
+    document.getElementById(
+      "keyboard-color-preview"
+    );
+
+  const settings =
+    document.getElementById(
+      "keyboard-led-settings"
+    );
+
+
+  /*
+   * Enable
+   */
+
+  if (toggle) {
+
+    toggle.checked =
+      Boolean(profile.enabled);
+
+  }
+
+
+  /*
+   * 亮度
+   *
+   * 0 = 0%
+   * 1 = 25%
+   * 2 = 50%
+   * 3 = 75%
+   * 4 = 100%
+   */
+
+  if (brightness) {
+
+    brightness.value =
+      profile.brightness;
+
+  }
+
+  if (brightnessValue) {
+
+    brightnessValue.textContent =
+      `${Number(profile.brightness) * 25}%`;
+
+  }
+
+
+  /*
+   * 模式
+   */
+
+  if (staticMode) {
+
+    staticMode.checked =
+      !profile.rainbow;
+
+  }
+
+  if (rainbowMode) {
+
+    rainbowMode.checked =
+      Boolean(profile.rainbow);
+
+  }
+
+
+  /*
+   * RGB
+   */
+
+  if (red) {
+
+    red.value =
+      profile.red;
+
+  }
+
+  if (green) {
+
+    green.value =
+      profile.green;
+
+  }
+
+  if (blue) {
+
+    blue.value =
+      profile.blue;
+
+  }
+
+
+  if (redValue) {
+
+    redValue.textContent =
+      profile.red;
+
+  }
+
+  if (greenValue) {
+
+    greenValue.textContent =
+      profile.green;
+
+  }
+
+  if (blueValue) {
+
+    blueValue.textContent =
+      profile.blue;
+
+  }
+
+
+  /*
+   * RGB 预览
+   */
+
+  const cssRed =
+    keyboardEcToCss(
+      profile.red
+    );
+
+  const cssGreen =
+    keyboardEcToCss(
+      profile.green
+    );
+
+  const cssBlue =
+    keyboardEcToCss(
+      profile.blue
+    );
+
+
+  if (preview) {
+
+    preview.style.backgroundColor =
+      `rgb(${cssRed}, ${cssGreen}, ${cssBlue})`;
+
+  }
+
+
+  if (picker) {
+
+    picker.value =
+      keyboardRgbToHex(
+        cssRed,
+        cssGreen,
+        cssBlue
+      );
+
+  }
+
+
+  /*
+   * 设置区域状态
+   */
+
+  if (settings) {
+
+    settings.classList.toggle(
+      "disabled",
+      !profile.enabled
+    );
+
+    settings.classList.toggle(
+      "rainbow-mode",
+      Boolean(profile.rainbow)
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   更新 AC / DC Tab
+   ========================================================= */
+
+function updateKeyboardPowerTabs() {
+
+  const acButton =
+    document.getElementById(
+      "keyboard-power-ac"
+    );
+
+  const dcButton =
+    document.getElementById(
+      "keyboard-power-dc"
+    );
+
+
+  if (acButton) {
+
+    acButton.classList.toggle(
+      "active",
+      keyboardPowerMode === "ac"
+    );
+
+  }
+
+
+  if (dcButton) {
+
+    dcButton.classList.toggle(
+      "active",
+      keyboardPowerMode === "dc"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   从 Rust 获取 AC / DC
+   ========================================================= */
+
+async function loadKeyboardProfile(
+  powerMode
+) {
+
+  const ac =
+    powerMode === "ac";
 
 
   try {
 
-    keyboardLedToggle.disabled =
-      true;
-
-
-    if (keyboardLedDescription) {
-
-      keyboardLedDescription.textContent =
-        t(
-          "keyboard.reading"
-        );
-    }
-
-
-    const enabled =
+    const result =
       await invoke(
-        "get_keyboard_led"
+        "get_keyboard_led",
+        {
+          ac: ac,
+        }
       );
 
 
-    updateKeyboardLedUI(
-      Boolean(enabled)
+    /*
+     * 读取并限制 EC 数据范围
+     */
+
+    const brightness =
+      Math.max(
+        0,
+        Math.min(
+          4,
+          Number(result.brightness) || 0
+        )
+      );
+
+
+    const red =
+      Math.max(
+        0,
+        Math.min(
+          50,
+          Number(result.red) || 0
+        )
+      );
+
+
+    const green =
+      Math.max(
+        0,
+        Math.min(
+          50,
+          Number(result.green) || 0
+        )
+      );
+
+
+    const blue =
+      Math.max(
+        0,
+        Math.min(
+          50,
+          Number(result.blue) || 0
+        )
+      );
+
+
+    /*
+     * 保存 Profile
+     */
+
+    keyboardProfiles[powerMode] = {
+
+      loaded: true,
+
+      enabled:
+        Boolean(result.enabled),
+
+      brightness:
+        brightness,
+
+      rainbow:
+        Boolean(result.rainbow),
+
+      red:
+        red,
+
+      green:
+        green,
+
+      blue:
+        blue,
+
+    };
+
+
+    console.log(
+      `Keyboard ${powerMode.toUpperCase()} profile:`,
+      keyboardProfiles[powerMode]
     );
+
+
+    /*
+     * 如果当前就是这个 Profile，
+     * 更新界面
+     */
+
+    if (
+      keyboardPowerMode ===
+      powerMode
+    ) {
+
+      updateKeyboardLedSettingsUI();
+
+    }
+
+
+    return true;
 
   } catch (error) {
 
     console.error(
-      "读取键盘 LED 状态失败:",
+      `读取键盘 ${powerMode.toUpperCase()} 配置失败:`,
       error
     );
 
+    return false;
 
-    if (keyboardLedDescription) {
-
-      keyboardLedDescription.textContent =
-        t(
-          "keyboard.readFailed"
-        );
-    }
-
-  } finally {
-
-    keyboardLedToggle.disabled =
-      false;
   }
+
 }
 
 
+/* =========================================================
+   初始化：同时读取 AC + DC
+   ========================================================= */
 
-// -----------------------------------------------------
-// 修改键盘 LED 状态
-// -----------------------------------------------------
+async function loadKeyboardProfiles() {
 
-async function setKeyboardLed(
+  /*
+   * 两个 profile 同时读取。
+   *
+   * 这里不是共用一个结果。
+   *
+   * AC -> get_keyboard_led({ ac: true })
+   * DC -> get_keyboard_led({ ac: false })
+   */
+
+  const results =
+    await Promise.all([
+      loadKeyboardProfile("ac"),
+      loadKeyboardProfile("dc"),
+    ]);
+
+
+  /*
+   * 默认显示 AC
+   */
+
+  keyboardPowerMode =
+    "ac";
+
+
+  updateKeyboardPowerTabs();
+
+  updateKeyboardLedSettingsUI();
+
+
+  console.log(
+    "Keyboard profiles loaded:",
+    keyboardProfiles
+  );
+
+
+  return results.every(
+    Boolean
+  );
+
+}
+
+
+/* =========================================================
+   切换 AC / DC
+   ========================================================= */
+
+async function switchKeyboardPowerMode(
+  mode
+) {
+
+  if (
+    mode !== "ac" &&
+    mode !== "dc"
+  ) {
+
+    return;
+
+  }
+
+
+  keyboardPowerMode =
+    mode;
+
+
+  updateKeyboardPowerTabs();
+
+
+  /*
+   * 如果初始化时已经读取过，
+   * 直接使用缓存。
+   */
+
+  if (
+    keyboardProfiles[mode].loaded
+  ) {
+
+    updateKeyboardLedSettingsUI();
+
+    return;
+
+  }
+
+
+  /*
+   * 如果之前没有成功读取，
+   * 再读取一次。
+   */
+
+  await loadKeyboardProfile(
+    mode
+  );
+
+}
+
+
+/* =========================================================
+   设置 Enable
+   ========================================================= */
+
+async function setKeyboardEnabled(
   enabled
 ) {
 
-  if (!keyboardLedToggle) {
+  const profile =
+    getKeyboardProfile();
+
+  if (!profile) {
     return;
   }
 
 
+  const ac =
+    keyboardPowerMode === "ac";
+
+
+  /*
+   * 先更新 UI，
+   * 让用户立即看到状态。
+   */
+
+  profile.enabled =
+    Boolean(enabled);
+
+  updateKeyboardLedSettingsUI();
+
+
   try {
 
-    keyboardLedToggle.disabled =
-      true;
-
-
     await invoke(
-      "set_keyboard_led",
+      "set_keyboard_enabled",
       {
-        enabled:
-          enabled
+        enable:
+          Boolean(enabled),
+
+        ac:
+          ac,
       }
     );
 
 
-    updateKeyboardLedUI(
-      enabled
-    );
-
-
     console.log(
-      "键盘 LED:",
+      `键盘 ${keyboardPowerMode.toUpperCase()} LED:`,
       enabled
         ? "开启"
         : "关闭"
@@ -1570,42 +2395,849 @@ async function setKeyboardLed(
   } catch (error) {
 
     console.error(
-      "设置键盘 LED 失败:",
+      "设置键盘 LED 开关失败:",
       error
     );
 
 
-    // 设置失败，恢复实际状态
-    await loadKeyboardLedState();
+    /*
+     * 写入失败后重新读取真实状态。
+     */
 
-  } finally {
+    await loadKeyboardProfile(
+      keyboardPowerMode
+    );
 
-    keyboardLedToggle.disabled =
-      false;
   }
+
 }
 
 
+/* =========================================================
+   设置亮度
+   ========================================================= */
 
-// -----------------------------------------------------
-// 开关事件
-// -----------------------------------------------------
+async function setKeyboardBrightness(
+  brightness
+) {
 
-if (keyboardLedToggle) {
+  const profile =
+    getKeyboardProfile();
 
-  keyboardLedToggle.addEventListener(
+  if (!profile) {
+    return;
+  }
+
+
+  const value =
+    Math.max(
+      0,
+      Math.min(
+        4,
+        Number(brightness)
+      )
+    );
+
+
+  const ac =
+    keyboardPowerMode === "ac";
+
+
+  /*
+   * 先更新 UI。
+   */
+
+  profile.brightness =
+    value;
+
+
+  updateKeyboardLedSettingsUI();
+
+
+  try {
+
+    await invoke(
+      "set_keyboard_brightness",
+      {
+        brightness:
+          value,
+
+        ac:
+          ac,
+      }
+    );
+
+
+    console.log(
+      `键盘 ${keyboardPowerMode.toUpperCase()} 亮度:`,
+      value
+    );
+
+  } catch (error) {
+
+    console.error(
+      "设置键盘亮度失败:",
+      error
+    );
+
+
+    await loadKeyboardProfile(
+      keyboardPowerMode
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   设置 Rainbow
+   ========================================================= */
+
+async function setKeyboardRainbow(
+  rainbow
+) {
+
+  const profile =
+    getKeyboardProfile();
+
+  if (!profile) {
+    return;
+  }
+
+
+  const ac =
+    keyboardPowerMode === "ac";
+
+
+  profile.rainbow =
+    Boolean(rainbow);
+
+
+  updateKeyboardLedSettingsUI();
+
+
+  try {
+
+    await invoke(
+      "set_keyboard_rainbow",
+      {
+        rainbow:
+          Boolean(rainbow),
+
+        ac:
+          ac,
+      }
+    );
+
+
+    console.log(
+      `键盘 ${keyboardPowerMode.toUpperCase()} 彩虹模式:`,
+      rainbow
+    );
+
+  } catch (error) {
+
+    console.error(
+      "设置键盘彩虹模式失败:",
+      error
+    );
+
+
+    await loadKeyboardProfile(
+      keyboardPowerMode
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   设置 RGB
+   ========================================================= */
+
+async function setKeyboardRGB(
+  red,
+  green,
+  blue
+) {
+
+  const profile =
+    getKeyboardProfile();
+
+  if (!profile) {
+    return;
+  }
+
+
+  const r =
+    Math.max(
+      0,
+      Math.min(
+        50,
+        Number(red)
+      )
+    );
+
+
+  const g =
+    Math.max(
+      0,
+      Math.min(
+        50,
+        Number(green)
+      )
+    );
+
+
+  const b =
+    Math.max(
+      0,
+      Math.min(
+        50,
+        Number(blue)
+      )
+    );
+
+
+  const ac =
+    keyboardPowerMode === "ac";
+
+
+  try {
+
+    /*
+     * 不使用 Promise.all。
+     *
+     * 你的目标是通过 ACPIDriver 操作 EC，
+     * 这里串行写三个寄存器更稳妥。
+     */
+
+    await invoke(
+      "set_keyboard_red",
+      {
+        red:
+          r,
+
+        ac:
+          ac,
+      }
+    );
+
+
+    await invoke(
+      "set_keyboard_green",
+      {
+        green:
+          g,
+
+        ac:
+          ac,
+      }
+    );
+
+
+    await invoke(
+      "set_keyboard_blue",
+      {
+        blue:
+          b,
+
+        ac:
+          ac,
+      }
+    );
+
+
+    /*
+     * 三个写入全部成功后更新 Profile。
+     */
+
+    profile.red =
+      r;
+
+    profile.green =
+      g;
+
+    profile.blue =
+      b;
+
+
+    /*
+     * 更新 UI。
+     */
+
+    updateKeyboardLedSettingsUI();
+
+
+    console.log(
+      `键盘 ${keyboardPowerMode.toUpperCase()} RGB:`,
+      r,
+      g,
+      b
+    );
+
+  } catch (error) {
+
+    console.error(
+      "设置键盘 RGB 失败:",
+      error
+    );
+
+
+    /*
+     * 任意一个写入失败，
+     * 重新从 EC 获取真实状态。
+     */
+
+    await loadKeyboardProfile(
+      keyboardPowerMode
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   Color Picker -> RGB
+   ========================================================= */
+
+function updateKeyboardFromColorPicker() {
+
+  const picker =
+    document.getElementById(
+      "keyboard-color-picker"
+    );
+
+  if (!picker) {
+    return null;
+  }
+
+
+  const rgb =
+    keyboardHexToRgb(
+      picker.value
+    );
+
+
+  const red =
+    keyboardCssToEc(
+      rgb.r
+    );
+
+  const green =
+    keyboardCssToEc(
+      rgb.g
+    );
+
+  const blue =
+    keyboardCssToEc(
+      rgb.b
+    );
+
+
+  /*
+   * 更新滑块。
+   */
+
+  const redInput =
+    document.getElementById(
+      "keyboard-red"
+    );
+
+  const greenInput =
+    document.getElementById(
+      "keyboard-green"
+    );
+
+  const blueInput =
+    document.getElementById(
+      "keyboard-blue"
+    );
+
+
+  if (redInput) {
+    redInput.value =
+      red;
+  }
+
+  if (greenInput) {
+    greenInput.value =
+      green;
+  }
+
+  if (blueInput) {
+    blueInput.value =
+      blue;
+  }
+
+
+  /*
+   * 立即更新预览。
+   */
+
+  updateKeyboardColorPreview();
+
+
+  return {
+    red,
+    green,
+    blue,
+  };
+
+}
+
+
+/* =========================================================
+   初始化键盘事件
+   ========================================================= */
+
+function bindKeyboardLedEvents() {
+
+  const toggle =
+    document.getElementById(
+      "keyboard-led-toggle"
+    );
+
+  const brightness =
+    document.getElementById(
+      "keyboard-brightness"
+    );
+
+  const staticMode =
+    document.getElementById(
+      "keyboard-mode-static"
+    );
+
+  const rainbowMode =
+    document.getElementById(
+      "keyboard-mode-rainbow"
+    );
+
+  const red =
+    document.getElementById(
+      "keyboard-red"
+    );
+
+  const green =
+    document.getElementById(
+      "keyboard-green"
+    );
+
+  const blue =
+    document.getElementById(
+      "keyboard-blue"
+    );
+
+  const picker =
+    document.getElementById(
+      "keyboard-color-picker"
+    );
+
+  const acButton =
+    document.getElementById(
+      "keyboard-power-ac"
+    );
+
+  const dcButton =
+    document.getElementById(
+      "keyboard-power-dc"
+    );
+
+
+  /*
+   * 页面不存在键盘控件。
+   */
+
+  if (
+    !toggle ||
+    !brightness ||
+    !staticMode ||
+    !rainbowMode ||
+    !red ||
+    !green ||
+    !blue
+  ) {
+
+    console.warn(
+      "键盘 LED 控件不存在"
+    );
+
+    return;
+
+  }
+
+
+  /* =======================================================
+     AC
+     ======================================================= */
+
+  if (acButton) {
+
+    acButton.addEventListener(
+      "click",
+      async () => {
+
+        await switchKeyboardPowerMode(
+          "ac"
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     DC
+     ======================================================= */
+
+  if (dcButton) {
+
+    dcButton.addEventListener(
+      "click",
+      async () => {
+
+        await switchKeyboardPowerMode(
+          "dc"
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =======================================================
+     Enable
+     ======================================================= */
+
+  toggle.addEventListener(
     "change",
     async () => {
 
-      const enabled =
-        keyboardLedToggle.checked;
-
-      await setKeyboardLed(
-        enabled
+      await setKeyboardEnabled(
+        toggle.checked
       );
 
     }
   );
+
+
+  /* =======================================================
+     Brightness
+     ======================================================= */
+
+  /*
+   * 拖动过程中只更新 UI，
+   * 不连续写 EC。
+   */
+
+  brightness.addEventListener(
+    "input",
+    () => {
+
+      const profile =
+        getKeyboardProfile();
+
+      if (!profile) {
+        return;
+      }
+
+
+      const value =
+        Number(
+          brightness.value
+        );
+
+
+      profile.brightness =
+        value;
+
+
+      const brightnessValue =
+        document.getElementById(
+          "keyboard-brightness-value"
+        );
+
+
+      if (brightnessValue) {
+
+        brightnessValue.textContent =
+          `${value * 25}%`;
+
+      }
+
+    }
+  );
+
+
+  /*
+   * 松开滑块后写 EC。
+   */
+
+  brightness.addEventListener(
+    "change",
+    async () => {
+
+      await setKeyboardBrightness(
+        Number(
+          brightness.value
+        )
+      );
+
+    }
+  );
+
+
+  /* =======================================================
+     Static
+     ======================================================= */
+
+  staticMode.addEventListener(
+    "change",
+    async () => {
+
+      if (!staticMode.checked) {
+        return;
+      }
+
+
+      await setKeyboardRainbow(
+        false
+      );
+
+    }
+  );
+
+
+  /* =======================================================
+     Rainbow
+     ======================================================= */
+
+  rainbowMode.addEventListener(
+    "change",
+    async () => {
+
+      if (!rainbowMode.checked) {
+        return;
+      }
+
+
+      await setKeyboardRainbow(
+        true
+      );
+
+    }
+  );
+
+
+  /* =======================================================
+     RGB - 实时预览
+     ======================================================= */
+
+  red.addEventListener(
+    "input",
+    () => {
+
+      updateKeyboardColorPreview();
+
+    }
+  );
+
+
+  green.addEventListener(
+    "input",
+    () => {
+
+      updateKeyboardColorPreview();
+
+    }
+  );
+
+
+  blue.addEventListener(
+    "input",
+    () => {
+
+      updateKeyboardColorPreview();
+
+    }
+  );
+
+
+  /* =======================================================
+     RGB - 写入 EC
+     ======================================================= */
+
+  red.addEventListener(
+    "change",
+    async () => {
+
+      const profile =
+        getKeyboardProfile();
+
+      if (!profile) {
+        return;
+      }
+
+
+      await setKeyboardRGB(
+        Number(red.value),
+        profile.green,
+        profile.blue
+      );
+
+    }
+  );
+
+
+  green.addEventListener(
+    "change",
+    async () => {
+
+      const profile =
+        getKeyboardProfile();
+
+      if (!profile) {
+        return;
+      }
+
+
+      await setKeyboardRGB(
+        profile.red,
+        Number(green.value),
+        profile.blue
+      );
+
+    }
+  );
+
+
+  blue.addEventListener(
+    "change",
+    async () => {
+
+      const profile =
+        getKeyboardProfile();
+
+      if (!profile) {
+        return;
+      }
+
+
+      await setKeyboardRGB(
+        profile.red,
+        profile.green,
+        Number(blue.value)
+      );
+
+    }
+  );
+
+
+  /* =======================================================
+     Color Picker
+     ======================================================= */
+
+  if (picker) {
+
+    /*
+     * 点击/拖动系统颜色选择器时，
+     * 立即更新 RGB 滑块和预览。
+     *
+     * 此时不写 EC。
+     */
+
+    picker.addEventListener(
+      "input",
+      () => {
+
+        updateKeyboardFromColorPicker();
+
+      }
+    );
+
+
+    /*
+     * 颜色选择完成后写 EC。
+     */
+
+    picker.addEventListener(
+      "change",
+      async () => {
+
+        const rgb =
+          updateKeyboardFromColorPicker();
+
+
+        if (!rgb) {
+          return;
+        }
+
+
+        await setKeyboardRGB(
+          rgb.red,
+          rgb.green,
+          rgb.blue
+        );
+
+      }
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   初始化键盘 LED
+   ========================================================= */
+
+async function initKeyboardLed() {
+
+  /*
+   * 先绑定事件。
+   *
+   * 这样即使读取 EC 比较慢，
+   * 页面也不会出现没有事件的问题。
+   */
+
+  bindKeyboardLedEvents();
+
+
+  /*
+   * 默认显示 AC。
+   */
+
+  keyboardPowerMode =
+    "ac";
+
+
+  updateKeyboardPowerTabs();
+
+
+  /*
+   * 同时读取 AC + DC。
+   *
+   * 这里会调用：
+   *
+   * get_keyboard_led({ ac: true })
+   * get_keyboard_led({ ac: false })
+   */
+
+  await loadKeyboardProfiles();
+
+
+  /*
+   * 再次确保当前 AC UI 与 EC 同步。
+   */
+
+  updateKeyboardPowerTabs();
+
+  updateKeyboardLedSettingsUI();
 
 }
 
@@ -2720,11 +4352,11 @@ async function init() {
   await initFanControlStatus();
   updateControlState();
   loadPerformanceMode();
-  loadKeyboardLedState();
   await loadBatteryHealthMode();
   loadFanMode();
   loadAutostartState();
   await initGscCheck();
+  await initKeyboardLed();
   if (model != "LAPAC71H" && model != "LAPAC71G") {
     await initLightbar();
   }

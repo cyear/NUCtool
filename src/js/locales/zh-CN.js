@@ -106,7 +106,7 @@ const zhCN = {
     gpuIntelArc: "GPU(Intel ARC)",
     battery: "Battery",
 
-    chargingLimit: "Charging limit",
+    chargingLimit: "充电限制",
   },
 
   // ==========================================================
@@ -206,6 +206,24 @@ const zhCN = {
 
     ledEnabled: "键盘 LED 灯已开启",
     ledDisabled: "键盘 LED 灯已关闭",
+
+    brightness: "亮度",
+    brightnessDescription: "调整键盘背光亮度",
+
+    mode: "灯光模式",
+    modeDescription: "选择静态或彩虹模式",
+
+    static: "静态",
+    rainbow: "彩虹",
+
+    color: "键盘颜色",
+    colorDescription: "调整键盘 LED 的 RGB 颜色",
+
+    ac: "AC 模式",
+    acDescription: "配置接通电源时的键盘灯光",
+
+    dc: "DC 模式",
+    dcDescription: "配置使用电池时的键盘灯光",
 
     reading: "读取中...",
     readFailed: "读取失败",

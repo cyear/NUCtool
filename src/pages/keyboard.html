@@ -20,38 +20,271 @@
   </header>
 
 
-  <div class="keyboard-card">
+  <!-- 键盘 LED -->
+<div class="keyboard-card">
 
-    <div class="keyboard-header">
+  <!-- AC / DC 配置切换 -->
+  <div class="keyboard-power-tabs">
 
-      <div>
+    <button
+      type="button"
+      class="keyboard-power-tab active"
+      id="keyboard-power-ac"
+      data-power="ac">
+      <span data-i18n="keyboard.ac">
+        AC 电源
+      </span>
+    </button>
 
-        <div class="keyboard-title" data-i18n="keyboard.keyboardLed">
-          键盘 LED 灯
+    <button
+      type="button"
+      class="keyboard-power-tab"
+      id="keyboard-power-dc"
+      data-power="dc">
+      <span data-i18n="keyboard.dc">
+        电池
+      </span>
+    </button>
+
+  </div>
+
+  <div class="keyboard-header">
+
+    <div>
+
+      <div
+        class="keyboard-title"
+        data-i18n="keyboard.keyboardLed">
+        键盘 LED 灯
+      </div>
+
+      <div
+        class="keyboard-description"
+        id="keyboard-led-description"
+        data-i18n="keyboard.keyboardLedDescription">
+        控制键盘 LED 灯
+      </div>
+
+    </div>
+
+    <label class="keyboard-switch">
+
+      <input
+        type="checkbox"
+        id="keyboard-led-toggle">
+
+      <span class="keyboard-slider"></span>
+
+    </label>
+
+  </div>
+
+  <div
+    id="keyboard-led-settings"
+    class="keyboard-led-settings">
+
+    <!-- 亮度 -->
+    <div class="keyboard-setting-row">
+
+      <div class="keyboard-setting-info">
+
+        <div
+          class="keyboard-setting-title"
+          data-i18n="keyboard.brightness">
+          亮度
         </div>
 
         <div
-          class="keyboard-description"
-          id="keyboard-led-description"
-          data-i18n="keyboard.keyboardLedDescription">
-          控制键盘 LED 灯
+          class="keyboard-setting-description"
+          data-i18n="keyboard.brightnessDescription">
+          调整键盘背光亮度
+        </div>
+
+      </div>
+
+      <div class="keyboard-brightness-control">
+
+        <input
+          type="range"
+          id="keyboard-brightness"
+          min="0"
+          max="4"
+          step="1"
+          value="0">
+
+        <span id="keyboard-brightness-value">
+          0%
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- 模式 -->
+    <div class="keyboard-setting-row">
+
+      <div class="keyboard-setting-info">
+
+        <div
+          class="keyboard-setting-title"
+          data-i18n="keyboard.mode">
+          灯光模式
+        </div>
+
+        <div
+          class="keyboard-setting-description"
+          data-i18n="keyboard.modeDescription">
+          选择静态或彩虹模式
+        </div>
+
+      </div>
+
+      <div class="keyboard-mode-control">
+
+        <label class="keyboard-radio">
+
+          <input
+            type="radio"
+            name="keyboard-mode"
+            id="keyboard-mode-static"
+            value="static"
+            checked>
+
+          <span data-i18n="keyboard.static">
+            静态
+          </span>
+
+        </label>
+
+        <label class="keyboard-radio">
+
+          <input
+            type="radio"
+            name="keyboard-mode"
+            id="keyboard-mode-rainbow"
+            value="rainbow">
+
+          <span data-i18n="keyboard.rainbow">
+            彩虹
+          </span>
+
+        </label>
+
+      </div>
+
+    </div>
+
+
+    <!-- RGB -->
+    <div
+      id="keyboard-rgb-settings"
+      class="keyboard-setting-row">
+
+      <div class="keyboard-setting-info">
+
+        <div
+          class="keyboard-setting-title"
+          data-i18n="keyboard.color">
+          键盘颜色
+        </div>
+
+        <div
+          class="keyboard-setting-description"
+          data-i18n="keyboard.colorDescription">
+          调整键盘 LED 的 RGB 颜色
         </div>
 
       </div>
 
 
-      <label class="keyboard-switch">
+      <div class="keyboard-rgb-control">
 
-        <input
-          type="checkbox"
-          id="keyboard-led-toggle">
+        <!-- 颜色预览 -->
+        <label
+          class="keyboard-color-preview-wrapper"
+          for="keyboard-color-picker">
 
-        <span class="keyboard-slider"></span>
+          <input
+            type="color"
+            id="keyboard-color-picker"
+            value="#ffffff">
 
-      </label>
+          <div
+            id="keyboard-color-preview"
+            class="keyboard-color-preview">
+          </div>
+
+        </label>
+
+
+        <!-- RGB 滑块 -->
+        <div class="keyboard-rgb-sliders">
+
+          <div class="keyboard-rgb-row">
+
+            <span>R</span>
+
+            <input
+              type="range"
+              id="keyboard-red"
+              min="0"
+              max="50"
+              step="1"
+              value="50">
+
+            <span id="keyboard-red-value">
+              50
+            </span>
+
+          </div>
+
+
+          <div class="keyboard-rgb-row">
+
+            <span>G</span>
+
+            <input
+              type="range"
+              id="keyboard-green"
+              min="0"
+              max="50"
+              step="1"
+              value="50">
+
+            <span id="keyboard-green-value">
+              50
+            </span>
+
+          </div>
+
+
+          <div class="keyboard-rgb-row">
+
+            <span>B</span>
+
+            <input
+              type="range"
+              id="keyboard-blue"
+              min="0"
+              max="50"
+              step="1"
+              value="50">
+
+            <span id="keyboard-blue-value">
+              50
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
 
     </div>
 
   </div>
+
+</div>
 
 </section>

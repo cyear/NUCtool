@@ -209,18 +209,35 @@ const enUS = {
   // Keyboard
   // ==========================================================
   keyboard: {
-    title: "Keyboard Settings",
+    title: "Keyboard",
     subtitle: "Configure keyboard lighting",
 
     keyboardLed: "Keyboard LED",
-    keyboardLedDescription:
-      "Control keyboard LED lighting",
+    keyboardLedDescription: "Control keyboard LED lighting",
 
-    ledEnabled: "Keyboard LED is on",
-    ledDisabled: "Keyboard LED is off",
+    ledEnabled: "Keyboard LED is enabled",
+    ledDisabled: "Keyboard LED is disabled",
+
+    brightness: "Brightness",
+    brightnessDescription: "Adjust keyboard backlight brightness",
+
+    mode: "Lighting Mode",
+    modeDescription: "Choose between static and rainbow lighting",
+
+    static: "Static",
+    rainbow: "Rainbow",
+
+    color: "Keyboard Color",
+    colorDescription: "Adjust the RGB color of the keyboard LED",
+
+    ac: "AC Mode",
+    acDescription: "Configure keyboard lighting when connected to AC power",
+
+    dc: "DC Mode",
+    dcDescription: "Configure keyboard lighting when running on battery",
 
     reading: "Reading...",
-    readFailed: "Read failed",
+    readFailed: "Failed to read",
   },
   lightbar: {
     title: "Light Bar Settings",

@@ -225,14 +225,31 @@ const jaJP = {
   // ==========================================================
   keyboard: {
     title: "キーボード設定",
-    subtitle: "キーボードライトを設定します",
+    subtitle: "キーボードのライティングを設定",
 
     keyboardLed: "キーボード LED",
-    keyboardLedDescription:
-      "キーボード LED ライトを制御します",
+    keyboardLedDescription: "キーボード LED ライティングを制御",
 
     ledEnabled: "キーボード LED はオンです",
     ledDisabled: "キーボード LED はオフです",
+
+    brightness: "明るさ",
+    brightnessDescription: "キーボードバックライトの明るさを調整",
+
+    mode: "ライティングモード",
+    modeDescription: "静的またはレインボーライティングを選択",
+
+    static: "静的",
+    rainbow: "レインボー",
+
+    color: "キーボードカラー",
+    colorDescription: "キーボード LED の RGB カラーを調整",
+
+    ac: "AC モード",
+    acDescription: "AC 電源接続時のキーボードライティングを設定",
+
+    dc: "DC モード",
+    dcDescription: "バッテリー駆動時のキーボードライティングを設定",
 
     reading: "読み込み中...",
     readFailed: "読み込みに失敗しました",

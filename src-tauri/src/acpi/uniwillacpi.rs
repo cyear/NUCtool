@@ -1,7 +1,7 @@
 use std::ffi::OsStr;
 use std::io;
 use std::os::windows::ffi::OsStrExt;
-
+use serde::{Deserialize, Serialize};
 use windows::core::PCWSTR;
 use windows::Win32::Foundation::{CloseHandle, HANDLE, INVALID_HANDLE_VALUE};
 use windows::Win32::Storage::FileSystem::{
@@ -87,6 +87,41 @@ const _EC_MDOE_STATE_: u16 = 0x07AC;
 
 // 风扇同步 疑似 其他待验证
 const _EC_ADDR_AP_OEM_BYTE: u16 = 0x0741;
+
+// AC keyboard state
+const EC_KEY_AC_SINGLEBL: u16 = 0x07EA;
+
+// DC keyboard state
+const EC_KEY_DC_SINGLEBL: u16 = 0x07EB;
+
+// AC RGB
+const EC_KEY_AC_RED: u16 = 0x0769;
+const EC_KEY_AC_GREEN: u16 = 0x076A;
+const EC_KEY_AC_BLUE: u16 = 0x076B;
+
+// DC RGB
+const EC_KEY_DC_RED: u16 = 0x07EC;
+const EC_KEY_DC_GREEN: u16 = 0x07ED;
+const EC_KEY_DC_BLUE: u16 = 0x07EE;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum KeyboardMode {
+    Static,
+    Rainbow,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct KeyboardBacklight {
+    pub enabled: bool,
+    /// 亮度
+    pub brightness: u8,
+    /// Static / Rainbow
+    pub rainbow: bool,
+    /// RGB 0..50
+    pub red: u8,
+    pub green: u8,
+    pub blue: u8,
+}
 
 // FanModeByte as u8
 #[repr(u8)]
@@ -333,6 +368,82 @@ impl UniwillAcpiEc {
     pub fn system_read_power(&self) -> io::Result<u8> {
         self.read_u8(EC_APC_WATT)
     }
+
+    /// 键盘
+    pub fn keyboard_read(&self, ac: bool) -> KeyboardBacklight {
+        let (enable_addr, red_addr, green_addr, blue_addr) = if ac {
+            (
+                EC_KEY_AC_SINGLEBL,
+                EC_KEY_AC_RED,
+                EC_KEY_AC_GREEN,
+                EC_KEY_AC_BLUE,
+            )
+        } else {
+            (
+                EC_KEY_DC_SINGLEBL,
+                EC_KEY_DC_RED,
+                EC_KEY_DC_GREEN,
+                EC_KEY_DC_BLUE,
+            )
+        };
+
+        let enable = self.read_u8(enable_addr).unwrap_or(0);
+        let r = self.read_u8(red_addr).unwrap_or(0);
+        let g = self.read_u8(green_addr).unwrap_or(0);
+        let b = self.read_u8(blue_addr).unwrap_or(0);
+
+        let decode_brightness = |raw: u8| -> u8 {
+            match raw {
+                0x08..=0x0C => raw - 8,
+                0x01..=0x04 => raw,
+                _ => 0,
+            }
+        };
+        
+        KeyboardBacklight {
+            enabled: (enable & 0x10) == 0,
+            brightness: decode_brightness(enable & 0x0F),
+            rainbow: (enable & 0x20) != 0,
+            red: r,
+            green: g,
+            blue: b
+        }
+    }
+    pub fn keyboard_write_enable(&self, enable: bool, ac: bool) {
+        let addr = if ac { EC_KEY_AC_SINGLEBL } else { EC_KEY_DC_SINGLEBL };
+        let ret = self.read_u8(addr).unwrap_or(0);
+        let _ = self.write_u8(addr, if enable { ret & !0x10 } else { ret | 0x10 });
+
+    }
+
+    pub fn keyboard_write_brightness(&self, brightness: u8, ac: bool) {
+        let addr = if ac { EC_KEY_AC_SINGLEBL } else { EC_KEY_DC_SINGLEBL };
+        let ret = self.read_u8(addr).unwrap_or(0);
+        let _ = self.write_u8(addr, (ret & 0xF0) | (0x08 + brightness));
+
+    }
+
+    pub fn keyboard_write_rainbow(&self, rainbow: bool, ac: bool) {
+        let addr = if ac { EC_KEY_AC_SINGLEBL } else { EC_KEY_DC_SINGLEBL };
+        let ret = self.read_u8(addr).unwrap_or(0);
+        let _ = self.write_u8(addr, if rainbow { ret | 0x20 } else { ret & !0x20 });
+    }
+
+    pub fn keyboard_write_red(&self, red: u8, ac: bool) {
+        let addr = if ac { EC_KEY_AC_RED } else { EC_KEY_DC_RED };
+        let _ = self.write_u8(addr, red);
+    }
+
+    pub fn keyboard_write_green(&self, green: u8, ac: bool) {
+        let addr = if ac { EC_KEY_AC_GREEN } else { EC_KEY_DC_GREEN };
+        let _ = self.write_u8(addr, green);
+    }
+
+    pub fn keyboard_write_blue(&self, blue: u8, ac: bool) {
+        let addr = if ac { EC_KEY_AC_BLUE } else { EC_KEY_DC_BLUE };
+        let _ = self.write_u8(addr, blue);
+    }
+
 
 }
 

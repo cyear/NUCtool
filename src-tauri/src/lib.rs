@@ -26,6 +26,7 @@ use windows::Win32::{
     },
 };
 
+use crate::acpi::uniwillacpi::KeyboardBacklight;
 use crate::acpi::uniwillwcf::NativeLightbarProfile;
 
 #[derive(Clone, Serialize)]
@@ -180,11 +181,10 @@ fn start_fan_control_internal(
 
         // 通知前端：已经启动
         let _ = app_handle.emit("fan-control-status", true);
-        let mut fan_data_set = fan_data;
         // 0 = 独立
         // 1 = 主风扇优先
         // 2 = 分风扇优先
-        let mut fan_mode: i32 = 1;
+        let fan_mode: i32;
         match config::load_fan_mode() {
             Ok(1) => {
                 fan_mode = 1;
@@ -202,7 +202,10 @@ fn start_fan_control_internal(
                 let _ = show_osd_i18n(&app_handle, "fanControl", "startIndependent");
             }
             Err(e) => {
+                fan_mode = 1;
                 println!("读取风扇模式配置失败: {}", e);
+                println!("主风扇优先 默认");
+                let _ = show_osd_i18n(&app_handle, "fanControl", "startMainPriority");
             }
         }
         while running.load(Ordering::SeqCst) {
@@ -220,10 +223,10 @@ fn start_fan_control_internal(
             // &fan_data.right_fan S
 
             // CPU 风扇 主 => 右
-            let mut right_speed = calculate_speed(&fan_data_set.left_fan, cpu_temp);
+            let mut right_speed = calculate_speed(&fan_data.left_fan, cpu_temp);
 
             // GPU 风扇 分 => 左
-            let mut left_speed = calculate_speed(&fan_data_set.right_fan, gpu_temp);
+            let mut left_speed = calculate_speed(&fan_data.right_fan, gpu_temp);
 
             if fan_mode == 0 {}
             else if fan_mode == 1 { left_speed = right_speed; } 
@@ -552,46 +555,94 @@ async fn set_display_mode(app: tauri::AppHandle, mode: i32) {
 }
 
 #[tauri::command]
-fn get_keyboard_led() -> bool {
-    let wcf = match UniwillWcfEc::new() {
-        Ok(wcf) => wcf,
+async fn get_keyboard_led(ac: bool) -> KeyboardBacklight {
+    let ec = match UniwillAcpiEc::open() {
+        Ok(ec) => ec,
         Err(e) => {
-            eprintln!("加载 NUCtool DLL 失败: {}", e);
-            None
+            eprintln!("打开 ACPIDriver 失败: {}", e);
+            return KeyboardBacklight {
+                enabled: false,
+                brightness: 0,
+                rainbow: false,
+                red: 0,
+                green: 0,
+                blue: 0,
+            };
         }
-        .expect("加载 NUCtool DLL 失败"),
     };
-    let ret = wcf.connect();
-    let g = wcf.keyboard_get_leds_power();
-    println!("connect: {} wcf_get_keyboard_leds_power: {}", ret, g);
-    wcf.disconnect();
-    if g == 1 {
-        true
-    } else {
-        false
-    }
+    ec.keyboard_read(ac)
 }
 
 #[tauri::command]
-fn set_keyboard_led(app: tauri::AppHandle, enabled: bool) {
-    let wcf = match UniwillWcfEc::new() {
-        Ok(wcf) => wcf,
+async fn set_keyboard_enabled(enable: bool, ac: bool) {
+    let ec = match UniwillAcpiEc::open() {
+        Ok(ec) => ec,
         Err(e) => {
-            eprintln!("加载 NUCtool DLL 失败: {}", e);
-            None
+            eprintln!("打开 ACPIDriver 失败: {}", e);
+            return;
         }
-        .expect("加载 NUCtool DLL 失败"),
     };
-    let ret = wcf.connect();
-    println!("connect: {} set_keyboard_led: {}", ret, enabled);
-    if enabled {
-        wcf.keyboard_set_leds_power(1);
-        let _ = show_osd_i18n(&app, "keyboardLed", "keyboardLedOn");
-    } else {
-        wcf.keyboard_set_leds_power(0);
-        let _ = show_osd_i18n(&app, "keyboardLed", "keyboardLedOff");
-    }
-    wcf.disconnect();
+    ec.keyboard_write_enable(enable, ac);
+}
+
+#[tauri::command]
+async fn set_keyboard_brightness(brightness: u8, ac: bool) {
+    let ec = match UniwillAcpiEc::open() {
+        Ok(ec) => ec,
+        Err(e) => {
+            eprintln!("打开 ACPIDriver 失败: {}", e);
+            return;
+        }
+    };
+    ec.keyboard_write_brightness(brightness, ac);
+}
+
+#[tauri::command]
+async fn set_keyboard_rainbow(rainbow: bool, ac: bool) {
+    let ec = match UniwillAcpiEc::open() {
+        Ok(ec) => ec,
+        Err(e) => {
+            eprintln!("打开 ACPIDriver 失败: {}", e);
+            return;
+        }
+    };
+    ec.keyboard_write_rainbow(rainbow, ac);
+}
+
+#[tauri::command]
+async fn set_keyboard_red(red: u8, ac: bool) {
+    let ec = match UniwillAcpiEc::open() {
+        Ok(ec) => ec,
+        Err(e) => {
+            eprintln!("打开 ACPIDriver 失败: {}", e);
+            return;
+        }
+    };
+    ec.keyboard_write_red(red, ac);
+}
+
+#[tauri::command]
+async fn set_keyboard_green(green: u8, ac: bool) {
+    let ec = match UniwillAcpiEc::open() {
+        Ok(ec) => ec,
+        Err(e) => {
+            eprintln!("打开 ACPIDriver 失败: {}", e);
+            return;
+        }
+    };
+    ec.keyboard_write_green(green, ac);
+}
+
+#[tauri::command]
+async fn set_keyboard_blue(blue: u8, ac: bool) {
+    let ec = match UniwillAcpiEc::open() {
+        Ok(ec) => ec,
+        Err(e) => {
+            eprintln!("打开 ACPIDriver 失败: {}", e);
+            return;
+        }
+    };
+    ec.keyboard_write_blue(blue, ac);
 }
 
 #[tauri::command]
@@ -1193,7 +1244,6 @@ pub fn run() {
             set_power_plan,
             set_display_mode,
             get_keyboard_led,
-            set_keyboard_led,
             osd_ready,
             show_osd_command,
             set_fan_mode,
@@ -1207,6 +1257,12 @@ pub fn run() {
             set_battery_charging_level,
             get_battery_mode,
             set_battery_mode,
+            set_keyboard_enabled,
+            set_keyboard_brightness,
+            set_keyboard_rainbow,
+            set_keyboard_red,
+            set_keyboard_green,
+            set_keyboard_blue,
         ])
         .setup(setup)
         .build(tauri::generate_context!())
