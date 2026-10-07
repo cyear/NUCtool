@@ -295,8 +295,13 @@ impl UniwillAcpiEc {
     }
 
     /// 读取 CPU PL1
-    pub fn cpu_read_pl1(&self) -> io::Result<u8> {
-        self.read_u8(EC_CPU_PL1)
+    pub fn cpu_read_pl1(&self) -> u8 {
+        let pl1 = self.read_u8(EC_CPU_PL1).unwrap_or(0);
+        if pl1 == 0 {
+            0x41
+        } else {
+            pl1
+        }
     }
 
     /// 写入 CPU PL1
@@ -305,8 +310,13 @@ impl UniwillAcpiEc {
     }
 
     /// 读取 CPU PL2
-    pub fn cpu_read_pl2(&self) -> io::Result<u8> {
-        self.read_u8(EC_CPU_PL2)
+    pub fn cpu_read_pl2(&self) -> u8 {
+        let pl2 = self.read_u8(EC_CPU_PL2).unwrap_or(0);
+        if pl2 == 0 {
+            0x64
+        } else {
+            pl2
+        }
     }
 
     /// 写入 CPU PL2
@@ -315,8 +325,13 @@ impl UniwillAcpiEc {
     }
 
     /// 读取 CPU PL4
-    pub fn cpu_read_pl4(&self) -> io::Result<u8> {
-        self.read_u8(EC_CPU_PL4)
+    pub fn cpu_read_pl4(&self) -> u8 {
+        let pl4 = self.read_u8(EC_CPU_PL4).unwrap_or(0);
+        if pl4 == 0 {
+            0x82
+        } else {
+            pl4
+        }
     }
 
     /// 写入 CPU PL4

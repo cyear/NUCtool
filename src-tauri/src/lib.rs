@@ -696,11 +696,11 @@ async fn get_tdp() -> Result<TdpConfig, String> {
     // CPU
     // =================================================
 
-    let cpu_pl1 = ec.cpu_read_pl1().expect("Error");
+    let cpu_pl1 = ec.cpu_read_pl1();
 
-    let cpu_pl2 = ec.cpu_read_pl2().expect("Error");
+    let cpu_pl2 = ec.cpu_read_pl2();
 
-    let cpu_pl4 = ec.cpu_read_pl4().expect("Error");
+    let cpu_pl4 = ec.cpu_read_pl4();
 
     // =================================================
     // GPU
