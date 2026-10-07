@@ -43,6 +43,12 @@ const EC_MAIN_FAN_RPM_2: u16 = 0x0465;
 const EC_SECOND_FAN_RPM_1: u16 = 0x046C;
 const EC_SECOND_FAN_RPM_2: u16 = 0x046D;
 
+// 启用双风扇独立控制
+const EC__FAN_CUSTOM_TABLE_1: u16 = 0x07C5;
+
+// 启用风扇表
+const EC__FAN_CUSTOM_TABLE_2: u16 = 0x07C6;
+
 // Windows Flip 1
 // const EC_WINDOWS_MODE: u16 = 0x767;
 
@@ -51,8 +57,6 @@ const EC_CPU_PL1: u16 = 0x0783;
 
 // CPU PL2 (W)
 const EC_CPU_PL2: u16 = 0x0784;
-
-// CPU PL3 (W)
 
 // CPU PL4 (W)
 const EC_CPU_PL4: u16 = 0x0785;
@@ -470,6 +474,64 @@ impl UniwillAcpiEc {
     pub fn keyboard_write_blue(&self, blue: u8, ac: bool) {
         let addr = if ac { EC_KEY_AC_BLUE } else { EC_KEY_DC_BLUE };
         let _ = self.write_u8(addr, blue);
+    }
+
+    /// 风扇手动模式
+    pub fn fan_write_manual(&self, enable: bool) {
+        let ret = self.fan_read_mode().unwrap_or(0);
+        let _ = if enable {
+            if ret&0x40!=0 {
+                let w = ret & 0xBF;
+                println!("fan_write_manual: ret: {}, write: {}", ret, w);
+                self.write_u8(EC_ADDR_MANUAL_FAN_CTRL, w) // !(1 << 6)
+            } else {
+                Ok(())
+            }
+        } else {
+            // 除了基准模式不需要恢复好像
+            Ok(())
+        };
+    }
+
+    /// 双风扇独立控制
+    pub fn fan_write_custom_table_1(&self, enable: bool) {
+        let _ = if enable {
+            self.write_u8(EC__FAN_CUSTOM_TABLE_1, 0x80)
+        } else {
+            self.write_u8(EC__FAN_CUSTOM_TABLE_1, 0)
+        };
+    }
+
+    /// 风扇表
+    pub fn fan_write_custom_table_2(&self, enable: bool) {
+        let _ = if enable {
+            self.write_u8(EC__FAN_CUSTOM_TABLE_2, 0x04)
+        } else {
+            self.write_u8(EC__FAN_CUSTOM_TABLE_2, 0)
+        };
+    }
+
+    /// 是否启用双风扇独立控制
+    pub fn fan_read_custom_table_1(&self) -> bool {
+        (self.read_u8(EC__FAN_CUSTOM_TABLE_1).unwrap_or(0) & 0x80) != 0
+    }
+
+    /// 是否启用风扇表
+    pub fn fan_read_custom_table_2(&self) -> bool {
+        (self.read_u8(EC__FAN_CUSTOM_TABLE_2).unwrap_or(0) & 0x04) != 0
+    }
+
+    /// 新风扇初始化
+    pub fn fan_write_init(&self) {
+        self.fan_write_manual(true);
+        self.fan_write_custom_table_1(true);
+        self.fan_write_custom_table_2(true);
+    }
+
+    /// 退出
+    pub fn fan_write_close(&self) {
+        self.fan_write_custom_table_1(false);
+        self.fan_write_custom_table_2(false);
     }
 
 
