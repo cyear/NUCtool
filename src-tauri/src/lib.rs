@@ -591,7 +591,7 @@ async fn set_keyboard_enabled(enable: bool, ac: bool) {
         }
     };
     ec.keyboard_write_enable(enable, ac);
-    keyboard_registry::set_power(enable);
+    let _ = keyboard_registry::set_power(enable);
 }
 
 #[tauri::command]
@@ -604,7 +604,7 @@ async fn set_keyboard_brightness(brightness: u8, ac: bool) {
         }
     };
     ec.keyboard_write_brightness(brightness, ac);
-    keyboard_registry::set_brightness(brightness, ac);
+    let _ = keyboard_registry::set_brightness(brightness, ac);
 }
 
 #[tauri::command]
@@ -617,7 +617,7 @@ async fn set_keyboard_rainbow(rainbow: bool, ac: bool) {
         }
     };
     ec.keyboard_write_rainbow(rainbow, ac);
-    keyboard_registry::set_effect(rainbow);
+    let _ = keyboard_registry::set_effect(rainbow);
 }
 
 #[tauri::command]
@@ -630,7 +630,7 @@ async fn set_keyboard_red(red: u8, ac: bool) {
         }
     };
     ec.keyboard_write_red(red, ac);
-    keyboard_registry::set_red(red, ac);
+    let _ = keyboard_registry::set_red(red, ac);
 }
 
 #[tauri::command]
@@ -643,7 +643,7 @@ async fn set_keyboard_green(green: u8, ac: bool) {
         }
     };
     ec.keyboard_write_green(green, ac);
-    keyboard_registry::set_green(green, ac);
+    let _ = keyboard_registry::set_green(green, ac);
 }
 
 #[tauri::command]
@@ -656,7 +656,7 @@ async fn set_keyboard_blue(blue: u8, ac: bool) {
         }
     };
     ec.keyboard_write_blue(blue, ac);
-    keyboard_registry::set_blue(blue, ac);
+    let _ = keyboard_registry::set_blue(blue, ac);
 }
 
 #[tauri::command]
@@ -1009,7 +1009,7 @@ async fn start_newfan_write(app: tauri::AppHandle) {
     };
     ec.fan_write_init();
     ec.fan_write_set(config::load().expect("load config error"));
-    let _ = show_osd_i18n(&app, "fanControl", "startMainPriority");
+    let _ = show_osd_i18n(&app, "fanControl", "startIndependent");
 }
 
 #[tauri::command]
