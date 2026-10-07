@@ -1285,6 +1285,10 @@ fn fnhook() {
 pub fn run() {
     // 管理员权限！！！
     privilege_escalation();
+    config::install_panic_hook();
+    println!("======================================");
+    println!("       NUCtool PANIC HOOK");
+    println!("======================================");
     // Fn Hook
     thread::spawn(|| loop {
         fnhook();

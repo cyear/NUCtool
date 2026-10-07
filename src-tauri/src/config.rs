@@ -20,6 +20,58 @@ pub fn config_dir() -> PathBuf {
         .join("com.cyear.nuctool")
 }
 
+use std::{
+    fs::OpenOptions,
+    io::Write,
+    panic,
+};
+
+pub fn install_panic_hook() {
+    panic::set_hook(Box::new(|info| {
+        let mut log = String::new();
+
+        log.push_str("\n========== NUCtool RUST PANIC ==========\n");
+
+        if let Some(location) = info.location() {
+            log.push_str(&format!(
+                "Location: {}:{}:{}\n",
+                location.file(),
+                location.line(),
+                location.column()
+            ));
+        } else {
+            log.push_str("Location: <unknown>\n");
+        }
+
+        if let Some(message) = info.payload().downcast_ref::<&str>() {
+            log.push_str(&format!("Message: {}\n", message));
+        } else if let Some(message) = info.payload().downcast_ref::<String>() {
+            log.push_str(&format!("Message: {}\n", message));
+        } else {
+            log.push_str("Message: <unknown>\n");
+        }
+
+        log.push_str("========================================\n");
+
+        eprintln!("{}", log);
+
+        let dir = config_dir();
+
+        if std::fs::create_dir_all(&dir).is_ok() {
+            let path = dir.join("crash.log");
+
+            if let Ok(mut file) = OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(path)
+            {
+                let _ = file.write_all(log.as_bytes());
+                let _ = file.flush();
+            }
+        }
+    }));
+}
+
 fn fan_config_path() -> PathBuf {
     config_dir().join("fan_config.json")
 }
