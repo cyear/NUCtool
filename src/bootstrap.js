@@ -5,6 +5,7 @@ const pages = [
   "monitor",
   "tuning",
   "fan",
+  "newfan",
   "system",
   "display",
   "keyboard",

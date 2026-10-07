@@ -1,14 +1,23 @@
-use std::ffi::OsStr;
-use std::io;
-use std::os::windows::ffi::OsStrExt;
-use serde::{Deserialize, Serialize};
-use windows::core::PCWSTR;
-use windows::Win32::Foundation::{CloseHandle, HANDLE, INVALID_HANDLE_VALUE};
-use windows::Win32::Storage::FileSystem::{
-    CreateFileW, FILE_ATTRIBUTE_NORMAL, FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_SHARE_READ,
-    FILE_SHARE_WRITE, OPEN_EXISTING,
+use crate::config::FanData;
+use std::{
+    io,
+    thread,
+    time::Duration,
+    ffi::OsStr,
+    os::windows::ffi::OsStrExt,
 };
-use windows::Win32::System::IO::DeviceIoControl;
+use serde::{Deserialize, Serialize};
+use windows::{
+    core::PCWSTR,
+    Win32::{
+        System::IO::DeviceIoControl,
+        Foundation::{CloseHandle, HANDLE, INVALID_HANDLE_VALUE},
+        Storage::FileSystem::{
+            CreateFileW, FILE_ATTRIBUTE_NORMAL, FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_SHARE_READ,
+            FILE_SHARE_WRITE, OPEN_EXISTING
+        }
+    }
+};
 
 // ============================================================
 // Uniwill ACPIDriver
@@ -48,6 +57,25 @@ const EC__FAN_CUSTOM_TABLE_1: u16 = 0x07C5;
 
 // 启用风扇表
 const EC__FAN_CUSTOM_TABLE_2: u16 = 0x07C6;
+
+// CPU 温度上升阈值起始地址
+pub const EC_FAN_CPU_UP_BASE: u16 = 0x0F00;
+
+// CPU 温度下降阈值起始地址
+pub const EC_FAN_CPU_DOWN_BASE: u16 = 0x0F10;
+
+// CPU 风扇占空比起始地址
+pub const EC_FAN_CPU_DUTY_BASE: u16 = 0x0F20;
+
+// GPU 温度上升阈值起始地址
+pub const EC_FAN_GPU_UP_BASE: u16 = 0x0F30;
+
+// GPU 温度下降阈值起始地址
+pub const EC_FAN_GPU_DOWN_BASE: u16 = 0x0F40;
+
+// GPU 风扇占空比起始地址
+pub const EC_FAN_GPU_DUTY_BASE: u16 = 0x0F50;
+
 
 // Windows Flip 1
 // const EC_WINDOWS_MODE: u16 = 0x767;
@@ -488,9 +516,12 @@ impl UniwillAcpiEc {
                 Ok(())
             }
         } else {
-            // 除了基准模式不需要恢复好像
             Ok(())
         };
+    }
+
+    pub fn fan_read_manual(&self) -> bool {
+        (self.fan_read_mode().unwrap_or(0) & 0x40) == 0
     }
 
     /// 双风扇独立控制
@@ -511,6 +542,14 @@ impl UniwillAcpiEc {
         };
     }
 
+    /// 分离风扇
+    pub fn fan_write_split(&self, enable: bool) {
+        if enable {
+            let _ = self.write_u8(_EC_ADDR_AP_OEM_BYTE, 1);
+        } else {
+            let _ = self.write_u8(_EC_ADDR_AP_OEM_BYTE, 0);
+        }
+    }
     /// 是否启用双风扇独立控制
     pub fn fan_read_custom_table_1(&self) -> bool {
         (self.read_u8(EC__FAN_CUSTOM_TABLE_1).unwrap_or(0) & 0x80) != 0
@@ -521,17 +560,68 @@ impl UniwillAcpiEc {
         (self.read_u8(EC__FAN_CUSTOM_TABLE_2).unwrap_or(0) & 0x04) != 0
     }
 
+    /// 占空比
+    pub fn fan_read_duty(&self) -> bool {
+        let cpu = self.read_u8(EC_FAN_CPU_DUTY_BASE).unwrap_or(0);
+        let gpu = self.read_u8(EC_FAN_GPU_DUTY_BASE).unwrap_or(0);
+        cpu == 0 && gpu == 0
+    }
+
+    pub fn fan_write_duty(&self, enable:bool) {
+        let w: u8;
+        if enable {
+            w = 0;
+        } else {
+            w = 0xFF;
+        }
+        let _ = self.write_u8(EC_FAN_CPU_DUTY_BASE, w);
+        let _ = self.write_u8(EC_FAN_GPU_DUTY_BASE, w);
+    }
+
     /// 新风扇初始化
     pub fn fan_write_init(&self) {
         self.fan_write_manual(true);
+        self.fan_write_split(true);
         self.fan_write_custom_table_1(true);
         self.fan_write_custom_table_2(true);
+        self.fan_write_duty(true);
+    }
+
+    /// 设置风扇
+    pub fn fan_write_set(&self, fandata: FanData) {
+        let (left, right) = (fandata.left_fan, fandata.right_fan);
+        let _ = self.write_u8(EC_FAN_CPU_UP_BASE, 20);
+        let _ = self.write_u8(EC_FAN_CPU_DOWN_BASE, 17);
+        for i in 1..16 {
+            let _ = self.write_u8(EC_FAN_CPU_UP_BASE + i as u16, left[i-1].temperature);
+            thread::sleep(Duration::from_millis(10));
+            let _ = self.write_u8(EC_FAN_CPU_DOWN_BASE + i as u16, left[i-1].temperature - 3);
+            thread::sleep(Duration::from_millis(10));
+            let _ = self.write_u8(EC_FAN_CPU_DUTY_BASE + i as u16, left[i-1].speed * 2);
+            thread::sleep(Duration::from_millis(10));
+        }
+        let _ = self.write_u8(EC_FAN_GPU_UP_BASE, 20);
+        let _ = self.write_u8(EC_FAN_GPU_DOWN_BASE, 17);
+        for i in 1..16 {
+            let _ = self.write_u8(EC_FAN_GPU_UP_BASE + i as u16, right[i-1].temperature);
+            thread::sleep(Duration::from_millis(10));
+            let _ = self.write_u8(EC_FAN_GPU_DOWN_BASE + i as u16, right[i-1].temperature - 3);
+            thread::sleep(Duration::from_millis(10));
+            let _ = self.write_u8(EC_FAN_GPU_DUTY_BASE + i as u16, right[i-1].speed * 2);
+            thread::sleep(Duration::from_millis(10));
+        }
     }
 
     /// 退出
     pub fn fan_write_close(&self) {
+        let _ = self.write_u8(EC_FAN_CPU_UP_BASE, 0);
+        let _ = self.write_u8(EC_FAN_CPU_DOWN_BASE, 0);
+        let _ = self.write_u8(EC_FAN_GPU_UP_BASE, 0);
+        let _ = self.write_u8(EC_FAN_GPU_DOWN_BASE, 0);
         self.fan_write_custom_table_1(false);
         self.fan_write_custom_table_2(false);
+        self.fan_write_duty(false);
+        self.fan_write_split(false);
     }
 
 

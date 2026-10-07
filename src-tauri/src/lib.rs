@@ -18,7 +18,7 @@ use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     AppHandle, Emitter, Manager, State,
 };
-use win::{create_startup_task, is_startup_task_exists, privilege_escalation, remove_startup_task};
+use win::{create_startup_task, is_startup_task_exists, privilege_escalation, remove_startup_task, keyboard_registry};
 use windows::Win32::{
     Foundation::HINSTANCE,
     UI::WindowsAndMessaging::{
@@ -61,6 +61,14 @@ pub struct GpuDriverInfo {
 
 struct AppState {
     running: Arc<AtomicBool>,
+}
+
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct NewFanStatus {
+    pub mode: bool,
+    pub independent: bool,
+    pub fan: bool,
+    pub duty: bool,
 }
 
 #[tauri::command]
@@ -583,6 +591,7 @@ async fn set_keyboard_enabled(enable: bool, ac: bool) {
         }
     };
     ec.keyboard_write_enable(enable, ac);
+    keyboard_registry::set_power(enable);
 }
 
 #[tauri::command]
@@ -595,6 +604,7 @@ async fn set_keyboard_brightness(brightness: u8, ac: bool) {
         }
     };
     ec.keyboard_write_brightness(brightness, ac);
+    keyboard_registry::set_brightness(brightness, ac);
 }
 
 #[tauri::command]
@@ -607,6 +617,7 @@ async fn set_keyboard_rainbow(rainbow: bool, ac: bool) {
         }
     };
     ec.keyboard_write_rainbow(rainbow, ac);
+    keyboard_registry::set_effect(rainbow);
 }
 
 #[tauri::command]
@@ -619,6 +630,7 @@ async fn set_keyboard_red(red: u8, ac: bool) {
         }
     };
     ec.keyboard_write_red(red, ac);
+    keyboard_registry::set_red(red, ac);
 }
 
 #[tauri::command]
@@ -631,6 +643,7 @@ async fn set_keyboard_green(green: u8, ac: bool) {
         }
     };
     ec.keyboard_write_green(green, ac);
+    keyboard_registry::set_green(green, ac);
 }
 
 #[tauri::command]
@@ -643,6 +656,7 @@ async fn set_keyboard_blue(blue: u8, ac: bool) {
         }
     };
     ec.keyboard_write_blue(blue, ac);
+    keyboard_registry::set_blue(blue, ac);
 }
 
 #[tauri::command]
@@ -957,6 +971,60 @@ async fn get_sys_gsc_driver() -> Result<Option<String>, String> {
         .map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+fn start_newfan_monitor(app: tauri::AppHandle) -> Result<(), String> {
+    thread::spawn(move || {
+        let ec = match UniwillAcpiEc::open() {
+            Ok(ec) => ec,
+            Err(e) => {
+                eprintln!("打开 ACPIDriver 失败: {}", e);
+                return;
+            }
+        };
+        loop {
+            let status = NewFanStatus {
+                mode: ec.fan_read_manual(),
+                independent: ec.fan_read_custom_table_1(),
+                fan: ec.fan_read_custom_table_2(),
+                duty: ec.fan_read_duty(),
+            };
+            if let Err(e) = app.emit("newfan-status", status) {
+                eprintln!("发送 newfan-status 失败: {}", e);
+                break;
+            }
+            thread::sleep(Duration::from_millis(4000));
+        }
+    });
+    Ok(())
+}
+
+#[tauri::command]
+async fn start_newfan_write(app: tauri::AppHandle) {
+    let ec = match UniwillAcpiEc::open() {
+        Ok(ec) => ec,
+        Err(e) => {
+            eprintln!("打开 ACPIDriver 失败: {}", e);
+            return;
+        }
+    };
+    ec.fan_write_init();
+    ec.fan_write_set(config::load().expect("load config error"));
+    let _ = show_osd_i18n(&app, "fanControl", "startMainPriority");
+}
+
+#[tauri::command]
+async fn stop_newfan_write(app: tauri::AppHandle,) {
+    let ec = match UniwillAcpiEc::open() {
+        Ok(ec) => ec,
+        Err(e) => {
+            eprintln!("打开 ACPIDriver 失败: {}", e);
+            return;
+        }
+    };
+    ec.fan_write_close();
+    let _ = show_osd_i18n(&app, "fanControl", "stopFanControl");
+}
+
 fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
 
@@ -1263,6 +1331,9 @@ pub fn run() {
             set_keyboard_red,
             set_keyboard_green,
             set_keyboard_blue,
+            start_newfan_monitor,
+            start_newfan_write,
+            stop_newfan_write,
         ])
         .setup(setup)
         .build(tauri::generate_context!())

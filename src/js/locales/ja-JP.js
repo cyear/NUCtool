@@ -27,10 +27,11 @@ const jaJP = {
   status: {
     connecting: "接続中...",
     connected: "接続済み",
-    disconnected: "接続に失敗しました",
+    disconnected: "接続失敗",
     running: "実行中",
-    stopped: "停止中",
+    stopped: "未実行",
     checking: "確認中...",
+    error: "異常",
   },
 
   // ==========================================================
@@ -139,7 +140,30 @@ const jaJP = {
 
     dragHint: "ノードをドラッグして調整",
   },
+  // ==========================================================
+  // New Fan
+  // ==========================================================
+  newfan: {
+    subtitle: "EC独立ファンカーブ制御",
 
+    status: "ファン制御状態",
+
+    mode: "モード",
+    independent: "独立",
+    fan: "ファン",
+    duty: "デューティ",
+
+    startControl: "制御を開始",
+    stopControl: "制御を停止",
+
+    loadConfig: "設定を読み込む",
+    saveConfig: "設定を保存",
+
+    mainCurve: "Main ファンカーブ",
+    secondaryCurve: "Secondary ファンカーブ",
+
+    dragHint: "ノードをドラッグして調整",
+  },
   system: {
     title: "システム設定",
     subtitle: "システム関連の設定を調整します",

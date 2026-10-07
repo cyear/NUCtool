@@ -4459,6 +4459,612 @@ function compareVersions(a, b) {
 }
 
 
+// =========================================================
+// New Fan 状态实时推送
+// =========================================================
+
+/* =========================================================
+ * New Fan 写控制状态
+ *
+ * independent / fan / duty
+ * 三项全部 false：
+ *     → 启动控制
+ *
+ * 任意一项 true：
+ *     → 退出控制
+ *
+ * mode 不参与判断
+ * ========================================================= */
+
+let newFanWriteRunning = false;
+
+
+/* =========================================================
+ * 根据 EC 状态更新按钮
+ * ========================================================= */
+
+function updateNewFanWriteControlState(status) {
+  const startButton =
+    document.getElementById(
+      "newfan-start-button"
+    );
+
+  if (!startButton) {
+    return;
+  }
+
+  const independent =
+    Boolean(status?.independent);
+
+  const fan =
+    Boolean(status?.fan);
+
+  const duty =
+    Boolean(status?.duty);
+
+  /*
+   * 三项全部 false：
+   * 控制未启动
+   */
+  newFanWriteRunning =
+    independent ||
+    fan ||
+    duty;
+
+  if (newFanWriteRunning) {
+    startButton.textContent =
+      t("newfan.stopControl");
+
+    startButton.classList.remove(
+      "primary"
+    );
+
+    startButton.classList.add(
+      "danger"
+    );
+  } else {
+    startButton.textContent =
+      t("newfan.startControl");
+
+    startButton.classList.remove(
+      "danger"
+    );
+
+    startButton.classList.add(
+      "primary"
+    );
+  }
+}
+
+
+/* =========================================================
+ * 启动 New Fan 写控制
+ * ========================================================= */
+
+async function startNewFanWrite() {
+  try {
+    await invoke(
+      "start_newfan_write"
+    );
+
+    console.log(
+      "[NewFan] 写控制已启动"
+    );
+
+  } catch (error) {
+    console.error(
+      "[NewFan] 启动写控制失败:",
+      error
+    );
+  }
+}
+
+
+/* =========================================================
+ * 停止 New Fan 写控制
+ * ========================================================= */
+
+async function stopNewFanWrite() {
+  try {
+    await invoke(
+      "stop_newfan_write"
+    );
+
+    console.log(
+      "[NewFan] 写控制已停止"
+    );
+
+  } catch (error) {
+    console.error(
+      "[NewFan] 停止写控制失败:",
+      error
+    );
+  }
+}
+
+
+/* =========================================================
+ * 按钮点击
+ * ========================================================= */
+
+function initNewFanWriteControl() {
+  const startButton =
+    document.getElementById(
+      "newfan-start-button"
+    );
+
+  if (!startButton) {
+    return;
+  }
+
+  startButton.addEventListener(
+    "click",
+    async () => {
+      if (newFanWriteRunning) {
+        await stopNewFanWrite();
+      } else {
+        await startNewFanWrite();
+      }
+    }
+  );
+}
+
+function updateNewFanOverallStatus(status) {
+  const statusDot = document.getElementById("newfan-status-dot");
+  const statusText = document.getElementById("newfan-status-text");
+
+  if (!statusDot || !statusText) return;
+
+  const mode = Boolean(status?.mode);
+  const independent = Boolean(status?.independent);
+  const fan = Boolean(status?.fan);
+  const duty = Boolean(status?.duty);
+
+  const allControlOff =
+    !independent &&
+    !fan &&
+    !duty;
+
+  const allRunning =
+    mode &&
+    independent &&
+    fan &&
+    duty;
+
+  // 清除所有状态颜色
+  statusDot.classList.remove("active", "error", "warning");
+
+  if (allRunning) {
+    // Mode + 三项控制全部开启
+    statusDot.classList.add("active");
+    statusText.textContent = t("status.running");
+  } else if (allControlOff) {
+    // 三项控制全部关闭
+    // 即使 mode = true，也属于未运行
+    statusText.textContent = t("status.stopped");
+  } else {
+    // 三项控制出现部分开启
+    // 说明状态不一致
+    statusDot.classList.add("error");
+    statusText.textContent = t("status.error");
+  }
+}
+
+/* =========================================================
+ * New Fan 状态监听
+ * ========================================================= */
+
+async function initNewFanStatusListener() {
+  try {
+    await listen(
+      "newfan-status",
+      (event) => {
+        const status =
+          event.payload || {};
+
+        console.log(
+          "[NewFan] status:",
+          status
+        );
+
+        /*
+         * 更新三个状态指示灯
+         */
+
+        updateNewFanStatus(
+          "newfan-mode-indicator",
+          "newfan-mode-value",
+          status.mode
+        );
+
+        updateNewFanStatus(
+          "newfan-independent-indicator",
+          "newfan-independent-value",
+          status.independent
+        );
+
+        updateNewFanStatus(
+          "newfan-fan-indicator",
+          "newfan-fan-value",
+          status.fan
+        );
+
+        updateNewFanStatus(
+          "newfan-duty-indicator",
+          "newfan-duty-value",
+          status.duty
+        );
+        updateNewFanOverallStatus(status);
+        /*
+         * 根据 independent / fan / duty
+         * 更新启动/退出控制按钮
+         */
+        updateNewFanWriteControlState(
+          status
+        );
+      }
+    );
+
+    await invoke(
+      "start_newfan_monitor"
+    );
+
+    console.log(
+      "[NewFan] monitor started"
+    );
+
+  } catch (error) {
+    console.error(
+      "[NewFan] 初始化状态监听失败:",
+      error
+    );
+  }
+}
+
+
+// =========================================================
+// New Fan 状态显示
+// =========================================================
+
+function updateNewFanStatus(indicatorId, valueId, status) {
+    const indicator = document.getElementById(indicatorId);
+    const value = document.getElementById(valueId);
+    if (!indicator || !value) {
+        return;
+    }
+    const ok = Boolean(status);
+    // 指示灯状态
+    indicator.classList.toggle("active", ok);
+    indicator.classList.toggle("error", !ok);
+    // 状态文字
+    value.textContent = ok ? "YES" : "NOT";
+}
+
+
+/* =========================================================
+ * New Fan 曲线
+ * ========================================================= */
+
+const NEWFAN_COLOR_MAIN = "#3987e5";
+const NEWFAN_COLOR_SECONDARY = "#d95926";
+const NEWFAN_GRID = "rgba(255, 255, 255, 0.08)";
+
+let newFanMainCurve = null;
+let newFanSecondaryCurve = null;
+
+function createNewFanCurve(id, color, points) {
+  const canvas = document.getElementById(id);
+
+  if (!canvas) {
+    console.warn(`[NewFan] Canvas not found: ${id}`);
+    return null;
+  }
+
+  if (!Array.isArray(points) || points.length === 0) {
+    console.warn(
+      `[NewFan] No curve data for ${id}`
+    );
+    return null;
+  }
+
+  const labels = points.map(
+    (point) => Number(point.temperature)
+  );
+
+  const data = points.map(
+    (point) => Number(point.speed)
+  );
+
+  return new Chart(canvas, {
+    type: "line",
+
+    data: {
+      labels,
+
+      datasets: [
+        {
+          data,
+
+          borderColor: color,
+          borderWidth: 2,
+
+          pointRadius: 4,
+          pointHoverRadius: 6,
+
+          pointBackgroundColor: color,
+
+          fill: false,
+        },
+      ],
+    },
+
+    options: {
+      maintainAspectRatio: false,
+
+      cubicInterpolationMode: "monotone",
+
+      plugins: {
+        legend: {
+          display: false,
+        },
+
+        tooltip: {
+          displayColors: false,
+
+          callbacks: {
+            title: (items) =>
+              `${items[0].label} °C`,
+
+            label: (item) =>
+              `${item.formattedValue} %`,
+          },
+        },
+
+        dragData: {
+          round: 0,
+
+          dragX: false,
+
+          onDrag: (
+            event,
+            datasetIndex,
+            index,
+            value
+          ) => {
+            return Math.max(
+              0,
+              Math.min(100, value)
+            );
+          },
+        },
+      },
+
+      scales: {
+        x: {
+          grid: {
+            display: false,
+          },
+
+          ticks: {
+            maxRotation: 0,
+
+            callback: (value, index) => {
+              const temperature =
+                labels[index];
+
+              return temperature !== undefined
+                ? `${temperature}°`
+                : "";
+            },
+          },
+        },
+
+        y: {
+          min: 0,
+
+          max: 100,
+
+          grid: {
+            color: NEWFAN_GRID,
+          },
+
+          border: {
+            display: false,
+          },
+
+          ticks: {
+            stepSize: 25,
+
+            callback: (value) =>
+              `${value}%`,
+          },
+        },
+      },
+    },
+  });
+}
+
+function getNewFanCurve(chart) {
+  if (!chart) {
+    return [];
+  }
+
+  return chart.data.labels.map(
+    (temperature, index) => ({
+      temperature: Number(temperature),
+
+      speed: Number(
+        chart.data.datasets[0].data[index]
+      ),
+    })
+  );
+}
+
+async function loadNewFanConfig() {
+  try {
+    const data =
+      await invoke("load_fan_config");
+
+    console.log(
+      "[NewFan] loaded config:",
+      data
+    );
+
+    if (!data) {
+      console.warn(
+        "[NewFan] 配置为空"
+      );
+      return false;
+    }
+
+    if (
+      !Array.isArray(data.left_fan) ||
+      !Array.isArray(data.right_fan)
+    ) {
+      console.warn(
+        "[NewFan] 配置格式无效:",
+        data
+      );
+      return false;
+    }
+
+    if (newFanMainCurve) {
+      newFanMainCurve.destroy();
+      newFanMainCurve = null;
+    }
+
+    if (newFanSecondaryCurve) {
+      newFanSecondaryCurve.destroy();
+      newFanSecondaryCurve = null;
+    }
+
+    newFanMainCurve =
+      createNewFanCurve(
+        "newfan-main-curve",
+        NEWFAN_COLOR_MAIN,
+        data.left_fan
+      );
+
+    newFanSecondaryCurve =
+      createNewFanCurve(
+        "newfan-secondary-curve",
+        NEWFAN_COLOR_SECONDARY,
+        data.right_fan
+      );
+
+    return (
+      newFanMainCurve !== null &&
+      newFanSecondaryCurve !== null
+    );
+
+  } catch (error) {
+    console.error(
+      "[NewFan] 加载配置失败:",
+      error
+    );
+
+    return false;
+  }
+}
+
+async function saveNewFanConfig() {
+  try {
+    const fanData = {
+      left_fan:
+        getNewFanCurve(
+          newFanMainCurve
+        ),
+
+      right_fan:
+        getNewFanCurve(
+          newFanSecondaryCurve
+        ),
+    };
+
+    console.log(
+      "[NewFan] saving config:",
+      fanData
+    );
+
+    await invoke(
+      "save_fan_config",
+      {
+        fanData,
+      }
+    );
+
+    const button =
+      document.getElementById(
+        "newfan-save-button"
+      );
+
+    if (button) {
+      button.textContent =
+        t("common.saved");
+
+      setTimeout(() => {
+        button.textContent =
+          t("newfan.saveConfig");
+      }, 1200);
+    }
+
+    return true;
+
+  } catch (error) {
+    console.error(
+      "[NewFan] 保存配置失败:",
+      error
+    );
+
+    return false;
+  }
+}
+
+
+/* =========================================================
+ * Load / Save 按钮
+ * ========================================================= */
+
+const newFanLoadButton =
+  document.getElementById(
+    "newfan-load-button"
+  );
+
+const newFanSaveButton =
+  document.getElementById(
+    "newfan-save-button"
+  );
+
+
+if (newFanLoadButton) {
+  newFanLoadButton.addEventListener(
+    "click",
+    loadNewFanConfig
+  );
+}
+
+
+if (newFanSaveButton) {
+  newFanSaveButton.addEventListener(
+    "click",
+    saveNewFanConfig
+  );
+}
+
+window.loadNewFanConfig =
+  loadNewFanConfig;
+
+window.saveNewFanConfig =
+  saveNewFanConfig;
+
+async function initNewFanConfig() {
+  await loadNewFanConfig();
+}
+
+window.initNewFanConfig =
+  initNewFanConfig;
+
+
 /* =========================================================
    初始化
    ========================================================= */
@@ -4467,6 +5073,9 @@ async function init() {
   // 初始化语言
   initI18n();
   await loadConfig();
+  await initNewFanConfig();
+  await initNewFanStatusListener();
+  initNewFanWriteControl();
   // 初始化风扇控制状态
   await initFanControlStatus();
   updateControlState();

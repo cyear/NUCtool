@@ -1,0 +1,302 @@
+<section id="page-newfan" class="page">
+
+  <!-- 页面标题 -->
+  <header class="page-header">
+
+    <div class="page-heading">
+
+      <h1 data-i18n="newfan.title">
+        新风扇控制
+      </h1>
+
+      <p class="page-subtitle" data-i18n="newfan.subtitle">
+        EC 独立风扇曲线控制
+      </p>
+
+    </div>
+
+    <!-- 总状态 -->
+    <div class="status" id="newfan-status">
+
+      <span
+        class="status-dot"
+        id="newfan-status-dot">
+      </span>
+
+      <span
+        class="status-text"
+        id="newfan-status-text"
+        data-i18n="status.stopped">
+        未运行
+      </span>
+
+    </div>
+
+  </header>
+
+
+  <!-- =================================================
+       New Fan 状态
+       ================================================= -->
+  <div class="fan-section">
+
+    <div class="chart-card">
+
+      <div class="chart-header">
+
+        <div class="chart-title">
+
+          <span class="chart-dot main"></span>
+
+          <span data-i18n="newfan.status">
+            风扇控制状态
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- 状态指示灯 -->
+      <div class="newfan-status-grid">
+
+
+        <!-- 模式 -->
+        <div
+          class="newfan-status-item"
+          id="newfan-mode-status">
+
+          <span
+            class="newfan-indicator"
+            id="newfan-mode-indicator">
+          </span>
+
+          <div class="newfan-status-info">
+
+            <span
+              class="newfan-status-label"
+              data-i18n="newfan.mode">
+              模式
+            </span>
+
+            <span
+              class="newfan-status-value"
+              id="newfan-mode-value">
+              --
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- 独立 -->
+        <div
+          class="newfan-status-item"
+          id="newfan-independent-status">
+
+          <span
+            class="newfan-indicator"
+            id="newfan-independent-indicator">
+          </span>
+
+          <div class="newfan-status-info">
+
+            <span
+              class="newfan-status-label"
+              data-i18n="newfan.independent">
+              独立
+            </span>
+
+            <span
+              class="newfan-status-value"
+              id="newfan-independent-value">
+              --
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- 风扇 -->
+        <div
+          class="newfan-status-item"
+          id="newfan-fan-status">
+
+          <span
+            class="newfan-indicator"
+            id="newfan-fan-indicator">
+          </span>
+
+          <div class="newfan-status-info">
+
+            <span
+              class="newfan-status-label"
+              data-i18n="newfan.fan">
+              风扇
+            </span>
+
+            <span
+              class="newfan-status-value"
+              id="newfan-fan-value">
+              --
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- 占空比 -->
+        <div
+          class="newfan-status-item"
+          id="newfan-duty-status">
+
+          <span
+            class="newfan-indicator"
+            id="newfan-duty-indicator">
+          </span>
+
+          <div class="newfan-status-info">
+
+            <span
+              class="newfan-status-label"
+              data-i18n="newfan.duty">
+              占空比
+            </span>
+
+            <span
+              class="newfan-status-value"
+              id="newfan-duty-value">
+              --
+            </span>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================
+         操作栏
+         ================================================= -->
+    <div class="control-bar">
+
+      <div class="control-left">
+
+        <button
+          id="newfan-start-button"
+          class="action-btn primary"
+          type="button"
+          data-i18n="newfan.startControl">
+          启动控制
+        </button>
+
+      </div>
+
+
+      <div class="control-right">
+
+        <button
+          id="newfan-load-button"
+          class="action-btn"
+          type="button"
+          data-i18n="newfan.loadConfig">
+          加载配置
+        </button>
+
+        <button
+          id="newfan-save-button"
+          class="action-btn"
+          type="button"
+          data-i18n="newfan.saveConfig">
+          保存配置
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================
+         风扇曲线
+         ================================================= -->
+    <div class="fan-grid">
+
+
+      <!-- Main -->
+      <div class="chart-card">
+
+        <div class="chart-header">
+
+          <div class="chart-title">
+
+            <span class="chart-dot main"></span>
+
+            <span data-i18n="newfan.mainCurve">
+              Main 风扇曲线
+            </span>
+
+          </div>
+
+          <span
+            class="chart-hint"
+            data-i18n="newfan.dragHint">
+            拖动节点调整
+          </span>
+
+        </div>
+
+
+        <div class="chart-container">
+
+          <canvas id="newfan-main-curve"></canvas>
+
+        </div>
+
+      </div>
+
+
+      <!-- Secondary -->
+      <div class="chart-card">
+
+        <div class="chart-header">
+
+          <div class="chart-title">
+
+            <span class="chart-dot secondary"></span>
+
+            <span data-i18n="newfan.secondaryCurve">
+              Secondary 风扇曲线
+            </span>
+
+          </div>
+
+          <span
+            class="chart-hint"
+            data-i18n="newfan.dragHint">
+            拖动节点调整
+          </span>
+
+        </div>
+
+
+        <div class="chart-container">
+
+          <canvas id="newfan-secondary-curve"></canvas>
+
+        </div>
+
+      </div>
+
+
+    </div>
+
+  </div>
+
+</section>

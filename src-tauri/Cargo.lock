@@ -2179,6 +2179,7 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-opener",
  "windows 0.62.2",
+ "winreg",
  "wmi",
 ]
 

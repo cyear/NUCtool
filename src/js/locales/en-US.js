@@ -31,6 +31,7 @@ const enUS = {
     running: "Running",
     stopped: "Stopped",
     checking: "Checking...",
+    error: "Error",
   },
 
   // ==========================================================
@@ -137,7 +138,30 @@ const enUS = {
 
     dragHint: "Drag points to adjust",
   },
+  // ==========================================================
+  // New Fan
+  // ==========================================================
+  newfan: {
+    subtitle: "EC independent fan curve control",
 
+    status: "Fan Control Status",
+
+    mode: "Mode",
+    independent: "Independent",
+    fan: "Fan",
+    duty: "Duty",
+
+    startControl: "Start Control",
+    stopControl: "Stop Control",
+
+    loadConfig: "Load Configuration",
+    saveConfig: "Save Configuration",
+
+    mainCurve: "Main Fan Curve",
+    secondaryCurve: "Secondary Fan Curve",
+
+    dragHint: "Drag nodes to adjust",
+  },
   system: {
     title: "System Configuration",
     subtitle: "Adjust system-related settings",
@@ -316,7 +340,7 @@ const enUS = {
     rpm: "RPM",
 
     saved: "Saved ✓",
-  }
+  },
 };
 
 export default enUS;
