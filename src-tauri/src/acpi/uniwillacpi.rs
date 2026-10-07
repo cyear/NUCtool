@@ -581,9 +581,13 @@ impl UniwillAcpiEc {
     /// 新风扇初始化
     pub fn fan_write_init(&self) {
         self.fan_write_manual(true);
+        thread::sleep(Duration::from_millis(10));
         self.fan_write_split(true);
+        thread::sleep(Duration::from_millis(10));
         self.fan_write_custom_table_1(true);
+        thread::sleep(Duration::from_millis(10));
         self.fan_write_custom_table_2(true);
+        thread::sleep(Duration::from_millis(10));
         self.fan_write_duty(true);
     }
 
@@ -615,12 +619,19 @@ impl UniwillAcpiEc {
     /// 退出
     pub fn fan_write_close(&self) {
         let _ = self.write_u8(EC_FAN_CPU_UP_BASE, 0);
+        thread::sleep(Duration::from_millis(10));
         let _ = self.write_u8(EC_FAN_CPU_DOWN_BASE, 0);
+        thread::sleep(Duration::from_millis(10));
         let _ = self.write_u8(EC_FAN_GPU_UP_BASE, 0);
+        thread::sleep(Duration::from_millis(10));
         let _ = self.write_u8(EC_FAN_GPU_DOWN_BASE, 0);
+        thread::sleep(Duration::from_millis(10));
         self.fan_write_custom_table_1(false);
+        thread::sleep(Duration::from_millis(10));
         self.fan_write_custom_table_2(false);
+        thread::sleep(Duration::from_millis(10));
         self.fan_write_duty(false);
+        thread::sleep(Duration::from_millis(10));
         self.fan_write_split(false);
     }
 

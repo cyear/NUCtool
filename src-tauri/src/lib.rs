@@ -999,7 +999,7 @@ fn start_newfan_monitor(app: tauri::AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn start_newfan_write(app: tauri::AppHandle) {
+async fn start_newfan_write(app: tauri::AppHandle, fandata: FanData) {
     let ec = match UniwillAcpiEc::open() {
         Ok(ec) => ec,
         Err(e) => {
@@ -1008,7 +1008,7 @@ async fn start_newfan_write(app: tauri::AppHandle) {
         }
     };
     ec.fan_write_init();
-    ec.fan_write_set(config::load().expect("load config error"));
+    ec.fan_write_set(fandata);
     let _ = show_osd_i18n(&app, "fanControl", "startIndependent");
 }
 

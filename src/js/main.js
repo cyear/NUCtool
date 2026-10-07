@@ -4543,8 +4543,21 @@ function updateNewFanWriteControlState(status) {
 
 async function startNewFanWrite() {
   try {
+    const fandata = {
+      left_fan: getNewFanCurve(newFanMainCurve),
+      right_fan: getNewFanCurve(newFanSecondaryCurve),
+    };
+
+    console.log(
+      "[NewFan] 启动写控制，发送配置:",
+      fandata
+    );
+
     await invoke(
-      "start_newfan_write"
+      "start_newfan_write",
+      {
+        fandata,
+      }
     );
 
     console.log(
@@ -4748,10 +4761,41 @@ function updateNewFanStatus(indicatorId, valueId, status) {
 const NEWFAN_COLOR_MAIN = "#3987e5";
 const NEWFAN_COLOR_SECONDARY = "#d95926";
 const NEWFAN_GRID = "rgba(255, 255, 255, 0.08)";
+const NEWFAN_DEFAULT_TEMPERATURES = [
+  30,
+  35,
+  40,
+  45,
+  50,
+  55,
+  60,
+  65,
+  70,
+  75,
+  80,
+  85,
+  90,
+  95,
+  100,
+];
 
 let newFanMainCurve = null;
 let newFanSecondaryCurve = null;
 
+function createNewFanDefaultConfig() {
+  const createCurve = () =>
+    NEWFAN_DEFAULT_TEMPERATURES.map(
+      (temperature) => ({
+        temperature,
+        speed: 50,
+      })
+    );
+
+  return {
+    left_fan: createCurve(),
+    right_fan: createCurve(),
+  };
+}
 function createNewFanCurve(id, color, points) {
   const canvas = document.getElementById(id);
 
@@ -4901,70 +4945,82 @@ function getNewFanCurve(chart) {
 }
 
 async function loadNewFanConfig() {
+  let data = null;
+
   try {
-    const data =
-      await invoke("load_fan_config");
+    data = await invoke("load_fan_config");
 
     console.log(
       "[NewFan] loaded config:",
       data
     );
 
-    if (!data) {
-      console.warn(
-        "[NewFan] 配置为空"
-      );
-      return false;
-    }
-
-    if (
-      !Array.isArray(data.left_fan) ||
-      !Array.isArray(data.right_fan)
-    ) {
-      console.warn(
-        "[NewFan] 配置格式无效:",
-        data
-      );
-      return false;
-    }
-
-    if (newFanMainCurve) {
-      newFanMainCurve.destroy();
-      newFanMainCurve = null;
-    }
-
-    if (newFanSecondaryCurve) {
-      newFanSecondaryCurve.destroy();
-      newFanSecondaryCurve = null;
-    }
-
-    newFanMainCurve =
-      createNewFanCurve(
-        "newfan-main-curve",
-        NEWFAN_COLOR_MAIN,
-        data.left_fan
-      );
-
-    newFanSecondaryCurve =
-      createNewFanCurve(
-        "newfan-secondary-curve",
-        NEWFAN_COLOR_SECONDARY,
-        data.right_fan
-      );
-
-    return (
-      newFanMainCurve !== null &&
-      newFanSecondaryCurve !== null
-    );
-
   } catch (error) {
-    console.error(
-      "[NewFan] 加载配置失败:",
+    console.warn(
+      "[NewFan] 加载配置失败，使用默认 50% 曲线:",
       error
     );
-
-    return false;
   }
+
+  /*
+   * 没有配置：
+   *
+   * Main      → 全部 50%
+   * Secondary → 全部 50%
+   */
+  if (
+    !data ||
+    !Array.isArray(data.left_fan) ||
+    !Array.isArray(data.right_fan)
+  ) {
+    console.warn(
+      "[NewFan] 没有有效配置，使用默认 50% 曲线"
+    );
+
+    data = createNewFanDefaultConfig();
+  }
+
+  /*
+   * 销毁旧图表
+   */
+  if (newFanMainCurve) {
+    newFanMainCurve.destroy();
+    newFanMainCurve = null;
+  }
+
+  if (newFanSecondaryCurve) {
+    newFanSecondaryCurve.destroy();
+    newFanSecondaryCurve = null;
+  }
+
+  /*
+   * 根据 Rust 返回的实际节点创建图表
+   */
+  newFanMainCurve =
+    createNewFanCurve(
+      "newfan-main-curve",
+      NEWFAN_COLOR_MAIN,
+      data.left_fan
+    );
+
+  newFanSecondaryCurve =
+    createNewFanCurve(
+      "newfan-secondary-curve",
+      NEWFAN_COLOR_SECONDARY,
+      data.right_fan
+    );
+
+  const success =
+    newFanMainCurve !== null &&
+    newFanSecondaryCurve !== null;
+
+  if (!success) {
+    console.error(
+      "[NewFan] 创建风扇曲线失败"
+    );
+  }
+
+  return success;
 }
 
 async function saveNewFanConfig() {
