@@ -85,6 +85,7 @@ pub fn show_osd_i18n(
             format!("Missing translation: {subtitle_key}")
         })?;
 
+    println!("OSD: {} {}", title, subtitle);
     show_osd(
         app,
         title,
@@ -192,6 +193,7 @@ pub fn show_osd(
 ) -> Result<(), String> {
     // WebView 还没有加载完成
     if !OSD_READY.load(Ordering::Acquire) {
+        println!("OSD is not ready");
         return Err("OSD is not ready".to_string());
     }
 

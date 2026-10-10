@@ -3,6 +3,7 @@
   "startMainPriority": "Start Main Fan Priority",
   "startSplitPriority": "Start Separate Fan Priority",
   "startIndependent": "Start Independent",
+  "startEcFan": "Start EC Fan",
   "stopFanControl": "Stop",
 
   "fanModeError": "Error: FANMODE={value}",

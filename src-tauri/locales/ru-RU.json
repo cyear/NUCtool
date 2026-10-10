@@ -3,7 +3,7 @@
   "startMainPriority": "Вентиляторы по Главной кривой",
   "startSplitPriority": "Вентиляторы по Доп. кривой",
   "startIndependent": "Индивидуальный режим работы",
-
+  "startEcFan": "Режим вентилятора EC",
   "stopFanControl": "Остановить",
 
   "fanModeError": "Ошибка: FANMODE={value}",

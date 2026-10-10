@@ -1000,6 +1000,10 @@ fn start_newfan_monitor(app: tauri::AppHandle) -> Result<(), String> {
 
 #[tauri::command]
 async fn start_newfan_write(app: tauri::AppHandle, fandata: FanData) {
+    start_newfan(&app, fandata);
+}
+
+fn start_newfan(app: &tauri::AppHandle, fandata: FanData) {
     let ec = match UniwillAcpiEc::open() {
         Ok(ec) => ec,
         Err(e) => {
@@ -1009,7 +1013,8 @@ async fn start_newfan_write(app: tauri::AppHandle, fandata: FanData) {
     };
     ec.fan_write_init();
     ec.fan_write_set(fandata);
-    let _ = show_osd_i18n(&app, "fanControl", "startIndependent");
+    println!("start_newfan: Ok");
+    let _ = show_osd_i18n(app, "fanControl", "startEcFan");
 }
 
 #[tauri::command]
@@ -1189,7 +1194,6 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
                 if button == MouseButton::Left && button_state == MouseButtonState::Up {
                     if let Some(window) = tray.app_handle().get_webview_window("main") {
                         let visible = window.is_visible().unwrap_or(false);
-
                         if visible {
                             let _ = window.hide();
                         } else {
@@ -1235,10 +1239,26 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
                 return Ok(());
             }
         };
-        let state = app.state::<FanControlState>();
-        if let Err(e) = start_fan_control_internal(&app.handle(), fan_data, &state) {
-            eprintln!("自动启动风扇控制失败: {}", e);
+        let ec = match UniwillAcpiEc::open() {
+            Ok(ec) => ec,
+            Err(e) => {
+                eprintln!("打开 ACPIDriver 失败: {}", e);
+                return Ok(());
+            }
         };
+        if ec.fan_read_custom_table_1() && ec.fan_read_custom_table_2() {
+            println!("启用新EC风扇");
+            let app_handle = app.handle().clone();
+            let _ = thread::spawn(move || {
+                thread::sleep(Duration::from_millis(3000));
+                start_newfan(&app_handle, fan_data);
+            });
+        } else {
+            let state = app.state::<FanControlState>();
+            if let Err(e) = start_fan_control_internal(app.handle(), fan_data, &state) {
+                eprintln!("自动启动风扇控制失败: {}", e);
+            };
+        }
     } else {
         println!("未检测到 --fan-control，风扇控制默认关闭");
     }

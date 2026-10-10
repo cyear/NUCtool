@@ -252,7 +252,8 @@ impl UniwillAcpiEc {
             )
         }
         .map_err(|_| io::Error::last_os_error())?;
-
+        // 等待
+        thread::sleep(Duration::from_millis(6));
         Ok(())
     }
 
