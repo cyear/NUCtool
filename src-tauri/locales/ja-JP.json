@@ -4,7 +4,9 @@
   "startSplitPriority": "開始 個別ファン制御",
   "startIndependent": "開始 独立",
   "startEcFan": "開始 EC Fan",
-
+  "fanMax": "ファン最大速度",
+  "fanAuto": "ファン自動",
+  
   "stopFanControl": "停止",
 
   "fanModeError": "エラー: FANMODE={value}",

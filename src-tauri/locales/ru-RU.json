@@ -5,7 +5,9 @@
   "startIndependent": "Индивидуальный режим работы",
   "startEcFan": "Режим вентилятора EC",
   "stopFanControl": "Остановить",
-
+  "fanMax": "Максимальная скорость вентилятора",
+  "fanAuto": "Автоматическая скорость вентилятора",
+  
   "fanModeError": "Ошибка: FANMODE={value}",
   "fanModeSuccess": "Успешно: FANMODE={value}",
 

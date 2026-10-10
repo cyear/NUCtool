@@ -153,7 +153,7 @@ const enUS = {
 
     startControl: "Start Control",
     stopControl: "Stop Control",
-
+    fanMaxControl: "Max Fan(Toggle)",
     loadConfig: "Load Configuration",
     saveConfig: "Save Configuration",
 

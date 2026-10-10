@@ -3,31 +3,46 @@ mod config;
 mod fan_control;
 mod osd;
 mod win;
-use acpi::{uniwillfnkeyhook, UniwillAcpiEc, UniwillWcfEc, UniwillWmiEc, get_model, get_gpu_driver, get_gsc_driver};
+mod window_push;
+use acpi::{
+    uniwillfnkeyhook,
+    UniwillAcpiEc, UniwillWcfEc, UniwillWmiEc,
+    get_model, get_gpu_driver, get_gsc_driver,
+    KeyboardBacklight,NativeLightbarProfile, acpi_ec_worker
+};
 use config::FanData;
 use fan_control::{calculate_speed, FanControlState};
-use osd::{create_osd, osd_ready, show_osd_command, show_osd_i18n, show_osd_i18n_value};
+use osd::{
+    create_osd,
+    osd_ready, show_osd_command,
+    show_osd_i18n, show_osd_i18n_value
+};
+use win::{
+    create_startup_task,
+    is_startup_task_exists, privilege_escalation, remove_startup_task, keyboard_registry
+};
+use window_push::WindowPushState;
 use serde::Serialize;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
-use std::thread;
-use std::time::Duration;
+use std::{
+    thread,
+    time::Duration,
+    sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering}
+    }
+};
 use tauri::{
     include_image,
     menu::{MenuBuilder, MenuItemBuilder},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     AppHandle, Emitter, Manager, State,
 };
-use win::{create_startup_task, is_startup_task_exists, privilege_escalation, remove_startup_task, keyboard_registry};
 use windows::Win32::{
     Foundation::HINSTANCE,
     UI::WindowsAndMessaging::{
         DispatchMessageW, GetMessageW, SetWindowsHookExW, UnhookWindowsHookEx, MSG, WH_KEYBOARD_LL,
     },
 };
-
-use crate::acpi::uniwillacpi::KeyboardBacklight;
-use crate::acpi::uniwillwcf::NativeLightbarProfile;
 
 #[derive(Clone, Serialize)]
 struct SensorData {
@@ -38,10 +53,6 @@ struct SensorData {
     system_power: u8,
     bat_mah_percent: u8,
 }
-
-// =====================================================
-// TDP 数据
-// =====================================================
 
 #[derive(Debug, Serialize)]
 pub struct TdpConfig {
@@ -72,13 +83,13 @@ pub struct NewFanStatus {
 }
 
 #[tauri::command]
-fn start_sensor_loop(app: AppHandle, state: State<AppState>) {
+fn start_sensor_loop(app: AppHandle, state: State<AppState>, push_state: tauri::State<'_, WindowPushState>) {
     // 防止重复启动
     if state.running.swap(true, Ordering::SeqCst) {
         return;
     }
-
     let running = state.running.clone();
+    let push_state = push_state.inner().clone();
     let handle = app.clone();
     let wmi = match UniwillWmiEc::new() {
         Ok(wmi) => wmi,
@@ -90,28 +101,32 @@ fn start_sensor_loop(app: AppHandle, state: State<AppState>) {
     let bat_mah_percent = (100 * wmi.get_set(0x0000010000000404).unwrap_or(0)
         / wmi.get_set(0x0000010000000402).unwrap_or(1)) as u8;
     thread::spawn(move || {
-        let ec = match UniwillAcpiEc::open() {
-            Ok(ec) => ec,
-            Err(e) => {
-                eprintln!("打开 ACPIDriver 失败: {}", e);
-                running.store(false, Ordering::SeqCst);
-                return;
-            }
-        };
         while running.load(Ordering::SeqCst) {
-            let data = SensorData {
-                cpu_temp: ec.cpu_temperature().unwrap_or(0),
-                gpu_temp: ec.gpu_temperature().unwrap_or(0),
-                fan1_rpm: ec.fan1_rpm().unwrap_or(0),
-                fan2_rpm: ec.fan2_rpm().unwrap_or(0),
-                system_power: ec.system_read_power().unwrap_or(0),
-                bat_mah_percent: bat_mah_percent,
+            if !push_state.is_enabled() {
+                thread::sleep(Duration::from_millis(3000));
+                continue;
+            }
+            let data = match acpi_ec_worker().call(move |ec| {
+                SensorData {
+                    cpu_temp: ec.cpu_temperature().unwrap_or(0),
+                    gpu_temp: ec.gpu_temperature().unwrap_or(0),
+                    fan1_rpm: ec.fan1_rpm().unwrap_or(0),
+                    fan2_rpm: ec.fan2_rpm().unwrap_or(0),
+                    system_power: ec.system_read_power().unwrap_or(0),
+                    bat_mah_percent,
+                }
+            }) {
+                Ok(data) => data,
+                Err(e) => {
+                    eprintln!("读取 EC 传感器失败: {}", e);
+                    thread::sleep(Duration::from_millis(3000));
+                    continue;
+                }
             };
 
-            // 推送给前端
             let _ = handle.emit("sensor-update", data);
 
-            thread::sleep(Duration::from_millis(3000));
+            thread::sleep(Duration::from_millis(2500));
         }
     });
 }
@@ -149,33 +164,16 @@ fn start_fan_control_internal(
         println!("================================");
         println!("风扇控制线程启动");
         println!("================================");
-
-        // EC init
-        let ec = match UniwillAcpiEc::open() {
-            Ok(ec) => ec,
-            Err(e) => {
-                eprintln!("打开 ACPIDriver 失败: {}", e);
-                running.store(false, Ordering::SeqCst);
-
-                let _ = app_handle.emit("fan-control-status", false);
-
-                return;
-            }
-        };
-
         // WMI init
         let wmi = match UniwillWmiEc::new() {
             Ok(wmi) => wmi,
             Err(e) => {
                 eprintln!("打开 WMI 失败: {}", e);
                 running.store(false, Ordering::SeqCst);
-
                 let _ = app_handle.emit("fan-control-status", false);
-
                 return;
             }
         };
-
         let get_set = |data: u64| match wmi.get_set(data) {
             Ok(_) => {}
             Err(e) => {
@@ -183,9 +181,10 @@ fn start_fan_control_internal(
             }
         };
 
-        if let Err(e) = ec.fan_write_mode(acpi::uniwillacpi::FanModeByte::FanBoostMode) {
+        if let Err(e) = acpi_ec_worker().call(|ec| { ec.fan_write_manual(false) })
+        {
             eprintln!("切换FAN手动模式失败: {}", e);
-        }
+        };
 
         // 通知前端：已经启动
         let _ = app_handle.emit("fan-control-status", true);
@@ -217,16 +216,23 @@ fn start_fan_control_internal(
             }
         }
         while running.load(Ordering::SeqCst) {
-            // ========================================
-            // 1. 读取温度
-            // ========================================
-
-            let cpu_temp = ec.cpu_temperature().unwrap_or(0);
-            let gpu_temp = ec.gpu_temperature().unwrap_or(0);
-
-            // ========================================
-            // 2. 根据曲线计算风扇转速
-            // ========================================
+            let ec_result = acpi_ec_worker().call(|ec| {
+                let cpu_temp = ec.cpu_temperature().unwrap_or(0);
+                let gpu_temp = ec.gpu_temperature().unwrap_or(0);
+                if !ec.fan_read_manual() {
+                    ec.fan_write_manual(false);
+                }
+            (cpu_temp, gpu_temp)
+            });
+            let (cpu_temp, gpu_temp) = match ec_result {
+                Ok(data) => data,
+                Err(e) => {
+                    eprintln!("访问 EC 失败: {}", e);
+                    thread::sleep(Duration::from_millis(1500));
+                    continue;
+                }
+            };
+            
             // &fan_data.left_fan M
             // &fan_data.right_fan S
 
@@ -236,38 +242,11 @@ fn start_fan_control_internal(
             // GPU 风扇 分 => 左
             let mut left_speed = calculate_speed(&fan_data.right_fan, gpu_temp);
 
-            if fan_mode == 0 {}
-            else if fan_mode == 1 { left_speed = right_speed; } 
-            else if fan_mode == 2 { right_speed = left_speed; }
-            else {}
-
-            // ========================================
-            // 3. 模式检查
-            // ========================================
-
-            let fanm = match ec.fan_read_mode() {
-                Ok(v) => v,
-                Err(e) => {
-                    eprintln!("读取MODE失败: {}", e);
-                    0
-                }
-            };
-
-            if fanm == acpi::uniwillacpi::FanModeByte::AutoMode as u8 {
-                println!("当前是 Auto Mode");
-
-                if let Err(e) = ec.fan_write_mode(acpi::uniwillacpi::FanModeByte::FanBoostMode) {
-                    eprintln!("切换FAN手动模式失败: {}", e);
-                    let _ = show_osd_i18n_value(&app_handle, "fanControl", "fanModeError", e);
-                } else {
-                    println!("切换FAN手动模式成功");
-                    let _ = show_osd_i18n_value(&app_handle, "fanControl", "fanModeSuccess", fanm);
-                }
+            if fan_mode == 1 {
+                left_speed = right_speed;
+            } else if fan_mode == 2 {
+                right_speed = left_speed;
             }
-
-            // ========================================
-            // 4. 写入 WMI
-            // ========================================
 
             // 左风扇 分
             get_set(((left_speed as u64 * 2) << 16) | 0x0000000000001809);
@@ -275,20 +254,12 @@ fn start_fan_control_internal(
             // 右风扇 主
             get_set(((right_speed as u64 * 2) << 16) | 0x0000000000001804);
 
-            // ========================================
-            // 5. 输出调试信息
-            // ========================================
-
             println!(
-                "CPU {}°C → Fan1 {}%  GPU {}°C → Fan2 {}%  M: {}",
-                cpu_temp, right_speed, gpu_temp, left_speed, fanm
+                "CPU {}°C → Fan1 {}%  GPU {}°C → Fan2 {}%",
+                cpu_temp, right_speed, gpu_temp, left_speed
             );
 
-            // ========================================
-            // 6. 控制周期
-            // ========================================
-
-            thread::sleep(Duration::from_millis(1500));
+            thread::sleep(Duration::from_millis(2500));
         }
         println!("风扇自动控制线程退出");
 
@@ -310,61 +281,21 @@ async fn start_fan_control(
 }
 
 fn stop_fan_control_inner(app: &tauri::AppHandle, state: &FanControlState) -> Result<(), String> {
-    // ========================================
-    // 1. 检查是否正在运行
-    // ========================================
-
     if !state.running.swap(false, Ordering::SeqCst) {
         return Ok(());
     }
-
     println!("正在停止风扇控制...");
-
-    // ========================================
-    // 2. 等待控制线程退出
-    // ========================================
-
     if let Some(handle) = state.thread.lock().unwrap().take() {
         let _ = handle.join();
     }
-
-    // ========================================
-    // 3. 打开 EC
-    // ========================================
-
-    let ec = match UniwillAcpiEc::open() {
-        Ok(ec) => ec,
-
-        Err(e) => {
-            eprintln!("打开 ACPIDriver 失败: {}", e);
-
-            let _ = app.emit("fan-control-status", false);
-
-            return Err(format!("打开 ACPIDriver 失败: {}", e));
-        }
-    };
-
-    // ========================================
-    // 4. 恢复自动风扇模式
-    // ========================================
-
-    if let Err(e) = ec.fan_write_mode(acpi::uniwillacpi::FanModeByte::AutoMode) {
+    if let Err(e) = acpi_ec_worker().call(|ec| { ec.fan_write_manual(true) })
+    {   
         eprintln!("恢复自动风扇模式失败: {}", e);
-
+    } else {
         let _ = app.emit("fan-control-status", false);
-
-        return Err(format!("恢复自动风扇模式失败: {}", e));
-    }
-
+        let _ = show_osd_i18n(app, "fanControl", "stopFanControl");
+    };
     println!("风扇控制已停止");
-
-    // ========================================
-    // 5. 通知前端
-    // ========================================
-
-    let _ = app.emit("fan-control-status", false);
-    let _ = show_osd_i18n(app, "fanControl", "stopFanControl");
-
     Ok(())
 }
 
@@ -377,12 +308,12 @@ async fn stop_fan_control(
 }
 
 #[tauri::command]
-async fn set_fan_mode(mode: i32) {
+async fn set_fan_mode_file(mode: i32) {
     let _ = config::save_fan_mode(mode);
 }
 
 #[tauri::command]
-async fn get_fan_mode() -> i32 {
+async fn get_fan_mode_file() -> i32 {
     if let Ok(mode) = config::load_fan_mode() {
         mode
     } else {
@@ -564,98 +495,74 @@ async fn set_display_mode(app: tauri::AppHandle, mode: i32) {
 
 #[tauri::command]
 async fn get_keyboard_led(ac: bool) -> KeyboardBacklight {
-    let ec = match UniwillAcpiEc::open() {
-        Ok(ec) => ec,
+    let result = acpi_ec_worker().call(move |ec| { ec.keyboard_read(ac) });
+    return match result {
+        Ok(ret) => ret,
         Err(e) => {
-            eprintln!("打开 ACPIDriver 失败: {}", e);
-            return KeyboardBacklight {
+            eprintln!("get_keyboard_led 失败: {}", e);
+            KeyboardBacklight {
                 enabled: false,
                 brightness: 0,
                 rainbow: false,
                 red: 0,
                 green: 0,
                 blue: 0,
-            };
+            }
         }
     };
-    ec.keyboard_read(ac)
 }
 
 #[tauri::command]
 async fn set_keyboard_enabled(enable: bool, ac: bool) {
-    let ec = match UniwillAcpiEc::open() {
-        Ok(ec) => ec,
-        Err(e) => {
-            eprintln!("打开 ACPIDriver 失败: {}", e);
-            return;
-        }
-    };
-    ec.keyboard_write_enable(enable, ac);
+    if let Err(e) = acpi_ec_worker().call(move |ec| { ec.keyboard_write_enable(enable, ac) })
+    {
+        eprintln!("set_keyboard_enabled 失败: {}", e);
+    }
     let _ = keyboard_registry::set_power(enable);
 }
 
 #[tauri::command]
 async fn set_keyboard_brightness(brightness: u8, ac: bool) {
-    let ec = match UniwillAcpiEc::open() {
-        Ok(ec) => ec,
-        Err(e) => {
-            eprintln!("打开 ACPIDriver 失败: {}", e);
-            return;
-        }
-    };
-    ec.keyboard_write_brightness(brightness, ac);
+    if let Err(e) = acpi_ec_worker().call(move |ec| { ec.keyboard_write_brightness(brightness, ac) })
+    {
+        eprintln!("set_keyboard_brightness 失败: {}", e);
+    }
     let _ = keyboard_registry::set_brightness(brightness, ac);
 }
 
 #[tauri::command]
 async fn set_keyboard_rainbow(rainbow: bool, ac: bool) {
-    let ec = match UniwillAcpiEc::open() {
-        Ok(ec) => ec,
-        Err(e) => {
-            eprintln!("打开 ACPIDriver 失败: {}", e);
-            return;
-        }
-    };
-    ec.keyboard_write_rainbow(rainbow, ac);
+    if let Err(e) = acpi_ec_worker().call(move |ec| { ec.keyboard_write_rainbow(rainbow, ac) })
+    {
+        eprintln!("set_keyboard_rainbow 失败: {}", e);
+    }
     let _ = keyboard_registry::set_effect(rainbow);
 }
 
 #[tauri::command]
 async fn set_keyboard_red(red: u8, ac: bool) {
-    let ec = match UniwillAcpiEc::open() {
-        Ok(ec) => ec,
-        Err(e) => {
-            eprintln!("打开 ACPIDriver 失败: {}", e);
-            return;
-        }
-    };
-    ec.keyboard_write_red(red, ac);
+    if let Err(e) = acpi_ec_worker().call(move |ec| { ec.keyboard_write_red(red, ac) })
+    {
+        eprintln!("set_keyboard_red 失败: {}", e);
+    }
     let _ = keyboard_registry::set_red(red, ac);
 }
 
 #[tauri::command]
 async fn set_keyboard_green(green: u8, ac: bool) {
-    let ec = match UniwillAcpiEc::open() {
-        Ok(ec) => ec,
-        Err(e) => {
-            eprintln!("打开 ACPIDriver 失败: {}", e);
-            return;
-        }
-    };
-    ec.keyboard_write_green(green, ac);
+    if let Err(e) = acpi_ec_worker().call(move |ec| { ec.keyboard_write_green(green, ac) })
+    {
+        eprintln!("set_keyboard_green 失败: {}", e);
+    }
     let _ = keyboard_registry::set_green(green, ac);
 }
 
 #[tauri::command]
 async fn set_keyboard_blue(blue: u8, ac: bool) {
-    let ec = match UniwillAcpiEc::open() {
-        Ok(ec) => ec,
-        Err(e) => {
-            eprintln!("打开 ACPIDriver 失败: {}", e);
-            return;
-        }
-    };
-    ec.keyboard_write_blue(blue, ac);
+    if let Err(e) = acpi_ec_worker().call(move |ec| { ec.keyboard_write_blue(blue, ac) })
+    {
+        eprintln!("set_keyboard_blue 失败: {}", e);
+    }
     let _ = keyboard_registry::set_blue(blue, ac);
 }
 
@@ -676,7 +583,7 @@ async fn get_lightbar_profile() -> NativeLightbarProfile {
 }
 
 #[tauri::command]
-async fn set_lightbar_profile(app: tauri::AppHandle, profile: NativeLightbarProfile) {
+async fn set_lightbar_profile(profile: NativeLightbarProfile) {
     let wcf = match UniwillWcfEc::new() {
         Ok(wcf) => wcf,
         Err(e) => {
@@ -690,51 +597,21 @@ async fn set_lightbar_profile(app: tauri::AppHandle, profile: NativeLightbarProf
     println!("connect: {} set_lightbar_profile: {:?}", ret, &profile);
 }
 
-// =====================================================
-// 读取 TDP
-// =====================================================
-
 #[tauri::command]
 async fn get_tdp() -> Result<TdpConfig, String> {
-    // EC init
-    let ec = match UniwillAcpiEc::open() {
-        Ok(ec) => ec,
-        Err(e) => {
-            eprintln!("打开 ACPIDriver 失败: {}", e);
-            None
-        }
-        .expect("EC init Error"),
-    };
-
-    // =================================================
-    // CPU
-    // =================================================
-
-    let cpu_pl1 = ec.cpu_read_pl1();
-
-    let cpu_pl2 = ec.cpu_read_pl2();
-
-    let cpu_pl4 = ec.cpu_read_pl4();
-
-    // =================================================
-    // GPU
-    // =================================================
-
-    let gpu_pl1 = ec.gpu_read_pl1().expect("Error");
-
-    let gpu_pl2 = ec.gpu_read_pl2().expect("Error");
-
-    // =================================================
-    // PSYS PL1
-    // =================================================
-
-    let psys_pl1 = ec.psys_read_pl1().expect("Error");
-
-    println!(
-        "TDP 读取: CPU PL1={}W PL2={}W PL4={}W, GPU PL1={}W PL2={}W, PSYS_PL1={}W",
-        cpu_pl1, cpu_pl2, cpu_pl4, gpu_pl1, gpu_pl2, psys_pl1
-    );
-
+    let (cpu_pl1, cpu_pl2, cpu_pl4, gpu_pl1, gpu_pl2, psys_pl1) = acpi_ec_worker().call(|ec| {
+        let cpu_pl1 = ec.cpu_read_pl1();
+        let cpu_pl2 = ec.cpu_read_pl2();
+        let cpu_pl4 = ec.cpu_read_pl4();
+        let gpu_pl1 = ec.gpu_read_pl1().expect("Error");
+        let gpu_pl2 = ec.gpu_read_pl2().expect("Error");
+        let psys_pl1 = ec.psys_read_pl1().expect("Error");
+        println!(
+            "TDP 读取: CPU PL1={}W PL2={}W PL4={}W, GPU PL1={}W PL2={}W, PSYS_PL1={}W",
+            cpu_pl1, cpu_pl2, cpu_pl4, gpu_pl1, gpu_pl2, psys_pl1
+        );
+        (cpu_pl1, cpu_pl2, cpu_pl4, gpu_pl1, gpu_pl2, psys_pl1)
+    }).expect("get_tdp Error");
     Ok(TdpConfig {
         cpu_pl1,
         cpu_pl2,
@@ -745,76 +622,45 @@ async fn get_tdp() -> Result<TdpConfig, String> {
     })
 }
 
-// =====================================================
-// 写入 TDP
-// =====================================================
-
 #[tauri::command]
 async fn set_tdp(app: tauri::AppHandle, tdp_type: String, value: u8) -> Result<(), String> {
-    // EC init
-    let ec = match UniwillAcpiEc::open() {
-        Ok(ec) => ec,
-        Err(e) => {
-            eprintln!("打开 ACPIDriver 失败: {}", e);
-            None
-        }
-        .expect("EC init Error"),
-    };
-
-    match tdp_type.as_str() {
-        // =============================================
-        // CPU
-        // =============================================
-        "cpu-pl1" => {
-            ec.cpu_write_pl1(value).expect("Error");
-            println!("写入 CPU PL1: {} W", value);
-            let _ = show_osd_i18n_value(&app, "tdpSettings", "cpuPl1", value);
-        }
-
-        "cpu-pl2" => {
-            ec.cpu_write_pl2(value).expect("Error");
-            println!("写入 CPU PL2: {} W", value);
-            let _ = show_osd_i18n_value(&app, "tdpSettings", "cpuPl2", value);
-        }
-
-        "cpu-pl4" => {
-            ec.cpu_write_pl4(value).expect("Error");
-            println!("写入 CPU PL4: {} W", value);
-            let _ = show_osd_i18n_value(&app, "tdpSettings", "cpuPl4", value);
-        }
-
-        // =============================================
-        // GPU
-        // =============================================
-        "gpu-pl1" => {
-            ec.gpu_write_pl1(value).expect("Error");
-            println!("写入 GPU PL1: {} W", value);
-            let _ = show_osd_i18n_value(&app, "tdpSettings", "gpuPl1", value);
-        }
-
-        "gpu-pl2" => {
-            ec.gpu_write_pl2(value).expect("Error");
-            println!("写入 GPU PL2: {} W", value);
-            let _ = show_osd_i18n_value(&app, "tdpSettings", "gpuPl2", value);
-        }
-
-        // =============================================
-        // PSYS PL1
-        // =============================================
-        "psys_pl1" => {
-            ec.psys_write_pl1(value).expect("Error");
-            println!("写入PSYS PL1： {} W", value);
-            let _ = show_osd_i18n_value(&app, "tdpSettings", "psysPl1", value);
-        }
-
-        // =============================================
-        // 未知类型
-        // =============================================
-        _ => {
-            return Err(format!("未知的 TDP 类型: {}", tdp_type));
-        }
-    }
-
+    if let Err(e) = acpi_ec_worker().call(move |ec| { 
+        match tdp_type.as_str() {
+            "cpu-pl1" => {
+                ec.cpu_write_pl1(value).expect("Error");
+                println!("写入 CPU PL1: {} W", value);
+                let _ = show_osd_i18n_value(&app, "tdpSettings", "cpuPl1", value);
+            }
+            "cpu-pl2" => {
+                ec.cpu_write_pl2(value).expect("Error");
+                println!("写入 CPU PL2: {} W", value);
+                let _ = show_osd_i18n_value(&app, "tdpSettings", "cpuPl2", value);
+            }
+            "cpu-pl4" => {
+                ec.cpu_write_pl4(value).expect("Error");
+                println!("写入 CPU PL4: {} W", value);
+                let _ = show_osd_i18n_value(&app, "tdpSettings", "cpuPl4", value);
+            }
+            "gpu-pl1" => {
+                ec.gpu_write_pl1(value).expect("Error");
+                println!("写入 GPU PL1: {} W", value);
+                let _ = show_osd_i18n_value(&app, "tdpSettings", "gpuPl1", value);
+            }
+            "gpu-pl2" => {
+                ec.gpu_write_pl2(value).expect("Error");
+                println!("写入 GPU PL2: {} W", value);
+                let _ = show_osd_i18n_value(&app, "tdpSettings", "gpuPl2", value);
+            }
+            "psys_pl1" => {
+                ec.psys_write_pl1(value).expect("Error");
+                println!("写入PSYS PL1： {} W", value);
+                let _ = show_osd_i18n_value(&app, "tdpSettings", "psysPl1", value);
+            }
+            _ => {
+                eprintln!("未知的 TDP 类型: {}", tdp_type)
+            }
+        };
+    }){ eprintln!("set_tdp 失败: {}", e); }
     Ok(())
 }
 
@@ -906,7 +752,6 @@ async fn set_battery_mode(app: tauri::AppHandle, mode: i32) {
     wcf.disconnect();
 }
 
-
 #[tauri::command]
 async fn get_autostart() -> Result<bool, String> {
     match is_startup_task_exists() {
@@ -972,27 +817,34 @@ async fn get_sys_gsc_driver() -> Result<Option<String>, String> {
 }
 
 #[tauri::command]
-fn start_newfan_monitor(app: tauri::AppHandle) -> Result<(), String> {
+fn start_newfan_monitor(app: tauri::AppHandle, push_state: tauri::State<'_, WindowPushState>) -> Result<(), String> {
+    let push_state = push_state.inner().clone();
     thread::spawn(move || {
-        let ec = match UniwillAcpiEc::open() {
-            Ok(ec) => ec,
-            Err(e) => {
-                eprintln!("打开 ACPIDriver 失败: {}", e);
-                return;
-            }
-        };
         loop {
-            let status = NewFanStatus {
-                mode: ec.fan_read_manual(),
-                independent: ec.fan_read_custom_table_1(),
-                fan: ec.fan_read_custom_table_2(),
-                duty: ec.fan_read_duty(),
+            if !push_state.is_enabled() {
+                thread::sleep(Duration::from_millis(3000));
+                continue;
+            }
+            let status = match acpi_ec_worker().call(|ec| {
+                NewFanStatus {
+                    mode: ec.fan_read_manual(),
+                    independent: ec.fan_read_custom_table_1(),
+                    fan: ec.fan_read_custom_table_2(),
+                    duty: ec.fan_read_duty(),
+                }
+            }) {
+                Ok(status) => status,
+                Err(e) => {
+                    eprintln!("读取 NewFan EC 状态失败: {}", e);
+                    thread::sleep(Duration::from_millis(4000));
+                    continue;
+                }
             };
             if let Err(e) = app.emit("newfan-status", status) {
                 eprintln!("发送 newfan-status 失败: {}", e);
                 break;
             }
-            thread::sleep(Duration::from_millis(4000));
+            thread::sleep(Duration::from_millis(3000));
         }
     });
     Ok(())
@@ -1004,19 +856,39 @@ async fn start_newfan_write(app: tauri::AppHandle, fandata: FanData) {
 }
 
 fn start_newfan(app: &tauri::AppHandle, fandata: FanData) {
-    let ec = match UniwillAcpiEc::open() {
-        Ok(ec) => ec,
-        Err(e) => {
-            eprintln!("打开 ACPIDriver 失败: {}", e);
-            return;
-        }
-    };
-    ec.fan_write_init();
-    ec.fan_write_set(fandata);
-    println!("start_newfan: Ok");
-    let _ = show_osd_i18n(app, "fanControl", "startEcFan");
+    let app = app.clone();
+    if let Err(e) = acpi_ec_worker().call(move |ec| { 
+        ec.fan_write_init();
+        ec.fan_write_set(fandata);
+        println!("start_newfan: Ok");
+        let _ = show_osd_i18n(&app, "fanControl", "startEcFan");
+     })
+    {
+        eprintln!("start_newfan 失败: {}", e);
+    }
 }
 
+#[tauri::command]
+async fn set_fan_max(app: tauri::AppHandle) {
+    set_fan_max_auto(&app);
+}
+
+fn set_fan_max_auto(app: &tauri::AppHandle) {
+    let app = app.clone();
+    let result = acpi_ec_worker().call(move |ec| {
+        if ec.fan_read_manual() {
+            ec.fan_write_manual(false);
+            let _ = show_osd_i18n(&app, "fanControl", "fanMax");
+        } else {
+            ec.fan_write_manual(true);
+            let _ = show_osd_i18n(&app, "fanControl", "fanAuto");
+        }
+    });
+
+    if let Err(e) = result {
+        eprintln!("set_fan_max: {}", e);
+    }
+}
 #[tauri::command]
 async fn stop_newfan_write(app: tauri::AppHandle,) {
     let ec = match UniwillAcpiEc::open() {
@@ -1066,10 +938,6 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
     let show = MenuItemBuilder::with_id("show", "显示窗口").build(app)?;
 
-    let fancontrol_on = MenuItemBuilder::with_id("fancontrol_on", "开启风扇控制").build(app)?;
-
-    let fancontrol_off = MenuItemBuilder::with_id("fancontrol_off", "关闭风扇控制").build(app)?;
-
     let benchmark_on = MenuItemBuilder::with_id("benchmark_on", "开启基准模式").build(app)?;
 
     let benchmark_off = MenuItemBuilder::with_id("benchmark_off", "关闭基准模式").build(app)?;
@@ -1084,8 +952,6 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
     let menu = MenuBuilder::new(app)
         .item(&show)
-        .item(&fancontrol_on)
-        .item(&fancontrol_off)
         .item(&benchmark_on)
         .item(&benchmark_off)
         .item(&performance)
@@ -1123,37 +989,6 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
                     if let Some(window) = app.get_webview_window("main") {
                         let _ = window.show();
                         let _ = window.set_focus();
-                    }
-                }
-                "fancontrol_on" => {
-                    let state = app.state::<FanControlState>();
-                    if !state.running.load(Ordering::SeqCst) {
-                        println!("托盘启动风扇控制");
-                        let fan_data = match config::load() {
-                            Ok(data) => data,
-                            Err(e) => {
-                                eprintln!("auto_fan load config error: {}", e);
-                                return;
-                            }
-                        };
-                        if let Err(e) =
-                            start_fan_control_internal(&app.app_handle(), fan_data, &state)
-                        {
-                            eprintln!("托盘启动风扇控制失败: {}", e);
-                        }
-                    } else {
-                        println!("托盘启动风扇控制：已经在运行 跳过");
-                    }
-                }
-                "fancontrol_off" => {
-                    let state = app.state::<FanControlState>();
-                    if state.running.load(Ordering::SeqCst) {
-                        println!("托盘关闭风扇控制");
-                        if let Err(e) = stop_fan_control_inner(&app.app_handle(), state.inner()) {
-                            eprintln!("托盘关闭风扇控制失败: {}", e);
-                        }
-                    } else {
-                        println!("托盘关闭风扇控制：已经关闭了 跳过")
                     }
                 }
                 "benchmark_on" => {
@@ -1262,6 +1097,10 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     } else {
         println!("未检测到 --fan-control，风扇控制默认关闭");
     }
+
+    window_push::start_window_push_monitor(
+        app.handle().clone(),
+    );
     Ok(())
 }
 
@@ -1320,6 +1159,7 @@ pub fn run() {
             running: Arc::new(AtomicBool::new(false)),
         })
         .manage(FanControlState::new())
+        .manage(WindowPushState::new())
         .invoke_handler(tauri::generate_handler![
             start_sensor_loop,
             load_fan_config,
@@ -1338,8 +1178,8 @@ pub fn run() {
             get_keyboard_led,
             osd_ready,
             show_osd_command,
-            set_fan_mode,
-            get_fan_mode,
+            set_fan_mode_file,
+            get_fan_mode_file,
             get_lightbar_profile,
             set_lightbar_profile,
             get_sys_model,
@@ -1358,6 +1198,7 @@ pub fn run() {
             start_newfan_monitor,
             start_newfan_write,
             stop_newfan_write,
+            set_fan_max,
         ])
         .setup(setup)
         .build(tauri::generate_context!())

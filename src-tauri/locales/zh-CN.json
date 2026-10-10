@@ -4,6 +4,9 @@
   "startSplitPriority": "开始 分风扇优先",
   "startIndependent": "开始 独立",
   "startEcFan": "开始 EC风扇模式",
+  "fanMax": "风扇满转",
+  "fanAuto": "风扇自动",
+  
   "stopFanControl": "停止",
   "fanModeError": "错误: FANMODE={value}",
   "fanModeSuccess": "成功: FANMODE={value}",

@@ -3280,7 +3280,7 @@ const fanModeSelect = document.getElementById(
 async function loadFanMode() {
 
   const mode = await invoke(
-    "get_fan_mode"
+    "get_fan_mode_file"
   );
 
   fanModeSelect.value = String(mode);
@@ -3292,7 +3292,7 @@ fanModeSelect.addEventListener(
   async () => {
 
     await invoke(
-      "set_fan_mode",
+      "set_fan_mode_file",
       {
         mode: Number(fanModeSelect.value)
       }
@@ -4620,6 +4620,13 @@ function initNewFanWriteControl() {
       }
     }
   );
+  document.getElementById("newfan-fanmax-button")?.addEventListener("click", async () => {
+    try {
+        await invoke("set_fan_max");
+    } catch (error) {
+        console.error("调用 set_fan_max 失败:", error);
+    }
+  });
 }
 
 function updateNewFanOverallStatus(status) {

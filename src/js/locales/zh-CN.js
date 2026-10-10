@@ -144,7 +144,7 @@ const zhCN = {
 
     startControl: "启动控制",
     stopControl: "停止控制",
-
+    fanMaxControl: "一键强冷(切换)",
     loadConfig: "加载配置",
     saveConfig: "保存配置",
 

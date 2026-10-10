@@ -5,7 +5,9 @@
   "startIndependent": "Start Independent",
   "startEcFan": "Start EC Fan",
   "stopFanControl": "Stop",
-
+  "fanMax": "Full Fan Speed",
+  "fanAuto": "Auto Fan Speed",
+  
   "fanModeError": "Error: FANMODE={value}",
   "fanModeSuccess": "Success: FANMODE={value}",
 

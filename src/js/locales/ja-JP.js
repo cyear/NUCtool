@@ -155,7 +155,7 @@ const jaJP = {
 
     startControl: "制御を開始",
     stopControl: "制御を停止",
-
+    fanMaxControl: "ワンタッチ強力冷房（切替）",
     loadConfig: "設定を読み込む",
     saveConfig: "設定を保存",
 
