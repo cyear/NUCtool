@@ -511,7 +511,7 @@ impl UniwillAcpiEc {
         let _ = if enable {
             if ret&0x40!=0 {
                 let w = ret & 0xBF;
-                println!("fan_write_manual 切换手动: ret: {}, write: {}", ret, w);
+                println!("fan_write_manual 切换手动 自动 表可写: ret: {}, write: {}", ret, w);
                 self.write_u8(EC_ADDR_MANUAL_FAN_CTRL, w) // !(1 << 6)
             } else {
                 Ok(())
@@ -519,7 +519,7 @@ impl UniwillAcpiEc {
         } else {
             if ret & 0x40 == 0 {
                 let w = ret | 0x40;
-                println!("fan_write_manual 切换自动: ret: {}, write: {}", ret, w);
+                println!("fan_write_manual 切换自动 满转 风扇可写: ret: {}, write: {}", ret, w);
                 self.write_u8(EC_ADDR_MANUAL_FAN_CTRL, w) // 设置 bit 6
             } else {
                 Ok(())
