@@ -1,3 +1,9 @@
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+
+#[cfg(target_os = "windows")]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
+
 #[macro_use]
 mod logging;
 mod acpi;
@@ -924,6 +930,7 @@ fn set_fan_max_auto(app: &tauri::AppHandle) {
         eprintln!("set_fan_max: {}", e);
     };
 }
+
 #[tauri::command]
 async fn stop_newfan_write(app: tauri::AppHandle) {
     let app = app.clone();
@@ -981,6 +988,7 @@ async fn read_bios_nvram() -> Result<String, String> {
     let result = Command::new(&exe)
         .args(["/o", "/s", "nvram_bak.txt"])
         .current_dir(&dir)
+        .creation_flags(CREATE_NO_WINDOW)
         .output()
         .map_err(|e| format!("启动 BIOS NVRAM 工具失败：{e}"))?;
 
@@ -1082,8 +1090,6 @@ fn export_nvram(text: String) -> Result<String, String> {
 
 #[tauri::command]
 async fn write_bios_nvram(password: String) -> Result<(), String> {
-    use std::fs;
-    use std::process::Command;
 
     if password.trim().is_empty() {
         return Err("BIOS 管理员密码不能为空。".to_string());
@@ -1138,6 +1144,7 @@ async fn write_bios_nvram(password: String) -> Result<(), String> {
         .args(["/i", "/s"])
         .arg(&nvram_file)
         .current_dir(&dir)
+        .creation_flags(CREATE_NO_WINDOW)
         .output()
         .map_err(|e| {
             let msg = format!("启动 BIOS NVRAM 工具失败：{e}");
