@@ -109,11 +109,25 @@
 - `--hide` 启动只保留托盘
 - `--fan-control` 自动启动风扇控制
 - `--no-osd` 关闭osd
+- `--log` 启用日志
 - 默认安装文件位置`C:\Program Files\NUCtool`
-- 默认配置文件位置`%AppData%\com.cyear.nuctool`
+- 默认配置文件、log位置`%AppData%\com.cyear.nuctool`
 - 如需在Linux测试建议查看文档底部Thank中的Linux驱动
 
 ---
+
+## 如何反馈BUG以及新增功能
+
+### 1.BUG
+
+1. 使用管理员命令行添加`--log`运行NUCtool
+2. 提供截图或视频
+3. 提供`%AppData%\com.cyear.nuctool\crash_*.log*`(如果有)和`%AppData%\com.cyear.nuctool\NUCtool.log`
+
+### 2.新增功能
+
+- issues(推荐)或邮箱(推荐)或discord
+- 注意: 不对稳定性做出任何保证，一堆bug能work
 
 ## Star History
 

@@ -42,7 +42,7 @@ const IOCTL_EC_WRITE: u32 = 0x9C40_A48C;
 // Temperature
 const EC_CPU_TEMP: u16 = 0x043E;
 const EC_GPU_TEMP: u16 = 0x044F;
-const EC_PCH_TEMP: u16 = 0x0E0E;
+// const EC_PCH_TEMP: u16 = 0x0E0E;
 
 // Main fan RPM
 const EC_MAIN_FAN_RPM_1: u16 = 0x0464;
@@ -159,10 +159,10 @@ pub struct KeyboardBacklight {
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FanModeByte {
-    // NormalMode = 0x00,
+    NormalMode = 0x00,
     FanBoostMode = 0x40,
     AutoMode = 0x10,
-    // Fuck = 0x50,
+    Fuck = 0x50,
 }
 
 // ============================================================

@@ -386,7 +386,7 @@ impl UniwillWcfEc {
     ///     },
     ///     effect: 0,
     /// }
-    pub fn keyboard_get_profile_single(&self) -> NativeKeyboardLedProfileSingleColor {
+    pub fn _keyboard_get_profile_single(&self) -> NativeKeyboardLedProfileSingleColor {
         let mut single_color = NativeKeyboardLedProfileSingleColor::default();
         let ret = unsafe { (self.wcf_get_current_keyboard_led_profile_single_color)(&mut single_color) };
         if ret == 0 {
@@ -395,7 +395,7 @@ impl UniwillWcfEc {
         single_color
     }
 
-    pub fn keyboard_get_profile(&self) -> NativeKeyboardLedProfile {
+    pub fn k_eyboard_get_profile(&self) -> NativeKeyboardLedProfile {
         let mut profile = NativeKeyboardLedProfile::default();
         let ret = unsafe { (self.wcf_get_current_keyboard_led_profile)(&mut profile) };
         if ret == 0 {
@@ -404,7 +404,7 @@ impl UniwillWcfEc {
         profile
     }
 
-    pub fn keyboard_get_profile_key_color(&self, profile: NativeKeyboardLedProfile) {}
+    // pub fn keyboard_get_profile_key_color(&self, profile: NativeKeyboardLedProfile) {}
 
     // ========================================================
     // 灯条设置

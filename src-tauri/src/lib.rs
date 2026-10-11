@@ -1,3 +1,5 @@
+#[macro_use]
+mod logging;
 mod acpi;
 mod config;
 mod fan_control;
@@ -6,7 +8,7 @@ mod win;
 mod window_push;
 use acpi::{
     uniwillfnkeyhook,
-    UniwillAcpiEc, UniwillWcfEc, UniwillWmiEc,
+    UniwillWcfEc, UniwillWmiEc,
     get_model, get_gpu_driver, get_gsc_driver,
     KeyboardBacklight,NativeLightbarProfile, acpi_ec_worker
 };
@@ -188,9 +190,7 @@ fn start_fan_control_internal(
 
         // 通知前端：已经启动
         let _ = app_handle.emit("fan-control-status", true);
-        // 0 = 独立
-        // 1 = 主风扇优先
-        // 2 = 分风扇优先
+        // 0 = 独立 1 = 主风扇优先  2 = 分风扇优先
         let fan_mode: i32;
         match config::load_fan_mode() {
             Ok(1) => {
@@ -238,7 +238,6 @@ fn start_fan_control_internal(
 
             // CPU 风扇 主 => 右
             let mut right_speed = calculate_speed(&fan_data.left_fan, cpu_temp);
-
             // GPU 风扇 分 => 左
             let mut left_speed = calculate_speed(&fan_data.right_fan, gpu_temp);
 
@@ -262,7 +261,6 @@ fn start_fan_control_internal(
             thread::sleep(Duration::from_millis(2500));
         }
         println!("风扇自动控制线程退出");
-
         let _ = app_handle.emit("fan-control-status", false);
     });
 
@@ -862,8 +860,7 @@ fn start_newfan(app: &tauri::AppHandle, fandata: FanData) {
         ec.fan_write_set(fandata);
         println!("start_newfan: Ok");
         let _ = show_osd_i18n(&app, "fanControl", "startEcFan");
-     })
-    {
+     }) {
         eprintln!("start_newfan 失败: {}", e);
     }
 }
@@ -875,7 +872,7 @@ async fn set_fan_max(app: tauri::AppHandle) {
 
 fn set_fan_max_auto(app: &tauri::AppHandle) {
     let app = app.clone();
-    let result = acpi_ec_worker().call(move |ec| {
+    if let Err(e) = acpi_ec_worker().call(move |ec| {
         if ec.fan_read_manual() {
             ec.fan_write_manual(false);
             let _ = show_osd_i18n(&app, "fanControl", "fanMax");
@@ -883,23 +880,19 @@ fn set_fan_max_auto(app: &tauri::AppHandle) {
             ec.fan_write_manual(true);
             let _ = show_osd_i18n(&app, "fanControl", "fanAuto");
         }
-    });
-
-    if let Err(e) = result {
+    }) {
         eprintln!("set_fan_max: {}", e);
-    }
+    };
 }
 #[tauri::command]
-async fn stop_newfan_write(app: tauri::AppHandle,) {
-    let ec = match UniwillAcpiEc::open() {
-        Ok(ec) => ec,
-        Err(e) => {
-            eprintln!("打开 ACPIDriver 失败: {}", e);
-            return;
-        }
+async fn stop_newfan_write(app: tauri::AppHandle) {
+    let app = app.clone();
+    if let Err(e) = acpi_ec_worker().call(move |ec| {
+        ec.fan_write_close(); 
+        let _ = show_osd_i18n(&app, "fanControl", "stopFanControl");
+    }) {
+        eprintln!("stop_newfan_write: {}", e);
     };
-    ec.fan_write_close();
-    let _ = show_osd_i18n(&app, "fanControl", "stopFanControl");
 }
 
 fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
@@ -915,14 +908,9 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         println!("检测到 --no-osd: {}/跳过创建OSD界面", osd);
     }
 
-    // =========================
     // 启动最小化
-    // =========================
-
     let hide = args.iter().any(|arg| arg == "--hide");
-
     let window = app.get_webview_window("main").unwrap();
-
     if hide {
         println!("检测到 --hide: {}/开机自启，只保留托盘", hide);
         window.hide()?;
@@ -932,24 +920,14 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         window.set_focus()?;
     }
 
-    // =========================
     // 托盘菜单
-    // =========================
-
     let show = MenuItemBuilder::with_id("show", "显示窗口").build(app)?;
-
     let benchmark_on = MenuItemBuilder::with_id("benchmark_on", "开启基准模式").build(app)?;
-
     let benchmark_off = MenuItemBuilder::with_id("benchmark_off", "关闭基准模式").build(app)?;
-
     let performance = MenuItemBuilder::with_id("performance", "性能模式").build(app)?;
-
     let balanced = MenuItemBuilder::with_id("balanced", "平衡模式").build(app)?;
-
     let quiet = MenuItemBuilder::with_id("quiet", "省电模式").build(app)?;
-
     let quit = MenuItemBuilder::with_id("quit", "退出").build(app)?;
-
     let menu = MenuBuilder::new(app)
         .item(&show)
         .item(&benchmark_on)
@@ -962,11 +940,7 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         .build()?;
 
     const TRAY_ICON: tauri::image::Image<'_> = include_image!("icons/32x32.png");
-
-    // =========================
     // 创建托盘
-    // =========================
-
     TrayIconBuilder::new()
         .icon(TRAY_ICON)
         .menu(&menu)
@@ -1041,28 +1015,20 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         })
         .build(app)?;
 
-    // =========================
     // 窗口关闭 → 隐藏到托盘
-    // =========================
-
     if let Some(window) = app.get_webview_window("main") {
         let window_for_event = window.clone();
-
         window.on_window_event(move |event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 // 阻止真正关闭
                 api.prevent_close();
-
                 // 隐藏窗口
                 let _ = window_for_event.hide();
             }
         });
     }
 
-    // =========================
     // 风扇自启
-    // =========================
-
     let auto_fan_control = args.iter().any(|arg| arg == "--fan-control");
     if auto_fan_control {
         println!("检测到 --fan-control，自动启动风扇控制");
@@ -1074,26 +1040,21 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
                 return Ok(());
             }
         };
-        let ec = match UniwillAcpiEc::open() {
-            Ok(ec) => ec,
-            Err(e) => {
-                eprintln!("打开 ACPIDriver 失败: {}", e);
-                return Ok(());
-            }
-        };
-        if ec.fan_read_custom_table_1() && ec.fan_read_custom_table_2() {
-            println!("启用新EC风扇");
-            let app_handle = app.handle().clone();
-            let _ = thread::spawn(move || {
+        let app_handle = app.handle().clone();
+        if let Err(e) = acpi_ec_worker().call(move |ec| {
+            if ec.fan_read_custom_table_1() && ec.fan_read_custom_table_2() {
+                println!("启用新EC风扇");
                 thread::sleep(Duration::from_millis(3000));
                 start_newfan(&app_handle, fan_data);
-            });
-        } else {
-            let state = app.state::<FanControlState>();
-            if let Err(e) = start_fan_control_internal(app.handle(), fan_data, &state) {
-                eprintln!("自动启动风扇控制失败: {}", e);
-            };
-        }
+            } else {
+                let state = app_handle.state::<FanControlState>();
+                if let Err(e) = start_fan_control_internal(&app_handle, fan_data, &state) {
+                    eprintln!("自动启动风扇控制失败: {}", e);
+                };
+            }
+        }) {
+            eprintln!("风扇自启 失败: {}", e);
+        };
     } else {
         println!("未检测到 --fan-control，风扇控制默认关闭");
     }
@@ -1144,7 +1105,8 @@ fn fnhook() {
 pub fn run() {
     // 管理员权限！！！
     privilege_escalation();
-    config::install_panic_hook();
+    logging::init_log().expect("初始化日志系统失败");
+    logging::install_panic_hook();
     println!("======================================");
     println!("       NUCtool PANIC HOOK");
     println!("======================================");
