@@ -18,6 +18,7 @@ const ruRU = {
     display: "Дисплей",
     keyboard: "Клавиатура",
     lightbar: "Настройки световой ленты",
+    bios: "Настройки BIOS",
     settings: "Настройки",
   },
 
@@ -323,7 +324,124 @@ const ruRU = {
     secondaryPriority: "Раздельное управление вентиляторами",
 
   },
+  // ==========================================================
+  // Конфигурация BIOS
+  // ==========================================================
+  bios: {
+    eyebrow: "NUCTOOL / FIRMWARE",
+    title: "Конфигурация BIOS",
+    subtitle: "Чтение и просмотр данных конфигурации NVRAM BIOS.",
 
+    readBios: "Прочитать BIOS",
+    exportNvram: "Экспортировать NVRAM",
+
+    readOnlyTitle: "Режим только для чтения",
+    readOnlyDescription:
+      "Изменения здесь предназначены только для локального предварительного просмотра и не записываются в BIOS или NVRAM.",
+
+    statusReady: "Готово. Нажмите «Прочитать BIOS», чтобы получить данные конфигурации.",
+
+    totalEntries: "Всего параметров",
+    totalEntriesDescription: "Разобранные записи конфигурации",
+
+    entriesWithOptions: "Параметры с вариантами",
+    entriesWithOptionsDescription: "Параметры конфигурации с доступными вариантами значений",
+
+    modifiedLocally: "Изменено локально",
+    modifiedLocallyDescription: "Изменения предварительного просмотра, которые ещё не применены",
+
+    visibleEntries: "Отображаемые параметры",
+    visibleEntriesDescription: "Параметры, соответствующие текущим фильтрам",
+
+    searchConfiguration: "Поиск параметров",
+    searchPlaceholder: "Поиск по названию, токену, смещению, значению...",
+    clearSearch: "Очистить поиск",
+
+    entryType: "Тип параметра",
+    filterAll: "Все параметры",
+    filterOptions: "С вариантами",
+    filterNoOptions: "Без вариантов",
+    filterModified: "Изменённые локально",
+
+    resetEdits: "Сбросить изменения",
+    exportRecords: "Экспортировать записи",
+
+    noConfigurationLoaded: "Конфигурация не загружена",
+    selectEntryHint: "Выберите параметр, чтобы просмотреть подробности",
+
+    columnIndex: "Индекс",
+    columnQuestion: "Параметр конфигурации",
+    columnOffset: "Смещение",
+    columnWidth: "Ширина",
+    columnCurrentValue: "Текущее значение",
+    columnState: "Состояние",
+
+    noBiosData: "Данные BIOS не загружены",
+    noBiosDataDescription: "Нажмите «Прочитать BIOS», чтобы получить текущую конфигурацию NVRAM.",
+
+    recordCountZero: "0 записей",
+    recordCount: "Записей: {count}",
+    showAllEntries: "Показать все параметры",
+
+    configuration: "CONFIGURATION",
+    entryDetails: "Сведения о параметре",
+    noSelection: "Параметр не выбран",
+    detailEmpty: "Выберите параметр в таблице, чтобы просмотреть его метаданные и параметры локального редактирования.",
+
+    modifiedBadge: "Изменено локально",
+
+    offset: "Смещение",
+    width: "Ширина",
+    biosDefault: "Значение BIOS по умолчанию",
+
+    currentValuePreview: "Предварительный просмотр текущего значения",
+    editorHint: "Изменения влияют только на локальный предварительный просмотр.",
+
+    restoreOriginalValue: "Восстановить исходное значение",
+    copyDetails: "Копировать сведения",
+
+    availableOptions: "Доступные варианты",
+    noOptionList: "Для этого параметра нет доступных вариантов.",
+
+    rawEntryText: "Исходный текст записи",
+
+    sourceData: "SOURCE DATA",
+    nvramText: "Текст NVRAM",
+    showSource: "Показать исходные данные",
+    hideSource: "Скрыть исходные данные",
+    noSourceLoaded: "Исходные данные не загружены",
+    copySource: "Копировать исходные данные",
+
+    stateNormal: "Без изменений",
+    stateModified: "Изменено локально",
+    stateUnknown: "Неизвестно",
+
+    searchNoResults: "Подходящие параметры не найдены",
+    searchResults: "Найдено параметров: {count}",
+    readSuccess: "Конфигурация BIOS успешно прочитана",
+    readFailed: "Не удалось прочитать конфигурацию BIOS",
+    exportSuccess: "Экспорт выполнен успешно",
+    exportFailed: "Не удалось выполнить экспорт",
+    copySuccess: "Успешно скопировано",
+    copyFailed: "Не удалось скопировать",
+    resetSuccess: "Исходное значение восстановлено",
+    writeBios: "Записать BIOS",
+
+    writeWarningTitle: "Риск записи BIOS",
+    writeWarningDescription:
+      "Запись в BIOS NVRAM может привести к невозможности загрузки системы, ошибкам конфигурации или отказу аппаратных функций. Убедитесь в правильности настроек и стабильности электропитания. Выполняйте операцию только при полном понимании возможных рисков. Перед использованием создайте резервную копию NVRAM. Приложение не предоставляет безопасного механизма резервного копирования NVRAM.",
+
+    passwordPrompt: "Введите пароль администратора BIOS:",
+    passwordRequired: "Пароль администратора BIOS не может быть пустым.",
+    writeConfirmTitle: "Подтверждение записи BIOS",
+    writeConfirmDescription:
+      "Эта операция изменит BIOS NVRAM и может привести к невозможности загрузки системы или сбоям оборудования. Продолжить?",
+    writeSuccess: "Команда записи BIOS NVRAM выполнена",
+    writeFailed: "Не удалось записать BIOS NVRAM",
+
+    writing: "Выполняется запись BIOS NVRAM...",
+    writeCancelled: "Запись BIOS отменена",
+  },
   // ==========================================================
   // Common
   // ==========================================================

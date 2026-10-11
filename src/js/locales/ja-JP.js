@@ -18,6 +18,7 @@ const jaJP = {
     display: "ディスプレイ設定",
     keyboard: "キーボード設定",
     lightbar: "ライト設定",
+    bios: "BIOS設定",
     settings: "設定",
   },
 
@@ -278,7 +279,124 @@ const jaJP = {
     reading: "読み込み中...",
     readFailed: "読み込みに失敗しました",
   },
+  // ==========================================================
+  // BIOS 設定
+  // ==========================================================
+  bios: {
+    eyebrow: "NUCTOOL / FIRMWARE",
+    title: "BIOS 設定",
+    subtitle: "BIOS の NVRAM 設定データを読み取り、表示します。",
 
+    readBios: "BIOS を読み取る",
+    exportNvram: "NVRAM をエクスポート",
+
+    readOnlyTitle: "読み取り専用モード",
+    readOnlyDescription:
+      "ここでの変更はローカルプレビューのみで、BIOS や NVRAM には書き込まれません。",
+
+    statusReady: "準備完了。「BIOS を読み取る」をクリックして設定データを取得してください。",
+
+    totalEntries: "設定項目の総数",
+    totalEntriesDescription: "解析済みの設定項目",
+
+    entriesWithOptions: "選択肢あり",
+    entriesWithOptionsDescription: "選択可能な値を持つ設定項目",
+
+    modifiedLocally: "ローカルで変更済み",
+    modifiedLocallyDescription: "まだ適用されていないプレビューの変更",
+
+    visibleEntries: "表示中の項目",
+    visibleEntriesDescription: "現在のフィルター条件に一致する項目",
+
+    searchConfiguration: "設定項目を検索",
+    searchPlaceholder: "項目名、トークン、オフセット、値を検索...",
+    clearSearch: "検索をクリア",
+
+    entryType: "項目の種類",
+    filterAll: "すべての項目",
+    filterOptions: "選択肢あり",
+    filterNoOptions: "選択肢なし",
+    filterModified: "ローカルで変更済み",
+
+    resetEdits: "変更をリセット",
+    exportRecords: "項目をエクスポート",
+
+    noConfigurationLoaded: "設定データが読み込まれていません",
+    selectEntryHint: "項目を選択して詳細を表示してください",
+
+    columnIndex: "番号",
+    columnQuestion: "設定項目",
+    columnOffset: "オフセット",
+    columnWidth: "幅",
+    columnCurrentValue: "現在の値",
+    columnState: "状態",
+
+    noBiosData: "BIOS データが読み込まれていません",
+    noBiosDataDescription: "「BIOS を読み取る」をクリックして現在の NVRAM 設定を取得してください。",
+
+    recordCountZero: "0 件",
+    recordCount: "{count} 件",
+    showAllEntries: "すべての項目を表示",
+
+    configuration: "CONFIGURATION",
+    entryDetails: "項目の詳細",
+    noSelection: "項目が選択されていません",
+    detailEmpty: "テーブルから項目を選択すると、メタデータとローカル編集オプションが表示されます。",
+
+    modifiedBadge: "ローカルで変更済み",
+
+    offset: "オフセット",
+    width: "幅",
+    biosDefault: "BIOS の既定値",
+
+    currentValuePreview: "現在値のプレビュー",
+    editorHint: "変更はローカルプレビューにのみ反映されます。",
+
+    restoreOriginalValue: "元の値に戻す",
+    copyDetails: "詳細をコピー",
+
+    availableOptions: "利用可能な選択肢",
+    noOptionList: "利用可能な選択肢はありません。",
+
+    rawEntryText: "設定項目の生テキスト",
+
+    sourceData: "SOURCE DATA",
+    nvramText: "NVRAM テキスト",
+    showSource: "ソースデータを表示",
+    hideSource: "ソースデータを非表示",
+    noSourceLoaded: "ソースデータが読み込まれていません",
+    copySource: "ソースデータをコピー",
+
+    stateNormal: "未変更",
+    stateModified: "ローカルで変更済み",
+    stateUnknown: "不明",
+
+    searchNoResults: "一致する設定項目が見つかりません",
+    searchResults: "{count} 件の設定項目が見つかりました",
+    readSuccess: "BIOS 設定の読み取りが完了しました",
+    readFailed: "BIOS 設定の読み取りに失敗しました",
+    exportSuccess: "エクスポートが完了しました",
+    exportFailed: "エクスポートに失敗しました",
+    copySuccess: "コピーしました",
+    copyFailed: "コピーに失敗しました",
+    resetSuccess: "元の値に戻しました",
+    writeBios: "BIOS に書き込む",
+
+    writeWarningTitle: "BIOS 書き込みのリスク",
+    writeWarningDescription:
+      "BIOS NVRAM への書き込みにより、システムが起動できなくなったり、設定に異常が発生したり、ハードウェア機能が使用できなくなったりする可能性があります。設定内容が正しいことを確認し、電源が安定していることを確保してください。リスクを十分に理解したうえで実行してください。使用前に NVRAM をバックアップしてください。本アプリには安全な NVRAM バックアップ機能はありません。",
+
+    passwordPrompt: "BIOS 管理者パスワードを入力してください：",
+    passwordRequired: "BIOS 管理者パスワードを空欄にすることはできません。",
+    writeConfirmTitle: "BIOS 書き込みの確認",
+    writeConfirmDescription:
+      "この操作により BIOS NVRAM が変更され、システムが起動できなくなったり、ハードウェアが正常に動作しなくなったりする可能性があります。続行しますか？",
+    writeSuccess: "BIOS NVRAM の書き込みコマンドが完了しました",
+    writeFailed: "BIOS NVRAM の書き込みに失敗しました",
+
+    writing: "BIOS NVRAM に書き込み中...",
+    writeCancelled: "BIOS の書き込みをキャンセルしました",
+  },
   // ==========================================================
   // 設定
   // ==========================================================

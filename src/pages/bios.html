@@ -1,0 +1,259 @@
+<section id="page-bios" class="page bios-page">
+    <header class="page-header bios-header">
+        <div class="page-heading">
+            <div class="bios-eyebrow" data-i18n="bios.eyebrow">NUCTOOL / FIRMWARE</div>
+            <h1 data-i18n="bios.title">BIOS 配置</h1>
+            <p class="page-subtitle" data-i18n="bios.subtitle">
+                读取并查看 BIOS NVRAM 配置数据。
+            </p>
+        </div>
+
+        <div class="bios-header-actions">
+            <button id="bios-refresh-btn" class="bios-btn bios-btn-primary" type="button">
+                <span class="bios-btn-icon" aria-hidden="true">↻</span>
+                <span data-i18n="bios.readBios">读取 BIOS</span>
+            </button>
+
+            <button id="bios-export-raw-btn" class="bios-btn" type="button" disabled>
+                <span data-i18n="bios.exportNvram">导出 NVRAM</span>
+            </button>
+
+            <button id="bios-write-btn" class="bios-btn bios-btn-danger" type="button" disabled>
+                <span data-i18n="bios.writeBios">写入 BIOS</span>
+            </button>
+        </div>
+
+        <div class="bios-notice bios-notice-danger" role="alert">
+            <span class="bios-notice-icon" aria-hidden="true">!</span>
+            <div>
+                <strong data-i18n="bios.writeWarningTitle">BIOS 写入风险</strong>
+                <p data-i18n="bios.writeWarningDescription">
+                    写入 BIOS NVRAM 可能导致系统无法启动、配置异常或硬件功能失效。
+                    请确认配置内容正确，并确保设备供电稳定。写入操作仅应在明确了解风险后执行。
+                    使用请自行备份NVRAM，本程序没有NVRAM安全的备份。
+                </p>
+            </div>
+        </div>
+
+        <div id="bios-status" class="bios-status" role="status" aria-live="polite">
+            <span class="bios-status-dot"></span>
+            <span id="bios-status-text" data-i18n="bios.statusReady">
+                就绪。点击“读取 BIOS”以获取配置数据。
+            </span>
+        </div>
+
+        <div class="bios-stats">
+            <article class="bios-stat-card">
+                <span class="bios-stat-label" data-i18n="bios.totalEntries">配置项总数</span>
+                <strong id="bios-stat-total">0</strong>
+                <span class="bios-stat-description" data-i18n="bios.totalEntriesDescription">
+                    已解析的配置记录
+                </span>
+            </article>
+
+            <article class="bios-stat-card">
+                <span class="bios-stat-label" data-i18n="bios.entriesWithOptions">包含可选值</span>
+                <strong id="bios-stat-options">0</strong>
+                <span class="bios-stat-description" data-i18n="bios.entriesWithOptionsDescription">
+                    具有可选值的配置项
+                </span>
+            </article>
+
+            <article class="bios-stat-card">
+                <span class="bios-stat-label" data-i18n="bios.modifiedLocally">本地已修改</span>
+                <strong id="bios-stat-modified">0</strong>
+                <span class="bios-stat-description" data-i18n="bios.modifiedLocallyDescription">
+                    尚未应用的预览修改
+                </span>
+            </article>
+
+            <article class="bios-stat-card">
+                <span class="bios-stat-label" data-i18n="bios.visibleEntries">当前显示</span>
+                <strong id="bios-stat-visible">0</strong>
+                <span class="bios-stat-description" data-i18n="bios.visibleEntriesDescription">
+                    符合当前筛选条件的配置项
+                </span>
+            </article>
+        </div>
+
+        <section class="bios-panel">
+            <div class="bios-toolbar">
+                <div class="bios-search-wrap">
+                    <label class="bios-field-label" for="bios-search" data-i18n="bios.searchConfiguration">搜索配置项</label>
+
+                    <div class="bios-search-box">
+                        <span class="bios-search-icon" aria-hidden="true">⌕</span>
+                        <input id="bios-search" type="search" data-i18n-placeholder="bios.searchPlaceholder"
+                            placeholder="搜索问题、Token、偏移量、数值..." autocomplete="off" />
+                        <button id="bios-clear-search" class="bios-clear-search" type="button"
+                            data-i18n-aria-label="bios.clearSearch" aria-label="清除搜索">×</button>
+                    </div>
+                </div>
+
+                <div class="bios-filter-wrap">
+                    <label class="bios-field-label" for="bios-filter" data-i18n="bios.entryType">配置项类型</label>
+
+                    <select id="bios-filter">
+                        <option value="all" data-i18n="bios.filterAll">全部配置项</option>
+                        <option value="options" data-i18n="bios.filterOptions">包含可选值</option>
+                        <option value="no-options" data-i18n="bios.filterNoOptions">不包含可选值</option>
+                        <option value="modified" data-i18n="bios.filterModified">本地已修改</option>
+                    </select>
+                </div>
+
+                <div class="bios-toolbar-actions">
+                    <button id="bios-reset-btn" class="bios-btn" type="button" disabled>
+                        <span data-i18n="bios.resetEdits">重置修改</span>
+                    </button>
+                    <!-- <button id="bios-export-json-btn" class="bios-btn" type="button" disabled>
+                        <span data-i18n="bios.exportRecords">导出记录</span>
+                    </button> -->
+                </div>
+            </div>
+
+            <div class="bios-table-meta">
+                <span id="bios-results-label" data-i18n="bios.noConfigurationLoaded">
+                    尚未加载配置
+                </span>
+                <span class="bios-meta-hint" data-i18n="bios.selectEntryHint">
+                    选择一个配置项以查看详细信息
+                </span>
+            </div>
+
+            <div class="bios-table-wrap">
+                <table class="bios-table">
+                    <thead>
+                        <tr>
+                            <th class="bios-col-index" data-i18n="bios.columnIndex">序号</th>
+                            <th data-i18n="bios.columnQuestion">配置项</th>
+                            <th class="bios-col-token">Token</th>
+                            <th class="bios-col-offset" data-i18n="bios.columnOffset">偏移量</th>
+                            <th class="bios-col-width" data-i18n="bios.columnWidth">宽度</th>
+                            <th data-i18n="bios.columnCurrentValue">当前值</th>
+                            <th class="bios-col-state" data-i18n="bios.columnState">状态</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bios-table-body">
+                        <tr class="bios-empty-row">
+                            <td colspan="7">
+                                <div class="bios-empty">
+                                    <span class="bios-empty-symbol" aria-hidden="true">⌁</span>
+                                    <strong data-i18n="bios.noBiosData">尚未加载 BIOS 数据</strong>
+                                    <p data-i18n="bios.noBiosDataDescription">
+                                        点击“读取 BIOS”以获取当前 NVRAM 配置。
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="bios-table-footer">
+                <span id="bios-footer-count" data-i18n="bios.recordCountZero">0 条记录</span>
+                <button id="bios-show-all-btn" class="bios-text-btn" type="button" data-i18n="bios.showAllEntries"
+                    hidden>显示全部配置项</button>
+            </div>
+        </section>
+
+        <section class="bios-panel bios-detail-panel">
+            <div class="bios-section-heading">
+                <div>
+                    <span class="bios-section-kicker" data-i18n="bios.configuration">CONFIGURATION</span>
+                    <h2 data-i18n="bios.entryDetails">配置项详情</h2>
+                </div>
+                <span id="bios-detail-index" class="bios-detail-index" data-i18n="bios.noSelection">
+                    未选择配置项
+                </span>
+            </div>
+
+            <div id="bios-detail-empty" class="bios-detail-empty" data-i18n="bios.detailEmpty">
+                从表格中选择一个配置项，以查看其元数据和本地编辑选项。
+            </div>
+
+            <div id="bios-detail-content" class="bios-detail-content" hidden>
+                <div class="bios-detail-title-row">
+                    <div>
+                        <h3 id="bios-detail-question">—</h3>
+                        <p id="bios-detail-help" class="bios-detail-help"></p>
+                    </div>
+                    <span id="bios-detail-modified" class="bios-modified-badge" data-i18n="bios.modifiedBadge"
+                        hidden>本地已修改</span>
+                </div>
+
+                <div class="bios-metadata-grid">
+                    <div class="bios-metadata-item">
+                        <span>Token</span>
+                        <code id="bios-detail-token">—</code>
+                    </div>
+                    <div class="bios-metadata-item">
+                        <span data-i18n="bios.offset">偏移量</span>
+                        <code id="bios-detail-offset">—</code>
+                    </div>
+                    <div class="bios-metadata-item">
+                        <span data-i18n="bios.width">宽度</span>
+                        <code id="bios-detail-width">—</code>
+                    </div>
+                    <div class="bios-metadata-item">
+                        <span data-i18n="bios.biosDefault">BIOS 默认值</span>
+                        <code id="bios-detail-default">—</code>
+                    </div>
+                </div>
+
+                <div class="bios-editor">
+                    <label class="bios-field-label" for="bios-detail-value"
+                        data-i18n="bios.currentValuePreview">当前值预览</label>
+                    <div id="bios-editor-control"></div>
+                    <p id="bios-editor-hint" class="bios-editor-hint" data-i18n="bios.editorHint">
+                        修改仅影响本地预览。
+                    </p>
+                </div>
+
+                <div class="bios-detail-actions">
+                    <button id="bios-detail-reset-btn" class="bios-btn" type="button">
+                        <span data-i18n="bios.restoreOriginalValue">恢复原始值</span>
+                    </button>
+                    <button id="bios-detail-copy-btn" class="bios-btn" type="button">
+                        <span data-i18n="bios.copyDetails">复制详情</span>
+                    </button>
+                </div>
+
+                <div class="bios-options-section">
+                    <h4 data-i18n="bios.availableOptions">可用选项</h4>
+                    <div id="bios-detail-options" class="bios-options-list">
+                        <span class="bios-muted" data-i18n="bios.noOptionList">
+                            没有可用的选项列表。
+                        </span>
+                    </div>
+                </div>
+
+                <details class="bios-raw-details">
+                    <summary data-i18n="bios.rawEntryText">原始配置项文本</summary>
+                    <pre id="bios-detail-raw"></pre>
+                </details>
+            </div>
+        </section>
+
+        <section class="bios-panel bios-source-panel">
+            <div class="bios-section-heading">
+                <div>
+                    <span class="bios-section-kicker" data-i18n="bios.sourceData">SOURCE DATA</span>
+                    <h2 data-i18n="bios.nvramText">NVRAM 文本</h2>
+                </div>
+                <button id="bios-toggle-source-btn" class="bios-btn" type="button" data-i18n="bios.showSource"
+                    aria-expanded="false">显示源数据</button>
+            </div>
+
+            <div id="bios-source-content" hidden>
+                <div class="bios-source-toolbar">
+                    <span id="bios-source-info" data-i18n="bios.noSourceLoaded">
+                        尚未加载源数据
+                    </span>
+                    <button id="bios-copy-source-btn" class="bios-btn" type="button" disabled>
+                        <span data-i18n="bios.copySource">复制源数据</span>
+                    </button>
+                </div>
+                <pre id="bios-source-text" class="bios-source-text"></pre>
+            </div>
+        </section>
+</section>

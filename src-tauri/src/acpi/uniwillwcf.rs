@@ -1,3 +1,4 @@
+use crate::config::dll_dir;
 use libloading::{Library, Symbol};
 use sha2::{Digest, Sha256};
 use std::{ffi::CString, fs, os::raw::c_int};
@@ -186,9 +187,7 @@ impl UniwillWcfEc {
     // ========================================================
 
     pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
-        let exe_path = std::env::current_exe()?;
-        let install_dir = exe_path.parent().unwrap();
-        let dll_path = install_dir.join("NUCtoolV2.dll");
+        let dll_path = dll_dir().expect("dll_dir 失败").join("NUCtoolV2.dll");
         println!("DLL PATH: {:?}", &dll_path);
         let dll_data = fs::read(&dll_path)?;
         // 计算 SHA-256

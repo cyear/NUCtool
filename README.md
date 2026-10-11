@@ -85,6 +85,7 @@
 | CPU PL4 | ✅ 支持 | ❌ 未测试 |
 | GPU PL1 | ✅ 支持 | ❌ 不支持 |
 | GPU PL2 | ✅ 支持 | ❌ 不支持 |
+| BIOS NVRAM | ✅ 支持 | ❌ 未测试 |
 | 键盘RGB设置 | ✅ 支持 | ❌ 未测试 |
 | 灯条设置 | ❌ 不支持 | ✅ 支持 |
 | 模式切换 | ✅ 支持 | ❌ 未测试 |
@@ -94,11 +95,17 @@
 | DIY OSD | ✅ 可用 | ❌ 未测试 |
 | 多语言 | ✅ 可用 | ❌ 未测试 |
 
-> 对BIOS NVRAM读写可以使用AMI工具包括隐藏设置，是否生效自行测试
->
-> 需要在BIOS设置管理员密码(用户密码可跳过)，使用/cpwd 密码
 >
 > **注意：** 当前仅 `LAPAC71H` 测试(我只有它)。其他功能未测试或硬件/固件不支持。
+
+## BIOS配置使用流程
+
+1. 读取 BIOS
+2. 导出 NVRAM
+3. 写入 BIOS
+
+- 是否生效自行测试
+- 需要在BIOS设置管理员密码(用户密码可跳过)
 
 ## 说明
 
@@ -122,7 +129,7 @@
 
 1. 使用管理员命令行添加`--log`运行NUCtool
 2. 提供截图或视频
-3. 提供`%AppData%\com.cyear.nuctool\crash_*.log*`(如果有)和`%AppData%\com.cyear.nuctool\NUCtool.log`
+3. 提供`%AppData%\com.cyear.nuctool\crash_*.log`(如果有)和`%AppData%\com.cyear.nuctool\NUCtool.log`
 
 ### 2.新增功能
 
@@ -146,6 +153,8 @@
 > 致谢 [Wer-Wolf/uniwill-laptop](https://github.com/Wer-Wolf/uniwill-laptop)
 >
 > 致谢 [tuxedocomputers/tuxedo-keyboard](https://github.com/tuxedocomputers/tuxedo-keyboard/blob/master/src/tuxedo_io/tuxedo_io.c)
+>
+> 致谢 [ab3lkaizen/SCEHUB](https://github.com/ab3lkaizen/SCEHUB)
 >
 > Logo 下载来自 [veryicon](https://www.veryicon.com/icons/culture/antique-objects/antique-objects-chinese-style-fan-folding-fan.html?p=2&use_xbridge3=true&loader_name=forest&need_sec_link=1&sec_link_scene=im&theme=light)
 >

@@ -18,6 +18,7 @@ const zhCN = {
     system: "系统配置",
     keyboard: "键盘设置",
     lightbar: "灯条设置",
+    bios: "BIOS配置",
     settings: "设置",
   },
 
@@ -273,6 +274,123 @@ const zhCN = {
     breathingDescription: "",
     quickOff: "快速关闭"
   },
+
+  // ==========================================================
+  // BIOS 配置
+  // ==========================================================
+  bios: {
+    eyebrow: "NUCTOOL / FIRMWARE",
+    title: "BIOS 配置",
+    subtitle: "读取并查看 BIOS NVRAM 配置数据。",
+
+    readBios: "读取 BIOS",
+    exportNvram: "导出 NVRAM",
+
+    readOnlyTitle: "只读模式",
+    readOnlyDescription:
+      "此处的修改仅作为本地预览，不会写入 BIOS 或 NVRAM。",
+
+    statusReady: "就绪。点击“读取 BIOS”以获取配置数据。",
+
+    totalEntries: "配置项总数",
+    totalEntriesDescription: "已解析的配置记录",
+
+    entriesWithOptions: "包含可选值",
+    entriesWithOptionsDescription: "具有可选值的配置项",
+
+    modifiedLocally: "本地已修改",
+    modifiedLocallyDescription: "尚未应用的预览修改",
+
+    visibleEntries: "当前显示",
+    visibleEntriesDescription: "符合当前筛选条件的配置项",
+
+    searchConfiguration: "搜索配置项",
+    searchPlaceholder: "搜索问题、Token、偏移量、数值...",
+    clearSearch: "清除搜索",
+
+    entryType: "配置项类型",
+    filterAll: "全部配置项",
+    filterOptions: "包含可选值",
+    filterNoOptions: "不包含可选值",
+    filterModified: "本地已修改",
+
+    resetEdits: "重置修改",
+    exportRecords: "导出记录",
+
+    noConfigurationLoaded: "尚未加载配置",
+    selectEntryHint: "选择一个配置项以查看详细信息",
+
+    columnIndex: "序号",
+    columnQuestion: "配置项",
+    columnOffset: "偏移量",
+    columnWidth: "宽度",
+    columnCurrentValue: "当前值",
+    columnState: "状态",
+
+    noBiosData: "尚未加载 BIOS 数据",
+    noBiosDataDescription: "点击“读取 BIOS”以获取当前 NVRAM 配置。",
+
+    recordCountZero: "0 条记录",
+    recordCount: "{count} 条记录",
+    showAllEntries: "显示全部配置项",
+
+    configuration: "CONFIGURATION",
+    entryDetails: "配置项详情",
+    noSelection: "未选择配置项",
+    detailEmpty: "从表格中选择一个配置项，以查看其元数据和本地编辑选项。",
+
+    modifiedBadge: "本地已修改",
+
+    offset: "偏移量",
+    width: "宽度",
+    biosDefault: "BIOS 默认值",
+
+    currentValuePreview: "当前值预览",
+    editorHint: "修改仅影响本地预览。",
+
+    restoreOriginalValue: "恢复原始值",
+    copyDetails: "复制详情",
+
+    availableOptions: "可用选项",
+    noOptionList: "没有可用的选项列表。",
+
+    rawEntryText: "原始配置项文本",
+
+    sourceData: "SOURCE DATA",
+    nvramText: "NVRAM 文本",
+    showSource: "显示源数据",
+    hideSource: "隐藏源数据",
+    noSourceLoaded: "尚未加载源数据",
+    copySource: "复制源数据",
+
+    stateNormal: "未修改",
+    stateModified: "本地已修改",
+    stateUnknown: "未知",
+
+    searchNoResults: "没有符合条件的配置项",
+    searchResults: "找到 {count} 条配置项",
+    readSuccess: "BIOS 配置读取完成",
+    readFailed: "读取 BIOS 配置失败",
+    exportSuccess: "导出成功",
+    exportFailed: "导出失败",
+    copySuccess: "复制成功",
+    copyFailed: "复制失败",
+    resetSuccess: "已恢复原始值",
+    
+    writeBios: "写入 BIOS",
+    writeWarningTitle: "BIOS 写入风险",
+    writeWarningDescription:
+      "写入 BIOS NVRAM 可能导致系统无法启动、配置异常或硬件功能失效。请确认配置内容正确，并确保设备供电稳定。写入操作仅应在明确了解风险后执行。使用前请自行备份 NVRAM，本程序不提供安全备份功能。",
+
+    passwordPrompt: "请输入 BIOS 管理员密码：",
+    passwordRequired: "BIOS 管理员密码不能为空。",
+    writeConfirmTitle: "确认写入 BIOS",
+    writeConfirmDescription:
+      "此操作将修改 BIOS NVRAM，可能导致系统无法启动或硬件功能异常。确定继续吗？",
+    writeSuccess: "BIOS NVRAM 写入命令执行完成",
+    writeFailed: "BIOS NVRAM 写入失败",
+  },
+
   // ==========================================================
   // 设置
   // ==========================================================

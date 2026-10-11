@@ -1,0 +1,448 @@
+/* =========================================================
+   NUCtool / BIOS Configuration
+   Scope: #page-bios only
+   Layout: preserve global .page visibility; grid only inside .bios-layout
+   ========================================================= */
+
+/* ---------- Theme and base ---------- */
+#page-bios {
+  --bios-bg: #0f1115;
+  --bios-panel: #151820;
+  --bios-panel-hover: #191d27;
+  --bios-border: #292e3a;
+  --bios-border-strong: #353c4b;
+  --bios-text: #e6eaf2;
+  --bios-text-secondary: #a0a8b8;
+  --bios-muted: #727d90;
+  --bios-accent: #5b9dff;
+  --bios-accent-soft: rgba(91, 157, 255, .12);
+  --bios-success: #58c99b;
+  --bios-warning: #e9b96e;
+  --bios-danger: #f07e86;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 0;
+  color: var(--bios-text);
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+#page-bios *,
+#page-bios *::before,
+#page-bios *::after { box-sizing: border-box; }
+#page-bios [hidden] { display: none !important; }
+#page-bios img,
+#page-bios svg { max-width: 100%; }
+#page-bios button,
+#page-bios input,
+#page-bios select,
+#page-bios textarea { font: inherit; }
+
+/* ---------- Main layout ---------- */
+/*
+ * HTML 结构说明：#page-bios 的直接子元素只有 .bios-header。
+ * 标题、按钮、提示、状态、统计、表格、详情、源数据全部位于 .bios-header 内。
+ * 因此不能把 #page-bios 本身设为 Grid，也不能使用 #page-bios > .bios-panel。
+ * 根节点的显隐完全交给项目原有的 .page 页面切换逻辑。
+ */
+#page-bios .bios-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  justify-content: initial;
+  gap: 18px;
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 22px;
+}
+
+/* 第一行：页面标题 + 操作按钮 */
+#page-bios .bios-header > .page-heading {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+
+#page-bios .bios-header > .bios-header-actions {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+/* 其余区域每个独占一整行，禁止被排到标题旁边 */
+#page-bios .bios-header > .bios-notice,
+#page-bios .bios-header > .bios-status,
+#page-bios .bios-header > .bios-stats,
+#page-bios .bios-header > .bios-panel,
+#page-bios .bios-header > .bios-detail-panel,
+#page-bios .bios-header > .bios-source-panel {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+#page-bios .bios-header > .bios-panel,
+#page-bios .bios-header > .bios-detail-panel,
+#page-bios .bios-header > .bios-source-panel {
+  margin: 0 0 18px;
+}
+
+/* 统计卡片内部使用网格；不会影响外层页面 */
+#page-bios .bios-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  min-width: 0;
+  margin: 0 0 18px;
+}
+
+/* 兼容将来若有 .bios-layout 包裹，但当前提供的 HTML 不使用它 */
+#page-bios .bios-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 18px;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+#page-bios .bios-layout > * {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* ---------- Header ---------- */
+/* .bios-header 的 Grid 布局已在 Main layout 中定义。 */
+#page-bios .page-heading { min-width: 0; }
+#page-bios .bios-eyebrow {
+  margin: 0 0 10px;
+  color: var(--bios-accent);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: .16em;
+  line-height: 1.4;
+}
+#page-bios .page-heading h1 {
+  margin: 0;
+  color: var(--bios-text);
+  font-size: clamp(25px, 3vw, 34px);
+  font-weight: 700;
+  letter-spacing: -.035em;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+#page-bios .page-subtitle {
+  margin: 9px 0 0;
+  color: var(--bios-text-secondary);
+  font-size: 13px;
+  line-height: 1.65;
+}
+#page-bios .bios-header-actions,
+#page-bios .bios-toolbar-actions,
+#page-bios .bios-detail-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  min-width: 0;
+}
+#page-bios .bios-header-actions { justify-content: flex-end; }
+
+/* ---------- Buttons ---------- */
+#page-bios .bios-btn {
+  display: inline-flex;
+  min-width: 0;
+  min-height: 37px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 8px 13px;
+  border: 1px solid var(--bios-border-strong);
+  border-radius: 7px;
+  background: #1a1e28;
+  color: var(--bios-text);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease, opacity 140ms ease;
+}
+#page-bios .bios-btn:hover:not(:disabled) { border-color: #56647a; background: #222735; }
+#page-bios .bios-btn:focus-visible,
+#page-bios input:focus-visible,
+#page-bios select:focus-visible,
+#page-bios textarea:focus-visible,
+#page-bios .bios-text-btn:focus-visible { outline: 2px solid var(--bios-accent); outline-offset: 2px; }
+#page-bios .bios-btn:disabled { opacity: .42; cursor: not-allowed; }
+#page-bios .bios-btn-primary { border-color: var(--bios-accent); background: var(--bios-accent); color: #081323; }
+#page-bios .bios-btn-primary:hover:not(:disabled) { border-color: #80b5ff; background: #80b5ff; }
+#page-bios .bios-btn-icon { flex: 0 0 auto; font-size: 17px; line-height: 1; }
+#page-bios .bios-btn-danger { border-color: #d92d3e; background: #b4232f; color: #fff; }
+#page-bios .bios-btn-danger:hover:not(:disabled) { border-color: #f04452; background: #912018; }
+#page-bios .bios-btn-danger:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ---------- Notice ---------- */
+#page-bios .bios-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  border: 1px solid rgba(91, 157, 255, .23);
+  border-radius: 9px;
+  background: rgba(91, 157, 255, .055);
+}
+#page-bios .bios-notice-icon {
+  display: flex;
+  width: 21px;
+  height: 21px;
+  flex: 0 0 21px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  border: 1px solid rgba(91, 157, 255, .65);
+  border-radius: 50%;
+  color: #83b6ff;
+  font-size: 12px;
+  font-weight: 700;
+}
+#page-bios .bios-notice > div:last-child { min-width: 0; }
+#page-bios .bios-notice strong { display: block; margin-bottom: 4px; color: #b7d4ff; font-size: 12px; font-weight: 700; }
+#page-bios .bios-notice p { margin: 0; color: var(--bios-text-secondary); font-size: 12px; line-height: 1.6; }
+#page-bios .bios-notice-danger { border-color: rgba(217, 45, 62, .55); background: rgba(217, 45, 62, .07); }
+#page-bios .bios-notice-danger .bios-notice-icon { border-color: #f04438; color: #f04438; }
+
+/* ---------- Status ---------- */
+#page-bios .bios-status {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 17px;
+  padding: 10px 13px;
+  border: 1px solid var(--bios-border);
+  border-radius: 8px;
+  background: var(--bios-panel);
+  color: var(--bios-text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+#page-bios .bios-status-dot { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: var(--bios-muted); }
+#page-bios .bios-status[data-state="success"] .bios-status-dot { background: var(--bios-success); box-shadow: 0 0 9px rgba(88, 201, 155, .3); }
+#page-bios .bios-status[data-state="error"] .bios-status-dot { background: var(--bios-danger); }
+#page-bios .bios-status[data-state="loading"] .bios-status-dot { background: var(--bios-accent); animation: bios-status-pulse 1s ease-in-out infinite alternate; }
+@keyframes bios-status-pulse { from { opacity: .4; } to { opacity: 1; } }
+
+/* ---------- Statistics ---------- */
+#page-bios .bios-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  min-width: 0;
+  margin: 0 0 18px;
+}
+#page-bios .bios-stat-card { min-width: 0; padding: 16px 17px; border: 1px solid var(--bios-border); border-radius: 9px; background: var(--bios-panel); }
+#page-bios .bios-stat-label { display: block; margin-bottom: 10px; color: var(--bios-text-secondary); font-size: 11px; font-weight: 600; }
+#page-bios .bios-stat-card strong { display: block; color: var(--bios-text); font-size: 27px; font-weight: 700; letter-spacing: -.04em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+#page-bios .bios-stat-description { display: block; margin-top: 8px; color: var(--bios-muted); font-size: 10px; line-height: 1.5; }
+
+/* ---------- Panels ---------- */
+#page-bios .bios-panel {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0 0 18px;
+  overflow: hidden;
+  border: 1px solid var(--bios-border);
+  border-radius: 10px;
+  background: var(--bios-panel);
+}
+
+/* ---------- Toolbar ---------- */
+#page-bios .bios-toolbar { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 14px; min-width: 0; padding: 17px; border-bottom: 1px solid var(--bios-border); }
+#page-bios .bios-search-wrap { min-width: 0; flex: 1 1 220px; }
+#page-bios .bios-filter-wrap { min-width: 0; flex: 0 1 185px; }
+#page-bios .bios-field-label { display: block; margin-bottom: 7px; color: var(--bios-text-secondary); font-size: 11px; font-weight: 650; }
+#page-bios .bios-search-box { position: relative; display: flex; min-width: 0; align-items: center; }
+#page-bios .bios-search-icon { position: absolute; left: 12px; color: var(--bios-muted); font-size: 21px; pointer-events: none; }
+
+/* ---------- Form controls ---------- */
+#page-bios input,
+#page-bios select,
+#page-bios textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+  border: 1px solid var(--bios-border-strong);
+  border-radius: 7px;
+  background: #10131a;
+  color: var(--bios-text);
+  font-family: inherit;
+  font-size: 12px;
+}
+#page-bios input,
+#page-bios select { min-height: 38px; padding: 8px 10px; }
+#page-bios textarea { min-height: 90px; padding: 10px; resize: vertical; line-height: 1.6; }
+#page-bios .bios-search-box input { padding-right: 36px; padding-left: 38px; }
+#page-bios input::placeholder,
+#page-bios textarea::placeholder { color: #667084; }
+#page-bios select { color-scheme: dark; }
+#page-bios .bios-clear-search { position: absolute; right: 7px; display: flex; width: 25px; height: 25px; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 5px; background: transparent; color: var(--bios-muted); font-size: 18px; cursor: pointer; }
+#page-bios .bios-clear-search:hover { background: #252a36; color: var(--bios-text); }
+#page-bios .bios-toolbar-actions { flex: 0 1 auto; }
+
+/* ---------- Table metadata ---------- */
+#page-bios .bios-table-meta { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; min-width: 0; padding: 12px 17px; color: var(--bios-text-secondary); font-size: 11px; }
+#page-bios .bios-meta-hint { color: var(--bios-muted); }
+
+/* ---------- Table scrolling ---------- */
+#page-bios .bios-table-wrap { position: relative; width: 100%; height: clamp(280px, 48vh, 560px); min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain; border-top: 1px solid var(--bios-border); scrollbar-gutter: stable; }
+#page-bios .bios-table { width: 100%; min-width: 720px; margin: 0; border-collapse: separate; border-spacing: 0; table-layout: fixed; text-align: left; font-size: 12px; }
+#page-bios .bios-table thead { background: #12151c; }
+#page-bios .bios-table th { position: sticky; top: 0; z-index: 2; padding: 10px; border-bottom: 1px solid var(--bios-border); background: #12151c; color: var(--bios-muted); font-size: 10px; font-weight: 700; letter-spacing: .045em; text-align: left; white-space: nowrap; }
+#page-bios .bios-table td { padding: 10px; border-bottom: 1px solid rgba(41, 46, 58, .75); color: var(--bios-text-secondary); line-height: 1.45; vertical-align: middle; overflow-wrap: anywhere; }
+#page-bios .bios-table tbody tr:last-child td { border-bottom: 0; }
+#page-bios .bios-table tbody tr.bios-data-row { cursor: pointer; transition: background 120ms ease; }
+#page-bios .bios-table tbody tr.bios-data-row:hover { background: var(--bios-panel-hover); }
+#page-bios .bios-table tbody tr.bios-data-row.is-selected { background: var(--bios-accent-soft); box-shadow: inset 3px 0 0 var(--bios-accent); }
+#page-bios .bios-table tbody tr.bios-data-row.is-modified td:first-child::after { display: inline-block; width: 5px; height: 5px; margin-left: 6px; border-radius: 50%; background: var(--bios-warning); content: ""; vertical-align: middle; }
+#page-bios .bios-col-index { width: 52px; }
+#page-bios .bios-col-token { width: 82px; }
+#page-bios .bios-col-offset { width: 85px; }
+#page-bios .bios-col-width { width: 62px; }
+#page-bios .bios-col-state { width: 95px; }
+#page-bios .bios-question-cell { max-width: 380px; color: var(--bios-text) !important; overflow-wrap: anywhere; }
+#page-bios .bios-question-name { display: block; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+#page-bios .bios-question-help { display: block; margin-top: 4px; color: var(--bios-muted); font-size: 10px; line-height: 1.45; overflow-wrap: anywhere; }
+#page-bios .bios-table code,
+#page-bios .bios-metadata-item code { color: #9ec6ff; font-family: "Cascadia Code", "Consolas", monospace; font-size: 11px; overflow-wrap: anywhere; }
+#page-bios .bios-value-cell { max-width: 210px; color: var(--bios-text) !important; overflow-wrap: anywhere; }
+#page-bios .bios-state-tag { display: inline-flex; max-width: 100%; align-items: center; padding: 4px 7px; border: 1px solid var(--bios-border-strong); border-radius: 5px; color: var(--bios-text-secondary); font-size: 10px; line-height: 1.4; white-space: normal; overflow-wrap: anywhere; }
+#page-bios .bios-state-tag.is-modified { border-color: rgba(233, 185, 110, .35); background: rgba(233, 185, 110, .08); color: var(--bios-warning); }
+
+/* ---------- Empty state ---------- */
+#page-bios .bios-empty-row td { padding: 0; }
+#page-bios .bios-empty { display: flex; min-height: 190px; align-items: center; justify-content: center; flex-direction: column; padding: 25px; text-align: center; }
+#page-bios .bios-empty-symbol { margin-bottom: 13px; color: #59657a; font-size: 28px; }
+#page-bios .bios-empty strong { color: var(--bios-text); font-size: 13px; }
+#page-bios .bios-empty p { margin: 8px 0 0; color: var(--bios-muted); font-size: 11px; line-height: 1.6; }
+
+/* ---------- Table footer ---------- */
+#page-bios .bios-table-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 12px 17px; border-top: 1px solid var(--bios-border); color: var(--bios-muted); font-size: 11px; }
+#page-bios .bios-text-btn { padding: 5px 0; border: 0; background: transparent; color: var(--bios-accent); font: inherit; text-align: left; cursor: pointer; }
+#page-bios .bios-text-btn:hover { color: #91bdff; }
+
+/* ---------- Detail and source panels ---------- */
+#page-bios .bios-detail-panel,
+#page-bios .bios-source-panel { min-width: 0; padding: 19px; }
+#page-bios .bios-section-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 17px; }
+#page-bios .bios-section-kicker { display: block; margin-bottom: 5px; color: var(--bios-accent); font-size: 9px; font-weight: 750; letter-spacing: .14em; }
+#page-bios .bios-section-heading h2 { margin: 0; color: var(--bios-text); font-size: 17px; font-weight: 700; letter-spacing: -.02em; line-height: 1.4; }
+#page-bios .bios-detail-index { color: var(--bios-muted); font-family: "Cascadia Code", "Consolas", monospace; font-size: 11px; }
+#page-bios .bios-detail-empty { padding: 28px 15px; border: 1px dashed var(--bios-border-strong); border-radius: 8px; color: var(--bios-muted); font-size: 12px; line-height: 1.7; text-align: center; }
+#page-bios #bios-detail-content { min-width: 0; min-height: 0; }
+#page-bios .bios-detail-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; min-width: 0; margin-bottom: 19px; }
+#page-bios .bios-detail-title-row > * { min-width: 0; }
+#page-bios .bios-detail-title-row h3 { margin: 0; color: var(--bios-text); font-size: 16px; line-height: 1.55; overflow-wrap: anywhere; }
+#page-bios .bios-detail-help { margin: 7px 0 0; color: var(--bios-text-secondary); font-size: 12px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+#page-bios .bios-modified-badge { flex: 0 0 auto; padding: 5px 8px; border: 1px solid rgba(233, 185, 110, .35); border-radius: 5px; background: rgba(233, 185, 110, .08); color: var(--bios-warning); font-size: 10px; }
+
+/* ---------- Metadata ---------- */
+#page-bios .bios-metadata-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; min-width: 0; margin-bottom: 22px; }
+#page-bios .bios-metadata-item { display: flex; min-width: 0; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--bios-border); border-radius: 7px; background: #11141b; }
+#page-bios .bios-metadata-item > span { color: var(--bios-muted); font-size: 10px; }
+#page-bios .bios-metadata-item code { min-width: 0; overflow-wrap: anywhere; }
+
+/* ---------- Editor ---------- */
+#page-bios .bios-editor { min-width: 0; padding: 16px; border: 1px solid var(--bios-border); border-radius: 8px; background: #11141b; }
+#page-bios #bios-editor-control { width: 100%; min-width: 0; }
+#page-bios #bios-editor-control > * { max-width: 100%; }
+#page-bios #bios-editor-control input,
+#page-bios #bios-editor-control select,
+#page-bios #bios-editor-control textarea { width: 100%; max-width: 100%; }
+#page-bios .bios-editor-hint { margin: 8px 0 0; color: var(--bios-muted); font-size: 10px; line-height: 1.6; }
+#page-bios .bios-detail-actions { margin-top: 12px; }
+
+/* ---------- Options ---------- */
+#page-bios .bios-options-section { min-width: 0; margin-top: 23px; }
+#page-bios .bios-options-section h4 { margin: 0 0 11px; color: var(--bios-text); font-size: 12px; font-weight: 700; }
+#page-bios .bios-options-list { display: flex; flex-wrap: wrap; gap: 7px; min-width: 0; }
+#page-bios .bios-option-chip { display: inline-flex; max-width: 100%; align-items: center; padding: 6px 9px; border: 1px solid var(--bios-border-strong); border-radius: 5px; background: #11141b; color: var(--bios-text-secondary); font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+#page-bios .bios-option-chip.is-current { border-color: rgba(91, 157, 255, .5); background: var(--bios-accent-soft); color: #b9d5ff; }
+#page-bios .bios-muted { color: var(--bios-muted); font-size: 11px; }
+
+/* ---------- Raw data ---------- */
+#page-bios .bios-raw-details { min-width: 0; margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--bios-border); }
+#page-bios .bios-raw-details summary { color: var(--bios-text-secondary); font-size: 11px; line-height: 1.6; cursor: pointer; }
+#page-bios .bios-raw-details pre { max-width: 100%; max-height: 300px; margin: 12px 0 0; padding: 13px; overflow: auto; border: 1px solid var(--bios-border); border-radius: 7px; background: #0c0e13; color: #c5cfdf; font-family: "Cascadia Code", "Consolas", monospace; font-size: 11px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* ---------- Source text ---------- */
+#page-bios .bios-source-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; min-width: 0; margin-bottom: 12px; color: var(--bios-muted); font-size: 11px; }
+#page-bios .bios-source-text { display: block; width: 100%; max-width: 100%; max-height: 550px; margin: 0; padding: 15px; overflow: auto; border: 1px solid var(--bios-border); border-radius: 7px; background: #0c0e13; color: #c5cfdf; font-family: "Cascadia Code", "Consolas", monospace; font-size: 11px; line-height: 1.7; white-space: pre; tab-size: 4; }
+
+/* ---------- Medium screens ---------- */
+@media (max-width: 1100px) {
+  #page-bios .bios-header { gap: 14px; }
+  #page-bios .bios-toolbar { align-items: stretch; }
+  #page-bios .bios-toolbar-actions { width: 100%; }
+}
+
+/* ---------- Single-column layout ---------- */
+@media (max-width: 900px) {
+  #page-bios .bios-header {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  #page-bios .bios-header > .page-heading,
+  #page-bios .bios-header > .bios-header-actions {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  #page-bios .bios-header-actions { width: 100%; justify-content: flex-start; }
+  #page-bios .bios-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #page-bios .bios-filter-wrap { flex: 1 1 150px; }
+  #page-bios .bios-toolbar-actions { flex-wrap: wrap; }
+  #page-bios .bios-detail-panel,
+  #page-bios .bios-source-panel { padding: 14px; }
+  #page-bios .bios-meta-hint { display: none; }
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 520px) {
+  #page-bios .bios-stats { gap: 8px; }
+  #page-bios .bios-stat-card { padding: 12px; }
+  #page-bios .bios-stat-card strong { font-size: 23px; }
+  #page-bios .bios-metadata-grid { grid-template-columns: minmax(0, 1fr); }
+  #page-bios .bios-header-actions { align-items: stretch; }
+  #page-bios .bios-header-actions .bios-btn { flex: 1 1 auto; }
+  #page-bios .bios-toolbar { padding: 12px; }
+  #page-bios .bios-table-meta,
+  #page-bios .bios-table-footer { padding-right: 12px; padding-left: 12px; }
+  #page-bios .bios-detail-title-row { flex-direction: column; }
+  #page-bios .bios-modified-badge { align-self: flex-start; }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  #page-bios *,
+  #page-bios *::before,
+  #page-bios *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}

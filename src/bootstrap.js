@@ -10,6 +10,7 @@ const pages = [
   "display",
   "keyboard",
   "lightbar",
+  "bios",
   "settings",
 ];
 
@@ -37,6 +38,13 @@ async function loadPages() {
     const html = await loadPage(page);
 
     content.insertAdjacentHTML("beforeend", html);
+  }
+  if (typeof window.initBiosPage === "function") {
+    window.initBiosPage();
+  } else {
+    console.warn(
+      "BIOS page initializer not found. Check whether js/bios.js loaded successfully."
+    );
   }
 }
 

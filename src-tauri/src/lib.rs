@@ -26,8 +26,10 @@ use win::{
 use window_push::WindowPushState;
 use serde::Serialize;
 use std::{
+    fs,
     thread,
     time::Duration,
+    process::Command,
     sync::{
         Arc,
         atomic::{AtomicBool, Ordering}
@@ -73,6 +75,11 @@ pub struct GpuDriverInfo {
 }
 
 struct AppState {
+    running: Arc<AtomicBool>,
+}
+
+#[derive(Clone, Default)]
+struct NewFanMonitorState {
     running: Arc<AtomicBool>,
 }
 
@@ -815,36 +822,69 @@ async fn get_sys_gsc_driver() -> Result<Option<String>, String> {
 }
 
 #[tauri::command]
-fn start_newfan_monitor(app: tauri::AppHandle, push_state: tauri::State<'_, WindowPushState>) -> Result<(), String> {
+fn start_newfan_monitor(
+    app: tauri::AppHandle,
+    push_state: tauri::State<'_, WindowPushState>,
+    monitor_state: tauri::State<'_, NewFanMonitorState>,
+) -> Result<(), String> {
     let push_state = push_state.inner().clone();
-    thread::spawn(move || {
-        loop {
-            if !push_state.is_enabled() {
-                thread::sleep(Duration::from_millis(3000));
-                continue;
-            }
-            let status = match acpi_ec_worker().call(|ec| {
-                NewFanStatus {
-                    mode: ec.fan_read_manual(),
-                    independent: ec.fan_read_custom_table_1(),
-                    fan: ec.fan_read_custom_table_2(),
-                    duty: ec.fan_read_duty(),
+    let running = monitor_state.running.clone();
+
+    // 原子操作：只有第一个调用者能够启动线程。
+    if running.swap(true, Ordering::AcqRel) {
+        eprintln!("[NewFan] 监控线程已运行，忽略重复启动");
+        return Ok(());
+    }
+
+    let running_for_thread = running.clone();
+
+    let spawn_result = std::thread::Builder::new()
+        .name("newfan-monitor".to_string())
+        .spawn(move || {
+            eprintln!("[NewFan] 监控线程启动");
+            loop {
+                if !running_for_thread.load(Ordering::Acquire) {
+                    break;
                 }
-            }) {
-                Ok(status) => status,
-                Err(e) => {
-                    eprintln!("读取 NewFan EC 状态失败: {}", e);
-                    thread::sleep(Duration::from_millis(4000));
+                std::thread::sleep(Duration::from_secs(3));
+                if !running_for_thread.load(Ordering::Acquire) {
+                    break;
+                }
+                if !push_state.is_enabled() {
                     continue;
                 }
-            };
-            if let Err(e) = app.emit("newfan-status", status) {
-                eprintln!("发送 newfan-status 失败: {}", e);
-                break;
+                let status = match acpi_ec_worker().call(|ec| {
+                    NewFanStatus {
+                        mode: ec.fan_read_manual(),
+                        independent: ec.fan_read_custom_table_1(),
+                        fan: ec.fan_read_custom_table_2(),
+                        duty: ec.fan_read_duty(),
+                    }
+                }) {
+                    Ok(status) => status,
+                    Err(e) => {
+                        eprintln!("[NewFan] 读取 EC 状态失败: {}", e);
+                        continue;
+                    }
+                };
+                if !running_for_thread.load(Ordering::Acquire) {
+                    break;
+                }
+                if let Err(e) = app.emit("newfan-status", status) {
+                    eprintln!("[NewFan] 发送状态失败: {}", e);
+                    break;
+                }
             }
-            thread::sleep(Duration::from_millis(3000));
-        }
-    });
+            // 线程退出后允许重新启动。
+            running_for_thread.store(false, Ordering::Release);
+            eprintln!("[NewFan] 监控线程退出");
+        });
+    if let Err(e) = spawn_result {
+        // 线程创建失败，恢复启动标志。
+        running.store(false, Ordering::Release);
+        return Err(format!("创建 NewFan 监控线程失败: {}", e));
+    }
+
     Ok(())
 }
 
@@ -893,6 +933,243 @@ async fn stop_newfan_write(app: tauri::AppHandle) {
     }) {
         eprintln!("stop_newfan_write: {}", e);
     };
+}
+
+#[tauri::command]
+async fn read_bios_nvram() -> Result<String, String> {
+    let dir = config::dll_dir()?;
+    let config_dir = config::config_dir();
+
+    let exe = dir.join("SCEWIN_64.exe");
+    let driver1 = dir.join("amifldrv64.sys");
+    let driver2 = dir.join("amigendrv64.sys");
+
+    // 读取 BIOS 后保存的备份文件。
+    let output_file = config_dir.join("nvram_bak.txt");
+
+    // 检查工具及驱动文件。
+    for path in [&exe, &driver1, &driver2] {
+        if !path.is_file() {
+            let msg = format!("缺少 BIOS NVRAM 工具文件：{}", path.display());
+            eprintln!("{msg}");
+            return Err(msg);
+        }
+    }
+
+    // 确保配置目录存在。
+    fs::create_dir_all(&config_dir).map_err(|e| {
+        format!(
+            "创建配置目录失败：{}，错误：{e}",
+            config_dir.display()
+        )
+    })?;
+
+    println!("开始读取 BIOS NVRAM...");
+    println!("工具路径：{}", exe.display());
+    println!("备份路径：{}", output_file.display());
+
+    // 删除旧备份，避免读取到上一次的结果。
+    if output_file.exists() {
+        fs::remove_file(&output_file).map_err(|e| {
+            format!(
+                "删除旧 NVRAM 备份失败：{}，错误：{e}",
+                output_file.display()
+            )
+        })?;
+    }
+    // 文件先生成在工具目录中，随后移动到配置目录。
+    let result = Command::new(&exe)
+        .args(["/o", "/s", "nvram_bak.txt"])
+        .current_dir(&dir)
+        .output()
+        .map_err(|e| format!("启动 BIOS NVRAM 工具失败：{e}"))?;
+
+    let stdout = String::from_utf8_lossy(&result.stdout);
+    let stderr = String::from_utf8_lossy(&result.stderr);
+
+    if !stdout.trim().is_empty() {
+        println!("SCEWIN 输出：\n{stdout}");
+    }
+
+    if !stderr.trim().is_empty() {
+        eprintln!("SCEWIN 错误输出：\n{stderr}");
+    }
+
+    if !result.status.success() {
+        let msg = format!(
+            "BIOS NVRAM 导出失败，退出码：{:?}",
+            result.status.code()
+        );
+        eprintln!("{msg}");
+        return Err(msg);
+    }
+
+    // SCEWIN 实际生成文件的位置。
+    let generated_file = dir.join("nvram_bak.txt");
+
+    if !generated_file.is_file() {
+        let msg = format!(
+            "工具未生成 NVRAM 文件：{}",
+            generated_file.display()
+        );
+        eprintln!("{msg}");
+        return Err(msg);
+    }
+
+    // 读取生成的文件。
+    let bytes = fs::read(&generated_file)
+        .map_err(|e| format!("读取 NVRAM 文件失败：{e}"))?;
+
+    // 移除 UTF-8 BOM。
+    let bytes = bytes
+        .strip_prefix(&[0xEF, 0xBB, 0xBF])
+        .unwrap_or(&bytes);
+
+    let text = String::from_utf8_lossy(bytes).into_owned();
+
+    // 验证导出内容。
+    if !text.contains("Setup Question") {
+        let msg = "导出文件中未找到有效的 BIOS 配置区块".to_string();
+        eprintln!("{msg}");
+        return Err(msg);
+    }
+
+    // 将原始文件复制到配置目录，保留工具目录中的生成文件。
+    fs::write(&output_file, text.as_bytes()).map_err(|e| {
+        format!(
+            "保存 NVRAM 备份失败：{}，错误：{e}",
+            output_file.display()
+        )
+    })?;
+
+    println!(
+        "BIOS NVRAM 读取成功，共 {} 字节，备份路径：{}",
+        text.len(),
+        output_file.display()
+    );
+
+    Ok(text)
+}
+
+#[tauri::command]
+fn export_nvram(text: String) -> Result<String, String> {
+    if text.trim().is_empty() {
+        return Err("NVRAM 数据为空，无法导出。".to_string());
+    }
+
+    let config_dir = config::config_dir();
+
+    fs::create_dir_all(&config_dir).map_err(|e| {
+        format!(
+            "创建配置目录失败：{}，错误：{e}",
+            config_dir.display()
+        )
+    })?;
+
+    let output_file = config_dir.join("nvram.txt");
+
+    fs::write(&output_file, text.as_bytes()).map_err(|e| {
+        format!(
+            "导出 NVRAM 失败：{}，错误：{e}",
+            output_file.display()
+        )
+    })?;
+
+    println!("NVRAM 已导出至：{}", output_file.display());
+
+    Ok(output_file.display().to_string())
+}
+
+#[tauri::command]
+async fn write_bios_nvram(password: String) -> Result<(), String> {
+    use std::fs;
+    use std::process::Command;
+
+    if password.trim().is_empty() {
+        return Err("BIOS 管理员密码不能为空。".to_string());
+    }
+
+    // SCEWIN 工具和驱动位于 DLL 目录。
+    let dir = config::dll_dir()?;
+
+    // NVRAM 文件位于配置目录。
+    let config_dir = config::config_dir();
+
+    let exe = dir.join("SCEWIN_64.exe");
+    let driver1 = dir.join("amifldrv64.sys");
+    let driver2 = dir.join("amigendrv64.sys");
+    let nvram_file = config_dir.join("nvram.txt");
+
+    // 检查工具和驱动文件。
+    for path in [&exe, &driver1, &driver2] {
+        if !path.is_file() {
+            let msg = format!("缺少 BIOS NVRAM 工具文件：{}", path.display());
+            eprintln!("{msg}");
+            return Err(msg);
+        }
+    }
+
+    // 检查 NVRAM 文件。
+    if !nvram_file.is_file() {
+        let msg = format!(
+            "未找到 NVRAM 文件：{}\n请先导出或保存修改后的 NVRAM。",
+            nvram_file.display()
+        );
+        eprintln!("{msg}");
+        return Err(msg);
+    }
+
+    // 确保配置目录存在。
+    fs::create_dir_all(&config_dir).map_err(|e| {
+        format!(
+            "创建配置目录失败：{}，错误：{e}",
+            config_dir.display()
+        )
+    })?;
+
+    println!("开始写入 BIOS NVRAM...");
+    println!("工具路径：{}", exe.display());
+    println!("NVRAM 路径：{}", nvram_file.display());
+
+    // 执行 BIOS NVRAM 写入命令。
+    let result = Command::new(&exe)
+        .arg("/cpwd")
+        .arg(&password)
+        .args(["/i", "/s"])
+        .arg(&nvram_file)
+        .current_dir(&dir)
+        .output()
+        .map_err(|e| {
+            let msg = format!("启动 BIOS NVRAM 工具失败：{e}");
+            eprintln!("{msg}");
+            msg
+        })?;
+
+    // 输出标准输出。
+    let stdout = String::from_utf8_lossy(&result.stdout);
+    if !stdout.trim().is_empty() {
+        println!("SCEWIN 输出：\n{stdout}");
+    }
+
+    // 输出标准错误。
+    let stderr = String::from_utf8_lossy(&result.stderr);
+    if !stderr.trim().is_empty() {
+        eprintln!("SCEWIN 错误输出：\n{stderr}");
+    }
+
+    // 检查进程退出状态。
+    if !result.status.success() {
+        let msg = format!(
+            "BIOS NVRAM 写入失败，退出码：{:?}",
+            result.status.code()
+        );
+        eprintln!("{msg}");
+        return Err(msg);
+    }
+
+    println!("BIOS NVRAM 写入命令执行完成。");
+
+    Ok(())
 }
 
 fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
@@ -1120,6 +1397,7 @@ pub fn run() {
         .manage(AppState {
             running: Arc::new(AtomicBool::new(false)),
         })
+        .manage(NewFanMonitorState::default())
         .manage(FanControlState::new())
         .manage(WindowPushState::new())
         .invoke_handler(tauri::generate_handler![
@@ -1161,6 +1439,9 @@ pub fn run() {
             start_newfan_write,
             stop_newfan_write,
             set_fan_max,
+            read_bios_nvram,
+            export_nvram,
+            write_bios_nvram,
         ])
         .setup(setup)
         .build(tauri::generate_context!())

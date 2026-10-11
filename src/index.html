@@ -6,15 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>NUCtool</title>
-
   <!-- 主样式 -->
   <link rel="stylesheet" href="./css/styles.css" />
-
+  <link rel="stylesheet" href="./css/bios.css" />
   <!-- Chart.js -->
   <script src="assets/chart.js"></script>
-
   <!-- Chart.js 拖动插件 -->
   <script src="assets/chartjs-plugin-dragdata.js"></script>
+  <script src="./js/bios.js"></script>
 </head>
 
 <body>
@@ -90,12 +89,19 @@
           </span>
         </button>
 
-      <button class="nav-btn" data-page="lightbar" type="button">
-        <span class="nav-icon">●</span>
-        <span class="nav-text" data-i18n="nav.lightbar">
-          灯条设置
-        </span>
-      </button>
+        <button class="nav-btn" data-page="bios" type="button">
+          <span class="nav-icon">▦</span>
+          <span class="nav-text" data-i18n="nav.bios">
+            BIOS 配置
+          </span>
+        </button>
+
+        <button class="nav-btn" data-page="lightbar" type="button">
+          <span class="nav-icon">●</span>
+          <span class="nav-text" data-i18n="nav.lightbar">
+            灯条设置
+          </span>
+        </button>
 
         <button class="nav-btn" data-page="settings" type="button">
           <span class="nav-icon">⚙</span>
@@ -118,7 +124,7 @@
           class="update-badge"
           style="display: none;"
         ></span>
-        <span id="app-version">v1.1.2</span>
+        <span id="app-version">v1.1.3</span>
       </span>
       </div>
 

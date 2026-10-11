@@ -4,7 +4,6 @@ use std::{
     path::PathBuf,
 };
 
-
 #[derive(Serialize, Deserialize, Clone, Copy, Debug)]
 pub struct FanPoint {
     pub temperature: u8,
@@ -22,6 +21,23 @@ pub fn config_dir() -> PathBuf {
     dirs::config_dir()
         .unwrap_or_else(|| PathBuf::from("."))
         .join("com.cyear.nuctool")
+}
+
+pub fn dll_dir() -> Result<PathBuf, String> {
+    let exe_path = std::env::current_exe()
+        .map_err(|e| format!("获取程序路径失败：{e}"))?;
+
+    let install_dir = exe_path
+        .parent()
+        .ok_or_else(|| "无法获取程序安装目录".to_string())?;
+
+    let dll_path = install_dir.join("dll");
+
+    if !dll_path.is_dir() {
+        return Err(format!("DLL 目录不存在：{}", dll_path.display()));
+    }
+
+    Ok(dll_path)
 }
 
 fn fan_config_path() -> PathBuf {
