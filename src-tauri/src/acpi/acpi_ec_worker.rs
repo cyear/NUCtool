@@ -6,8 +6,7 @@ use std::sync::OnceLock;
 use std::thread;
 
 // EC 操作任务。所有任务均在专用线程中执行。
-type EcJob =
-    Box<dyn FnOnce(&mut Option<UniwillAcpiEc>) + Send + 'static>;
+type EcJob = Box<dyn FnOnce(&mut Option<UniwillAcpiEc>) + Send + 'static>;
 
 #[derive(Clone)]
 pub struct AcpiEcWorker {
@@ -39,55 +38,60 @@ impl AcpiEcWorker {
         R: Send + 'static,
         F: FnOnce(&UniwillAcpiEc) -> R + Send + 'static,
     {
-        let (result_tx, result_rx) =
-            mpsc::sync_channel::<Result<R, String>>(1);
+        const D: bool = false;
+        let (result_tx, result_rx) = mpsc::sync_channel::<Result<R, String>>(1);
+        if D { println!("[EC] A: 准备提交任务"); };
 
         self.tx
             .send(Box::new(move |slot| {
-                // 延迟初始化：只在尚无有效实例时尝试打开。
+                if D { println!("[EC] B: 工作线程收到任务"); };
                 if slot.is_none() {
+                    println!("[EC] C: 开始初始化 EC");
                     match UniwillAcpiEc::open() {
                         Ok(instance) => {
-                            println!("ACPI EC 初始化成功");
+                            if D { println!("[EC] D: EC 初始化成功"); };
                             *slot = Some(instance);
                         }
                         Err(e) => {
-                            let _ = result_tx.send(Err(format!(
-                                "打开 ACPIDriver 失败: {}",
-                                e
-                            )));
+                            if D { eprintln!("[EC] 初始化失败: {e}"); };
+                            let _ = result_tx.send(Err(format!("打开 ACPIDriver 失败: {e}")));
                             return;
                         }
                     }
                 }
 
-                // 捕获操作过程中发生的 panic，避免工作线程直接退出。
+                if D { println!("[EC] E: 准备执行 EC 操作"); };
+
                 let outcome = {
                     let ec = slot.as_ref().expect("EC 应已初始化");
-
                     catch_unwind(AssertUnwindSafe(|| f(ec)))
                 };
+                if D { println!("[EC] F: EC 操作已返回"); };
 
                 match outcome {
                     Ok(value) => {
                         let _ = result_tx.send(Ok(value));
+                        if D { println!("[EC] G: 已发送操作结果"); };
                     }
                     Err(_) => {
-                        // 操作发生 panic，释放当前实例。
-                        // 后续请求将重新尝试初始化。
                         *slot = None;
 
-                        let _ = result_tx.send(Err(
-                            "EC 操作发生 panic，实例已释放".to_string()
-                        ));
+                        let _ = result_tx.send(Err("EC 操作发生 panic，实例已释放".to_string()));
+                        eprintln!("[EC] 操作 panic");
                     }
                 }
             }))
             .map_err(|_| "EC 工作线程已停止".to_string())?;
 
-        result_rx
+        if D { println!("[EC] H: 等待操作结果"); };
+        
+        let result = result_rx
             .recv()
-            .map_err(|_| "EC 工作线程未返回结果".to_string())?
+            .map_err(|_| "EC 工作线程未返回结果".to_string())?;
+
+        if D { println!("[EC] I: 收到操作结果"); };
+
+        result
     }
 }
 

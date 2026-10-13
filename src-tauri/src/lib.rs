@@ -110,11 +110,24 @@ fn start_sensor_loop(app: AppHandle, state: State<AppState>, push_state: tauri::
         Ok(wmi) => wmi,
         Err(e) => {
             eprintln!("打开 WMI 失败: {}", e);
+            state.running.store(false, Ordering::SeqCst);
             return;
         }
     };
-    let bat_mah_percent = (100 * wmi.get_set(0x0000010000000404).unwrap_or(0)
-        / wmi.get_set(0x0000010000000402).unwrap_or(1)) as u8;
+    let current_capacity = wmi
+        .get_set(0x0000010000000404)
+        .unwrap_or(0);
+
+    let full_capacity = wmi
+        .get_set(0x0000010000000402)
+        .unwrap_or(0);
+    let bat_mah_percent: u8 = if full_capacity == 0 {
+        0
+    } else {
+        ((u128::from(current_capacity) * 100 / u128::from(full_capacity))
+            .min(100)) as u8
+    };
+    println!("BAT: {} {}", current_capacity, full_capacity);
     thread::spawn(move || {
         while running.load(Ordering::SeqCst) {
             if !push_state.is_enabled() {
@@ -835,15 +848,11 @@ fn start_newfan_monitor(
 ) -> Result<(), String> {
     let push_state = push_state.inner().clone();
     let running = monitor_state.running.clone();
-
-    // 原子操作：只有第一个调用者能够启动线程。
     if running.swap(true, Ordering::AcqRel) {
         eprintln!("[NewFan] 监控线程已运行，忽略重复启动");
         return Ok(());
     }
-
     let running_for_thread = running.clone();
-
     let spawn_result = std::thread::Builder::new()
         .name("newfan-monitor".to_string())
         .spawn(move || {
@@ -890,7 +899,6 @@ fn start_newfan_monitor(
         running.store(false, Ordering::Release);
         return Err(format!("创建 NewFan 监控线程失败: {}", e));
     }
-
     Ok(())
 }
 
@@ -1325,20 +1333,31 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
             }
         };
         let app_handle = app.handle().clone();
-        if let Err(e) = acpi_ec_worker().call(move |ec| {
-            if ec.fan_read_custom_table_1() && ec.fan_read_custom_table_2() {
+        thread::spawn(move || {
+            let use_new_fan = match acpi_ec_worker().call(|ec| {
+                ec.fan_read_custom_table_1() && ec.fan_read_custom_table_2()
+            }) {
+                Ok(value) => value,
+                Err(e) => {
+                    eprintln!("风扇自启失败: {}", e);
+                    return;
+                }
+            };
+            if use_new_fan {
+                thread::sleep(Duration::from_millis(4000));
                 println!("启用新EC风扇");
-                thread::sleep(Duration::from_millis(3000));
                 start_newfan(&app_handle, fan_data);
             } else {
+                thread::sleep(Duration::from_millis(4000));
+                println!("启用旧风扇控制");
                 let state = app_handle.state::<FanControlState>();
-                if let Err(e) = start_fan_control_internal(&app_handle, fan_data, &state) {
+                if let Err(e) =
+                    start_fan_control_internal(&app_handle, fan_data, &state)
+                {
                     eprintln!("自动启动风扇控制失败: {}", e);
-                };
+                }
             }
-        }) {
-            eprintln!("风扇自启 失败: {}", e);
-        };
+        });
     } else {
         println!("未检测到 --fan-control，风扇控制默认关闭");
     }
