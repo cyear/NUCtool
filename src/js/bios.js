@@ -679,8 +679,8 @@
                     <td class="bios-value-cell">${escapeHtml(value)}</td>
                     <td>
                         ${modified
-                    ? '<span class="bios-state-tag is-modified">已修改</span>'
-                    : '<span class="bios-state-tag">原始值</span>'}
+                    ? '<span class="bios-state-tag is-modified" data-i18n="bios.stateModified">已修改</span>'
+                    : '<span class="bios-state-tag" data-i18n="bios.stateNormal">原始值</span>'}
                     </td>
                 </tr>
             `;
