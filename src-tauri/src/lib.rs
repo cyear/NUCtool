@@ -54,7 +54,7 @@ use windows::Win32::{
     },
 };
 
-#[derive(Clone, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 struct SensorData {
     cpu_temp: u8,
     gpu_temp: u8,
@@ -135,14 +135,16 @@ fn start_sensor_loop(app: AppHandle, state: State<AppState>, push_state: tauri::
                 continue;
             }
             let data = match acpi_ec_worker().call(move |ec| {
-                SensorData {
+                let s = SensorData {
                     cpu_temp: ec.cpu_temperature().unwrap_or(0),
                     gpu_temp: ec.gpu_temperature().unwrap_or(0),
                     fan1_rpm: ec.fan1_rpm().unwrap_or(0),
                     fan2_rpm: ec.fan2_rpm().unwrap_or(0),
                     system_power: ec.system_read_power().unwrap_or(0),
                     bat_mah_percent,
-                }
+                };
+                println!("start_sensor_loop: {:?}", s);
+                s
             }) {
                 Ok(data) => data,
                 Err(e) => {
@@ -869,12 +871,14 @@ fn start_newfan_monitor(
                     continue;
                 }
                 let status = match acpi_ec_worker().call(|ec| {
-                    NewFanStatus {
+                    let r = NewFanStatus {
                         mode: ec.fan_read_manual(),
                         independent: ec.fan_read_custom_table_1(),
                         fan: ec.fan_read_custom_table_2(),
                         duty: ec.fan_read_duty(),
-                    }
+                    };
+                    println!("[NewFan] {:?}", r);
+                    r
                 }) {
                     Ok(status) => status,
                     Err(e) => {
@@ -1335,9 +1339,16 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         let app_handle = app.handle().clone();
         thread::spawn(move || {
             let use_new_fan = match acpi_ec_worker().call(|ec| {
-                ec.fan_read_custom_table_1() && ec.fan_read_custom_table_2()
+                let t1 = ec.fan_read_custom_table_1();
+                let t2 = ec.fan_read_custom_table_2();
+                let v = t1 || t2;
+                println!("自启动二次验证: 1:{} 2:{} O: {}", t1, t2, v);
+                v
             }) {
-                Ok(value) => value,
+                Ok(value) => {
+                    
+                    value
+                },
                 Err(e) => {
                     eprintln!("风扇自启失败: {}", e);
                     return;
@@ -1370,10 +1381,6 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
 
 fn fnhook() {
     unsafe {
-        // ==================================
-        // 安装低级键盘 Hook
-        // ==================================
-
         let hook = SetWindowsHookExW(
             WH_KEYBOARD_LL,
             Some(uniwillfnkeyhook),
@@ -1381,25 +1388,14 @@ fn fnhook() {
             0,
         )
         .expect("Fn Key Hook Error");
-
         println!("======================================");
         println!("       NUCtool Fn 快捷键监听");
         println!("======================================");
-
-        // ==================================
-        // 消息循环
-        // ==================================
-
         let mut msg = MSG::default();
-
         while GetMessageW(&mut msg, None, 0, 0).into() {
             DispatchMessageW(&msg);
         }
-
-        // ==================================
         // 卸载 Hook
-        // ==================================
-
         UnhookWindowsHookEx(hook).expect("卸载失败");
     }
 }

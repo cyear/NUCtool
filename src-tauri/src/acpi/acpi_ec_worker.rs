@@ -49,11 +49,11 @@ impl AcpiEcWorker {
                     println!("[EC] C: 开始初始化 EC");
                     match UniwillAcpiEc::open() {
                         Ok(instance) => {
-                            if D { println!("[EC] D: EC 初始化成功"); };
+                            println!("[EC] D: EC 初始化成功");
                             *slot = Some(instance);
                         }
                         Err(e) => {
-                            if D { eprintln!("[EC] 初始化失败: {e}"); };
+                            eprintln!("[EC] 初始化失败: {e}");
                             let _ = result_tx.send(Err(format!("打开 ACPIDriver 失败: {e}")));
                             return;
                         }

@@ -47,10 +47,12 @@ const EC_GPU_TEMP: u16 = 0x044F;
 // Main fan RPM
 const EC_MAIN_FAN_RPM_1: u16 = 0x0464;
 const EC_MAIN_FAN_RPM_2: u16 = 0x0465;
+const EC_MAIN_FAN_PWM: u16 = 0x075C;
 
 // Secondary fan RPM
 const EC_SECOND_FAN_RPM_1: u16 = 0x046C;
 const EC_SECOND_FAN_RPM_2: u16 = 0x046D;
+const EC_SECOND_FAN_PWM: u16 = 0x075B;
 
 // 启用双风扇独立控制
 const EC__FAN_CUSTOM_TABLE_1: u16 = 0x07C5;
@@ -533,6 +535,7 @@ impl UniwillAcpiEc {
 
     /// 双风扇独立控制
     pub fn fan_write_custom_table_1(&self, enable: bool) {
+        println!("fan_write_custom_table_1: {}", enable);
         let _ = if enable {
             self.write_u8(EC__FAN_CUSTOM_TABLE_1, 0x80)
         } else {
@@ -542,6 +545,7 @@ impl UniwillAcpiEc {
 
     /// 风扇表
     pub fn fan_write_custom_table_2(&self, enable: bool) {
+        println!("fan_write_custom_table_2: {}", enable);
         let _ = if enable {
             self.write_u8(EC__FAN_CUSTOM_TABLE_2, 0x04)
         } else {
@@ -551,6 +555,7 @@ impl UniwillAcpiEc {
 
     /// 分离风扇
     pub fn fan_write_split(&self, enable: bool) {
+        println!("fan_write_split: {}", enable);
         if enable {
             let _ = self.write_u8(_EC_ADDR_AP_OEM_BYTE, 1);
         } else {
@@ -575,6 +580,7 @@ impl UniwillAcpiEc {
     }
 
     pub fn fan_write_duty(&self, enable:bool) {
+        println!("fan_write_duty: {}", enable);
         let w: u8;
         if enable {
             w = 0;
@@ -601,6 +607,7 @@ impl UniwillAcpiEc {
     /// 设置风扇
     pub fn fan_write_set(&self, fandata: FanData) {
         let (left, right) = (fandata.left_fan, fandata.right_fan);
+        println!("fan_write_set: L({:?}) R({:?})", left, right);
         let _ = self.write_u8(EC_FAN_CPU_UP_BASE, 20);
         let _ = self.write_u8(EC_FAN_CPU_DOWN_BASE, 17);
         for i in 1..16 {
@@ -625,6 +632,7 @@ impl UniwillAcpiEc {
 
     /// 退出
     pub fn fan_write_close(&self) {
+        println!("fan_write_close");
         let _ = self.write_u8(EC_FAN_CPU_UP_BASE, 0);
         thread::sleep(Duration::from_millis(10));
         let _ = self.write_u8(EC_FAN_CPU_DOWN_BASE, 0);
