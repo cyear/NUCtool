@@ -119,9 +119,37 @@
 - `--log` 启用日志
 - 默认安装文件位置`C:\Program Files\NUCtool`
 - 默认配置文件、log位置`%AppData%\com.cyear.nuctool`
-- 如需在Linux测试建议查看文档底部Thank中的Linux驱动
 
 ---
+
+## Linux 风扇控制
+
+```bash
+# 1.下载 nuctool-fan-linux.tar.xz
+
+# 2.安装 acpi_call
+sudo pacman -S acpi_call
+# or
+sudo pacman -S acpi_call-dkms
+
+# 3.加载
+sudo modprobe acpi_call
+
+# 4.运行
+
+sudo ./nuctool-fan --fan
+
+# 参数:
+#   --fan              初始化并应用 fan.json 风扇曲线
+#   --stop             关闭自定义风扇控制
+#   --read <地址>      读取指定 EC 地址的 1 字节数据
+#   --write <地址> <值> 写入指定 EC 地址的 1 字节数据
+#   --ui               打开终端风扇曲线编辑器
+#   --help             显示帮助
+
+
+
+```
 
 ## 如何反馈BUG以及新增功能
 
