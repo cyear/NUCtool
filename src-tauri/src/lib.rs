@@ -243,11 +243,18 @@ fn start_fan_control_internal(
                 let _ = show_osd_i18n(&app_handle, "fanControl", "startMainPriority");
             }
         }
+
+        let mut tcache_l = 0;
+        let mut tcache_r = 0;
+        let mut timer_l = 0;
+        let mut timer_r = 0;
+        let mut left_speed = 0;
+        let mut right_speed = 0;
         while running.load(Ordering::SeqCst) {
             let ec_result = acpi_ec_worker().call(|ec| {
                 let cpu_temp = ec.cpu_temperature().unwrap_or(0);
                 let gpu_temp = ec.gpu_temperature().unwrap_or(0);
-                if !ec.fan_read_manual() {
+                if ec.fan_read_manual() {
                     ec.fan_write_manual(false);
                 }
             (cpu_temp, gpu_temp)
@@ -260,21 +267,62 @@ fn start_fan_control_internal(
                     continue;
                 }
             };
+            if timer_l == 0 && timer_r == 0 && (tcache_l + tcache_r == 0) {
+                tcache_r = cpu_temp;
+                tcache_l = gpu_temp;
+                left_speed = calculate_speed(&fan_data.right_fan, gpu_temp);
+                right_speed = calculate_speed(&fan_data.left_fan, cpu_temp);
+                println!(
+                    "[OLD FAN] 初始化变量: tcache_l: {}, tcache_r: {}, left_speed: {}, right_speed: {}",
+                    tcache_l, tcache_r, left_speed, right_speed
+                );
+            } else {
+                if tcache_l > (gpu_temp + 2) {
+                    timer_l = timer_l + 1;
+                }
+                if tcache_r > (cpu_temp + 2) {
+                    timer_r = timer_r + 1;
+                }
+                if tcache_l < (gpu_temp - 5) {
+                    timer_l = timer_l + 1;
+                }
+                if tcache_r < (cpu_temp - 5) {
+                    timer_r = timer_r + 1;
+                }
+                println!(
+                    "[OLD FAN] gpu_temp(Sc): {}({}), cpu_temp(Mc): {}({}), timer_l: {}, timer_r: {}",
+                    gpu_temp, tcache_l, cpu_temp, tcache_r, timer_l, timer_r
+                );
+                if timer_l > 3 {
+                    // GPU 风扇 分 => 左
+                    let cache_left = left_speed;
+                    left_speed = calculate_speed(&fan_data.right_fan, gpu_temp);
+                    println!("[OLD FAN] Left Speed {}% -> {}%", cache_left, left_speed);
+                    timer_l = 0;
+                }
+                if timer_r > 3 {
+                    // CPU 风扇 主 => 右
+                    let cache_right = right_speed;
+                    right_speed = calculate_speed(&fan_data.left_fan, cpu_temp);
+                    println!("[OLD FAN] Right Speed {}% -> {}%", cache_right, left_speed);
+                    timer_r = 0;
+                }
+            }
             
+            if cpu_temp > 98 && gpu_temp > 98 {
+                println!("[OLD FAN] Thermal Warning");
+                left_speed = 99;
+                right_speed = 99;
+            }
+
             // &fan_data.left_fan M
             // &fan_data.right_fan S
-
-            // CPU 风扇 主 => 右
-            let mut right_speed = calculate_speed(&fan_data.left_fan, cpu_temp);
-            // GPU 风扇 分 => 左
-            let mut left_speed = calculate_speed(&fan_data.right_fan, gpu_temp);
 
             if fan_mode == 1 {
                 left_speed = right_speed;
             } else if fan_mode == 2 {
                 right_speed = left_speed;
             }
-
             // 左风扇 分
             get_set(((left_speed as u64 * 2) << 16) | 0x0000000000001809);
 
@@ -282,11 +330,11 @@ fn start_fan_control_internal(
             get_set(((right_speed as u64 * 2) << 16) | 0x0000000000001804);
 
             println!(
-                "CPU {}°C → Fan1 {}%  GPU {}°C → Fan2 {}%",
+                "[OLD FAN] >> CPU {}°C → Fan1 {}%,  GPU {}°C → Fan2 {}%",
                 cpu_temp, right_speed, gpu_temp, left_speed
             );
 
-            thread::sleep(Duration::from_millis(2500));
+            thread::sleep(Duration::from_millis(2000));
         }
         println!("风扇自动控制线程退出");
         let _ = app_handle.emit("fan-control-status", false);
@@ -947,6 +995,7 @@ fn set_fan_max_auto(app: &tauri::AppHandle) {
 async fn stop_newfan_write(app: tauri::AppHandle) {
     let app = app.clone();
     if let Err(e) = acpi_ec_worker().call(move |ec| {
+        ec.fan_write_manual(true);
         ec.fan_write_close(); 
         let _ = show_osd_i18n(&app, "fanControl", "stopFanControl");
     }) {

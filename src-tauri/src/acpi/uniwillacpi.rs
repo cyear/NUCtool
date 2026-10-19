@@ -303,6 +303,14 @@ impl UniwillAcpiEc {
         self.second_fan_raw()
     }
 
+    pub fn fan1_pwm(&self) -> io::Result<u8> {
+        self.read_u8(EC_MAIN_FAN_PWM)
+    }
+
+    pub fn fan2_pwm(&self) -> io::Result<u8> {
+        self.read_u8(EC_SECOND_FAN_PWM)
+    }
+
     // /// 读取 Fan1 两个原始字节
     // pub fn fan1_raw_bytes(&self) -> io::Result<(u8, u8)> {
     //     let high = self.read_u8(EC_MAIN_FAN_RPM_1)?;
