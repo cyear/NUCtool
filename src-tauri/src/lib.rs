@@ -27,7 +27,7 @@ use osd::{
 };
 use win::{
     create_startup_task,
-    is_startup_task_exists, privilege_escalation, remove_startup_task, keyboard_registry
+    is_startup_task_exists, privilege_escalation, remove_startup_task, keyboard_registry, get_windows_language
 };
 use window_push::WindowPushState;
 use serde::Serialize;
@@ -309,7 +309,7 @@ fn start_fan_control_internal(
                 }
             }
             
-            if cpu_temp > 98 && gpu_temp > 98 {
+            if cpu_temp > 98 || gpu_temp > 98 {
                 println!("[OLD FAN] Thermal Warning");
                 left_speed = 99;
                 right_speed = 99;
@@ -1240,6 +1240,21 @@ async fn write_bios_nvram(password: String) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+async fn is_wcf_is_connect() -> bool {
+    let wcf = match UniwillWcfEc::new() {
+        Ok(wcf) => wcf,
+        Err(e) => {
+            eprintln!("加载 NUCtool DLL 失败: {}", e);
+            None
+        }.expect("加载 NUCtool DLL 失败"),
+    };
+    wcf.connect();
+    let c = wcf.is_connected();
+    println!("UniwillService Connect: {}", c);
+    c
+}
+
 fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
 
@@ -1266,13 +1281,19 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // 托盘菜单
-    let show = MenuItemBuilder::with_id("show", "显示窗口").build(app)?;
-    let benchmark_on = MenuItemBuilder::with_id("benchmark_on", "开启基准模式").build(app)?;
-    let benchmark_off = MenuItemBuilder::with_id("benchmark_off", "关闭基准模式").build(app)?;
-    let performance = MenuItemBuilder::with_id("performance", "性能模式").build(app)?;
-    let balanced = MenuItemBuilder::with_id("balanced", "平衡模式").build(app)?;
-    let quiet = MenuItemBuilder::with_id("quiet", "省电模式").build(app)?;
-    let quit = MenuItemBuilder::with_id("quit", "退出").build(app)?;
+    let is_zh = get_windows_language()
+        .map(|s| s.to_lowercase().starts_with("zh"))
+        .unwrap_or(false);
+
+    let pick = |zh: &'static str, en: &'static str| if is_zh { zh } else { en };
+
+    let show = MenuItemBuilder::with_id("show", pick("显示窗口", "Show Window")).build(app)?;
+    let benchmark_on = MenuItemBuilder::with_id("benchmark_on", pick("开启基准模式", "Enable Benchmark Mode")).build(app)?;
+    let benchmark_off = MenuItemBuilder::with_id("benchmark_off", pick("关闭基准模式", "Disable Benchmark Mode")).build(app)?;
+    let performance = MenuItemBuilder::with_id("performance", pick("性能模式", "Performance Mode")).build(app)?;
+    let balanced = MenuItemBuilder::with_id("balanced", pick("平衡模式", "Balanced Mode")).build(app)?;
+    let quiet = MenuItemBuilder::with_id("quiet", pick("省电模式", "Power Saving Mode")).build(app)?;
+    let quit = MenuItemBuilder::with_id("quit", pick("退出", "Quit")).build(app)?;
     let menu = MenuBuilder::new(app)
         .item(&show)
         .item(&benchmark_on)
@@ -1513,6 +1534,7 @@ pub fn run() {
             read_bios_nvram,
             export_nvram,
             write_bios_nvram,
+            is_wcf_is_connect
         ])
         .setup(setup)
         .build(tauri::generate_context!())

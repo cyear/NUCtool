@@ -912,6 +912,31 @@ powerPlanButtons.forEach(
 );
 
 
+// 服务连接失败置灰
+function disableTuningSections() {
+  const targets = [
+    { card: '.tuning-card',        header: '.tuning-header',        msg: 'UniwillService not detected as enabled' },
+    { card: '.power-plan-card',    header: '.power-plan-header',    msg: 'UniwillService not detected as enabled' },
+    { card: '.display-card',       header: '.display-header',       msg: 'UniwillService not detected as enabled' },
+    { card: '#battery-card',       header: '.tdp-header',           msg: 'UniwillService not detected as enabled' },
+  ];
+
+  targets.forEach(({ card, header, msg }) => {
+    const el = document.querySelector(card);
+    if (!el) return;
+    el.classList.add('disabled');
+    el.querySelectorAll('button, input, select').forEach(c => c.disabled = true);
+    insertWarning(el.querySelector(header), msg);
+  });
+}
+
+function insertWarning(container, text) {
+  if (!container) return;
+  const warn = document.createElement('div');
+  warn.className = 'connect-warning';
+  warn.textContent = '⚠ ' + text;
+  container.appendChild(warn);
+}
 
 // =====================================================
 // 功耗设置
@@ -5142,7 +5167,15 @@ async function init() {
   // 初始化风扇控制状态
   await initFanControlStatus();
   updateControlState();
-  loadPerformanceMode();
+
+  const connected = await invoke("is_wcf_is_connect");
+  console.log("UniwillService: " + connected);
+  if (connected === false) {
+    disableTuningSections();
+  } else {
+    loadPerformanceMode();
+  }
+  
   await loadBatteryHealthMode();
   loadFanMode();
   loadAutostartState();

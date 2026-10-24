@@ -1060,6 +1060,42 @@ body {
 }
 
 
+/* 性能调优服务连接失败警告 */
+.tuning-card.disabled,
+.power-plan-card.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  filter: grayscale(1);
+  position: relative;
+}
+
+.connect-warning {
+  margin-top: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: #c0392b;
+  background: rgba(231, 76, 60, 0.12);
+  border: 1px solid rgba(231, 76, 60, 0.4);
+  border-radius: 6px;
+}
+
+.tuning-card.disabled,
+.power-plan-card.disabled,
+.display-card.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  filter: grayscale(1);
+}
+
+.tuning-card.disabled,
+.power-plan-card.disabled,
+.display-card.disabled,
+#battery-card.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  filter: grayscale(1);
+}
+
 /* =====================================================
    功耗设置
    ===================================================== */
