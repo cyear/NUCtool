@@ -25,9 +25,9 @@
 >
 > [Hi~ 详细更新说明查看这里😊](./NUCtoolChange.md)
 >
-> [English translation deadline: September 22, 2026 (Version 1.0.6)](./README_en-US.md)
+> [English translation deadline: October 24, 2026 (Version 1.1.4beta)](./README_en-US.md)
 >
-> [Срок сдачи перевода на русский язык: 22 сентября 2026 г. (версия 1.0.6)](./README_ru-RU.md)
+> [Срок сдачи перевода на русский язык: 24 октября 2026 г. (версия 1.1.4beta)](./README_ru-RU.md)
 
 ```markdown
 # 免责声明（Disclaimer）
@@ -106,6 +106,7 @@
 
 - 需要在BIOS设置管理员密码(用户密码可跳过)
 - 读取可能会导致设备卡顿等问题，写入需等待弹窗结果(写入需要一点时间)，是否生效自行测试
+- 修正说明：对所有选项有改动后导出，理论改动都会被保存，预览下的解释说明可能不准确
 
 ## 说明
 
