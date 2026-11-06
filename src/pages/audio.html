@@ -1,0 +1,169 @@
+<!-- ===================================================
+     音频调优
+     =================================================== -->
+<section id="page-audio" class="page">
+  <header class="page-header">
+    <div class="page-heading">
+      <h1 data-i18n="audio.title">音频调优</h1>
+      <p class="page-subtitle" data-i18n="audio.description">
+        调整播放与录制设备的音效、均衡器和音量
+      </p>
+    </div>
+  </header>
+  <!-- 音频调优 -->
+  <section class="settings-card audio-tuning-card" id="audio-tuning-card">
+    <div class="settings-card-header audio-card-header">
+      <div class="audio-header-actions">
+        <span class="settings-status" id="audio-status" data-i18n="audio.loading">加载中...</span>
+        <button class="action-btn secondary audio-refresh-btn" id="audio-refresh" type="button" data-i18n="audio.refresh">
+          刷新
+        </button>
+      </div>
+    </div>
+
+    <div class="audio-device-row">
+      <label class="audio-field audio-output-device-field">
+        <span class="settings-option-title" data-i18n="audio.outputDevice">播放设备</span>
+        <select id="audio-output-device" class="settings-language-select"></select>
+      </label>
+      <label class="audio-field audio-volume-field">
+        <span class="audio-field-heading">
+          <span class="settings-option-title" data-i18n="audio.volume">主音量</span>
+          <output id="audio-volume-value">—%</output>
+        </span>
+        <input id="audio-volume" class="audio-range" type="range" min="0" max="100" step="1" value="50" data-i18n-title="audio.volume">
+      </label>
+    </div>
+
+    <div class="audio-tabs" role="tablist">
+      <button class="audio-tab active" id="audio-tab-output" type="button" role="tab" aria-selected="true" data-audio-tab="output" data-i18n="audio.output">输出</button>
+      <button class="audio-tab" id="audio-tab-input" type="button" role="tab" aria-selected="false" data-audio-tab="input" data-i18n="audio.input">输入</button>
+    </div>
+
+    <div class="audio-panel" id="audio-output-panel" role="tabpanel" aria-labelledby="audio-tab-output">
+      <div class="audio-output-layout">
+        <section class="audio-enhancement-panel" aria-labelledby="audio-enhancement-heading">
+          <div class="settings-option audio-option audio-master-option">
+            <div class="settings-option-info">
+              <div id="audio-enhancement-heading" class="settings-option-title" data-i18n="audio.enhancement">音频增强</div>
+              <div class="settings-option-description" data-i18n="audio.enhancementDescription">启用播放音效处理</div>
+            </div>
+            <label class="settings-switch">
+              <input id="audio-enhancement" type="checkbox" data-audio-key="audio_enhancement">
+              <span class="settings-slider"></span>
+            </label>
+          </div>
+
+          <div class="audio-dependent-settings">
+            <div class="audio-config-grid">
+              <label class="audio-field">
+                <span class="settings-option-title" data-i18n="audio.profile">配置文件</span>
+                <select id="audio-profile" class="settings-language-select"></select>
+              </label>
+              <div class="audio-field">
+                <span id="audio-preset-label" class="settings-option-title" data-i18n="audio.preset">均衡器预设</span>
+                <div class="audio-choice">
+                  <select id="audio-preset" class="audio-native-select" aria-hidden="true" tabindex="-1">
+                    <option value="" selected hidden data-i18n="audio.choosePreset">选择预设</option>
+                    <option value="custom" hidden data-i18n="audio.presetCustom" disabled>自定义</option>
+                    <option value="default" data-i18n="audio.presetDefault">默认</option>
+                    <option value="acoustic" data-i18n="audio.presetAcoustic">原声</option>
+                    <option value="blues" data-i18n="audio.presetBlues">蓝调</option>
+                    <option value="classical" data-i18n="audio.presetClassical">古典</option>
+                    <option value="country" data-i18n="audio.presetCountry">乡村</option>
+                    <option value="dance" data-i18n="audio.presetDance">舞曲</option>
+                    <option value="electronic" data-i18n="audio.presetElectronic">电子</option>
+                    <option value="hip_hop" data-i18n="audio.presetHipHop">嘻哈</option>
+                    <option value="jazz" data-i18n="audio.presetJazz">爵士</option>
+                    <option value="metal" data-i18n="audio.presetMetal">金属</option>
+                    <option value="pop" data-i18n="audio.presetPop">流行</option>
+                    <option value="rock" data-i18n="audio.presetRock">摇滚</option>
+                  </select>
+                  <button id="audio-preset-trigger" class="settings-language-select audio-choice-trigger" type="button" aria-labelledby="audio-preset-label" aria-haspopup="listbox" aria-expanded="false" aria-controls="audio-preset-menu"></button>
+                  <div id="audio-preset-menu" class="audio-choice-menu" role="listbox" aria-labelledby="audio-preset-label" hidden></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="audio-profile-actions">
+              <input id="audio-profile-name" class="audio-text-input" type="text" maxlength="64" data-i18n-placeholder="audio.profileNamePlaceholder">
+              <button class="action-btn secondary" id="audio-profile-create" type="button" data-i18n="audio.createProfile">新建配置</button>
+              <button class="action-btn secondary" id="audio-profile-delete" type="button" data-i18n="audio.deleteProfile">删除配置</button>
+              <button class="action-btn secondary" id="audio-profile-reset" type="button" data-i18n="audio.resetProfile">恢复当前配置默认值</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="audio-tone-panel" aria-labelledby="audio-mode-label">
+          <div class="audio-mode-header">
+            <h3 id="audio-mode-label" data-i18n="audio.mode">音效模式</h3>
+            <div class="audio-choice audio-mode-choice">
+              <select id="audio-mode" class="audio-native-select" aria-hidden="true" tabindex="-1">
+                <option value="" selected hidden data-i18n="audio.modeChoose">选择模式</option>
+                <option value="AnyContent" data-i18n="audio.modeMusic">音乐</option>
+                <option value="Voice" data-i18n="audio.modeVoice">语音</option>
+                <option value="Movie" data-i18n="audio.modeMovie">电影</option>
+                <option value="Gaming" data-i18n="audio.modeGaming">游戏</option>
+              </select>
+              <button id="audio-mode-trigger" class="settings-language-select audio-choice-trigger" type="button" aria-labelledby="audio-mode-label" aria-haspopup="listbox" aria-expanded="false" aria-controls="audio-mode-menu"></button>
+              <div id="audio-mode-menu" class="audio-choice-menu" role="listbox" aria-labelledby="audio-mode-label" hidden></div>
+            </div>
+          </div>
+          <div class="audio-slider-grid" id="audio-tone-controls"></div>
+        </section>
+      </div>
+
+      <div class="audio-eq-header">
+        <div class="settings-option-info">
+          <div class="settings-option-title" data-i18n="audio.equalizer">均衡器</div>
+          <div class="settings-option-description" data-i18n="audio.equalizerDescription">调整十段频率响应</div>
+        </div>
+        <label class="settings-switch">
+          <input id="audio-eq-enabled" type="checkbox" data-audio-key="eq_enabled">
+          <span class="settings-slider"></span>
+        </label>
+      </div>
+      <div class="audio-eq-grid" id="audio-eq-controls"></div>
+    </div>
+
+    <div class="audio-panel" id="audio-input-panel" role="tabpanel" aria-labelledby="audio-tab-input" hidden>
+      <label class="audio-field audio-input-device-field">
+        <span class="settings-option-title" data-i18n="audio.inputDevice">录制设备</span>
+        <select id="audio-input-device" class="settings-language-select"></select>
+      </label>
+      <div class="settings-option audio-option">
+        <div class="settings-option-info">
+          <div class="settings-option-title" data-i18n="audio.inputEnhancement">麦克风音频增强</div>
+          <div class="settings-option-description" data-i18n="audio.inputEnhancementDescription">启用录制设备的音频增强</div>
+        </div>
+        <label class="settings-switch">
+          <input id="audio-input-enhancement" type="checkbox">
+          <span class="settings-slider"></span>
+        </label>
+      </div>
+      <div class="audio-config-grid audio-input-config-grid">
+        <label class="audio-field">
+          <span class="settings-option-title" data-i18n="audio.inputMode">麦克风模式</span>
+          <select id="audio-input-profile" class="settings-language-select">
+            <option value="headset" data-i18n="audio.inputHeadset">耳机</option>
+            <option value="conference" data-i18n="audio.inputConference">会议</option>
+          </select>
+        </label>
+        <div class="settings-option audio-option audio-dns-option">
+          <div class="settings-option-info">
+            <div class="settings-option-title" data-i18n="audio.noiseReduction">降噪</div>
+            <div class="settings-option-description" data-i18n="audio.noiseReductionDescription">控制麦克风降噪</div>
+          </div>
+          <label class="settings-switch">
+            <input id="audio-input-dns" type="checkbox">
+            <span class="settings-slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <p class="audio-message" id="audio-message" role="status" hidden></p>
+  </section>
+
+
+</section>

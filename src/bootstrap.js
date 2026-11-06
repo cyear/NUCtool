@@ -8,6 +8,7 @@ const pages = [
   "newfan",
   "system",
   "display",
+  "audio",
   "keyboard",
   "lightbar",
   "bios",

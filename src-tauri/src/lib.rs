@@ -7,6 +7,7 @@ const CREATE_NO_WINDOW: u32 = 0x08000000;
 #[macro_use]
 mod logging;
 mod acpi;
+mod audio_tuning;
 mod config;
 mod fan_control;
 mod osd;
@@ -1470,8 +1471,122 @@ fn fnhook() {
     }
 }
 
+#[tauri::command]
+fn audio_list_devices() -> Result<audio_tuning::app::AudioDeviceLists, String> {
+    audio_tuning::app::worker_request("list_devices", serde_json::json!({}))
+}
+
+#[tauri::command]
+fn audio_read_settings(
+    output_endpoint: Option<String>,
+    input_endpoint: Option<String>,
+) -> Result<audio_tuning::app::AudioTuningState, String> {
+    audio_tuning::app::worker_request(
+        "read_settings",
+        serde_json::json!({
+            "outputEndpoint": output_endpoint,
+            "inputEndpoint": input_endpoint,
+        }),
+    )
+}
+
+#[tauri::command]
+fn audio_list_presets() -> Vec<String> {
+    audio_tuning::app::presets()
+}
+
+#[tauri::command]
+fn audio_set_parameter(endpoint: String, key: String, value: f32) -> Result<(), String> {
+    audio_tuning::app::worker_request(
+        "set_parameter",
+        serde_json::json!({ "endpoint": endpoint, "key": key, "value": value }),
+    )
+}
+
+#[tauri::command]
+fn audio_apply_preset(endpoint: String, preset: String) -> Result<(), String> {
+    audio_tuning::app::worker_request(
+        "apply_preset",
+        serde_json::json!({ "endpoint": endpoint, "preset": preset }),
+    )
+}
+
+#[tauri::command]
+fn audio_set_mode(endpoint: String, mode: String) -> Result<(), String> {
+    audio_tuning::app::worker_request(
+        "set_mode",
+        serde_json::json!({ "endpoint": endpoint, "mode": mode }),
+    )
+}
+
+#[tauri::command]
+fn audio_set_profile(endpoint: String, profile: String) -> Result<(), String> {
+    audio_tuning::app::worker_request(
+        "set_profile",
+        serde_json::json!({ "endpoint": endpoint, "profile": profile }),
+    )
+}
+
+#[tauri::command]
+fn audio_create_profile(endpoint: String, alias: String) -> Result<String, String> {
+    audio_tuning::app::worker_request(
+        "create_profile",
+        serde_json::json!({ "endpoint": endpoint, "alias": alias }),
+    )
+}
+
+#[tauri::command]
+fn audio_delete_profile(endpoint: String, profile: String) -> Result<(), String> {
+    audio_tuning::app::worker_request(
+        "delete_profile",
+        serde_json::json!({ "endpoint": endpoint, "profile": profile }),
+    )
+}
+
+#[tauri::command]
+fn audio_reset_profile(endpoint: String) -> Result<(), String> {
+    audio_tuning::app::worker_request(
+        "reset_profile",
+        serde_json::json!({ "endpoint": endpoint }),
+    )
+}
+
+#[tauri::command]
+fn audio_set_volume(endpoint: String, value: f32) -> Result<f32, String> {
+    audio_tuning::app::worker_request(
+        "set_volume",
+        serde_json::json!({ "endpoint": endpoint, "value": value }),
+    )
+}
+
+#[tauri::command]
+fn audio_set_input_setting(
+    output_endpoint: String,
+    input_endpoint: String,
+    key: String,
+    value: String,
+) -> Result<String, String> {
+    audio_tuning::app::worker_request(
+        "set_input_setting",
+        serde_json::json!({
+            "outputEndpoint": output_endpoint,
+            "inputEndpoint": input_endpoint,
+            "key": key,
+            "value": value,
+        }),
+    )
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    if std::env::args().nth(1).as_deref() == Some("--nuctool-audio-worker") {
+        if let Err(error) = audio_tuning::app::run_worker() {
+            eprintln!("音频隔离进程错误: {error}");
+            std::process::exit(2);
+        }
+        return;
+    }
+
     // 管理员权限！！！
     privilege_escalation();
     logging::init_log().expect("初始化日志系统失败");
@@ -1507,6 +1622,18 @@ pub fn run() {
             set_autostart,
             set_power_plan,
             set_display_mode,
+            audio_list_devices,
+            audio_read_settings,
+            audio_list_presets,
+            audio_set_parameter,
+            audio_apply_preset,
+            audio_set_mode,
+            audio_set_profile,
+            audio_create_profile,
+            audio_delete_profile,
+            audio_reset_profile,
+            audio_set_volume,
+            audio_set_input_setting,
             get_keyboard_led,
             osd_ready,
             show_osd_command,

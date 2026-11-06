@@ -1446,6 +1446,612 @@ displayButtons.forEach(
 
 
 // =====================================================
+// 音频调优
+// =====================================================
+
+const audioCard = document.getElementById("audio-tuning-card");
+const audioOutputSelect = document.getElementById("audio-output-device");
+const audioInputSelect = document.getElementById("audio-input-device");
+const audioStatus = document.getElementById("audio-status");
+const audioMessage = document.getElementById("audio-message");
+const audioProfileSelect = document.getElementById("audio-profile");
+const audioModeSelect = document.getElementById("audio-mode");
+const audioPresetSelect = document.getElementById("audio-preset");
+const audioVolume = document.getElementById("audio-volume");
+const audioVolumeValue = document.getElementById("audio-volume-value");
+let audioState = null;
+let audioDevices = null;
+let audioLoading = false;
+let audioControlsRendered = false;
+const audioChoiceSync = new Map();
+
+const audioToneParameters = [
+  { key: "bass", label: "audio.bass", min: 0, max: 100 },
+  { key: "detail", label: "audio.detail", min: 0, max: 100 },
+  { key: "voice", label: "audio.voice", min: 0, max: 100 },
+  { key: "surround", label: "audio.surround", min: 0, max: 100 },
+];
+
+const audioEqBands = [
+  ["31hz", "31 Hz"], ["62hz", "62 Hz"], ["125hz", "125 Hz"],
+  ["250hz", "250 Hz"], ["500hz", "500 Hz"], ["1khz", "1 kHz"],
+  ["2khz", "2 kHz"], ["4khz", "4 kHz"], ["8khz", "8 kHz"],
+  ["16khz", "16 kHz"],
+];
+const audioEqColors = [
+  "#eadb59", "#f1c64e", "#ef9388", "#ed7184", "#dc6f9d",
+  "#c18adb", "#a990ed", "#8593e9", "#648ee1", "#3e86c8",
+];
+
+function renderAudioControls() {
+  if (audioControlsRendered) return;
+  audioControlsRendered = true;
+
+  document.getElementById("audio-tone-controls").innerHTML = audioToneParameters
+    .map(({ key, label, min, max }) => `
+      <label class="audio-slider-control">
+        <span class="audio-slider-heading">
+          <span class="audio-slider-label" data-i18n="${label}"></span>
+          <output class="audio-slider-value" data-audio-value-for="${key}">—%</output>
+        </span>
+        <input class="audio-range" type="range" min="${min}" max="${max}" step="1" value="50" data-audio-key="${key}">
+      </label>
+    `)
+    .join("");
+
+  document.getElementById("audio-eq-controls").innerHTML = audioEqBands
+    .map(([key, label], index) => `
+      <label class="audio-eq-control" style="--eq-color: ${audioEqColors[index]}">
+        <output class="audio-eq-value" data-audio-value-for="eq_${key}">0.0 dB</output>
+        <span class="audio-eq-meter">
+          <span class="audio-eq-rail"></span>
+          <span class="audio-eq-fill"></span>
+          <span class="audio-eq-zero"></span>
+          <input class="audio-eq-range" type="range" min="-33.3333" max="33.3333" step="0.1" value="0" aria-label="${label}" data-audio-key="eq_${key}">
+        </span>
+        <span class="audio-eq-label">${label}</span>
+      </label>
+    `)
+    .join("");
+
+  window.NUCtoolI18n?.updateTranslations();
+}
+
+function setAudioStatus(key, state = "") {
+  if (!audioStatus) return;
+  audioStatus.textContent = t(key);
+  audioStatus.classList.remove("enabled", "error", "disabled");
+  if (state) audioStatus.classList.add(state);
+}
+
+function setAudioMessage(message = "") {
+  audioMessage.textContent = message;
+  audioMessage.hidden = !message;
+}
+
+function setAudioControlsEnabled(enabled) {
+  for (const control of audioCard.querySelectorAll("button, input, select")) {
+    if (control.id !== "audio-refresh") control.disabled = !enabled;
+  }
+}
+
+function fillAudioDeviceSelect(select, devices, selectedId) {
+  const previous = selectedId || select.value;
+  select.replaceChildren();
+
+  if (!devices.length) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = t("audio.noDevices");
+    select.append(option);
+    select.disabled = true;
+    return;
+  }
+
+  for (const device of devices) {
+    const option = document.createElement("option");
+    option.value = device.id;
+    option.textContent = device.isDefault
+      ? `${device.name} · ${t("audio.defaultDevice")}`
+      : device.name;
+    select.append(option);
+  }
+
+  select.disabled = false;
+  const selected = devices.some((device) => device.id === previous)
+    ? previous
+    : devices.find((device) => device.isDefault)?.id || devices[0].id;
+  select.value = selected;
+}
+
+function setupAudioChoice(selectId) {
+  const select = document.getElementById(selectId);
+  const wrapper = select?.closest(".audio-choice");
+  const trigger = wrapper?.querySelector(".audio-choice-trigger");
+  const menu = wrapper?.querySelector(".audio-choice-menu");
+  if (!select || !wrapper || !trigger || !menu) return null;
+
+  const value = document.createElement("span");
+  value.className = "audio-choice-value";
+  trigger.replaceChildren(value);
+  document.body.append(menu);
+
+  const sync = () => {
+    const selected = select.selectedOptions[0] || select.options[0];
+    const key = selected?.dataset.i18n;
+    value.textContent = key ? t(key) : selected?.textContent || "";
+    if (key) value.dataset.i18n = key;
+    else delete value.dataset.i18n;
+    trigger.disabled = select.disabled;
+    for (const item of menu.querySelectorAll(".audio-choice-option")) {
+      const isSelected = item.dataset.value === select.value;
+      item.setAttribute("aria-selected", String(isSelected));
+    }
+  };
+
+  const close = (returnFocus = false) => {
+    menu.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+    if (returnFocus) trigger.focus();
+  };
+
+  const open = () => {
+    if (trigger.disabled) return;
+    menu.replaceChildren();
+    for (const option of select.options) {
+      if (option.hidden) continue;
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = "audio-choice-option";
+      item.setAttribute("role", "option");
+      item.dataset.value = option.value;
+      item.disabled = option.disabled;
+      item.setAttribute("aria-selected", String(option.value === select.value));
+
+      const label = document.createElement("span");
+      const key = option.dataset.i18n;
+      if (key) label.dataset.i18n = key;
+      label.textContent = key ? t(key) : option.textContent;
+      item.append(label);
+      item.addEventListener("click", () => {
+        if (option.disabled) return;
+        select.value = option.value;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        close(true);
+      });
+      menu.append(item);
+    }
+
+    menu.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+    const rect = trigger.getBoundingClientRect();
+    const gap = 6;
+    const sidePadding = 8;
+    const below = Math.max(0, window.innerHeight - rect.bottom - sidePadding);
+    const above = Math.max(0, rect.top - sidePadding);
+    const desiredHeight = Math.min(menu.scrollHeight, 280);
+    const openAbove = below < Math.min(desiredHeight, 170) && above > below;
+    const available = openAbove ? above : below;
+    const maxHeight = Math.max(72, Math.min(280, available));
+    const menuWidth = Math.min(rect.width, window.innerWidth - sidePadding * 2);
+    menu.style.maxHeight = `${maxHeight}px`;
+    menu.style.width = `${menuWidth}px`;
+    menu.style.left = `${Math.max(
+      sidePadding,
+      Math.min(rect.left, window.innerWidth - menuWidth - sidePadding)
+    )}px`;
+    const visibleHeight = Math.min(menu.scrollHeight, maxHeight);
+    menu.style.top = openAbove
+      ? `${Math.max(sidePadding, rect.top - visibleHeight - gap)}px`
+      : `${Math.min(window.innerHeight - visibleHeight - sidePadding, rect.bottom + gap)}px`;
+
+    const options = [...menu.querySelectorAll(".audio-choice-option:not(:disabled)")];
+    (options.find((item) => item.dataset.value === select.value) || options[0])?.focus();
+  };
+
+  trigger.addEventListener("click", () => {
+    if (menu.hidden) open();
+    else close();
+  });
+  trigger.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      if (menu.hidden) open();
+    }
+  });
+  menu.addEventListener("keydown", (event) => {
+    const options = [...menu.querySelectorAll(".audio-choice-option:not(:disabled)")];
+    const index = options.indexOf(document.activeElement);
+    if (event.key === "Escape") {
+      event.preventDefault();
+      close(true);
+    } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      const direction = event.key === "ArrowDown" ? 1 : -1;
+      options[(index + direction + options.length) % options.length]?.focus();
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      options[0]?.focus();
+    } else if (event.key === "End") {
+      event.preventDefault();
+      options[options.length - 1]?.focus();
+    }
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (!wrapper.contains(event.target) && !menu.contains(event.target)) close();
+  });
+  window.addEventListener("resize", () => close());
+  window.addEventListener("scroll", (event) => {
+    if (!menu.contains(event.target)) close();
+  }, true);
+  select.addEventListener("change", sync);
+
+  audioChoiceSync.set(selectId, sync);
+  sync();
+  return { sync };
+}
+
+function audioParameterMap(state) {
+  return new Map(state.parameters.map((parameter) => [parameter.key, parameter.value]));
+}
+
+function setAudioEnhancementDependentControlsEnabled(enabled) {
+  const parameters = audioState ? audioParameterMap(audioState) : new Map();
+  const available = (key) => {
+    const value = parameters.get(key);
+    return typeof value === "number" && Number.isFinite(value);
+  };
+  const enhancementEnabled = enabled && !audioState?.apoError;
+  const eqEnabled = available("eq_enabled") && parameters.get("eq_enabled") >= 0.5;
+  const eqBandsAvailable = audioEqBands.every(([key]) => available(`eq_${key}`));
+
+  audioProfileSelect.disabled = !enhancementEnabled;
+  audioModeSelect.disabled = !enhancementEnabled;
+  audioPresetSelect.disabled = !enhancementEnabled || !eqEnabled || !eqBandsAvailable;
+  document.getElementById("audio-profile-name").disabled = !enhancementEnabled;
+  document.getElementById("audio-profile-create").disabled = !enhancementEnabled;
+  document.getElementById("audio-profile-delete").disabled =
+    !enhancementEnabled || !audioState?.profile;
+  document.getElementById("audio-profile-reset").disabled = !enhancementEnabled;
+
+  for (const { key } of audioToneParameters) {
+    const control = audioCard.querySelector(`[data-audio-key="${key}"]`);
+    if (control) control.disabled = !enhancementEnabled || !available(key);
+  }
+  const eqEnabledControl = document.getElementById("audio-eq-enabled");
+  eqEnabledControl.disabled = !enhancementEnabled || !available("eq_enabled");
+  for (const [key] of audioEqBands) {
+    const control = audioCard.querySelector(`[data-audio-key="eq_${key}"]`);
+    if (control) {
+      control.disabled = !enhancementEnabled || !eqEnabled || !available(`eq_${key}`);
+    }
+  }
+
+  document.getElementById("audio-output-panel")
+    .classList.toggle("audio-enhancement-disabled", !enhancementEnabled);
+}
+
+function renderAudioState(state) {
+  audioState = state;
+  setAudioControlsEnabled(true);
+  const parameters = audioParameterMap(state);
+  const supportedModes = ["AnyContent", "Voice", "Movie", "Gaming"];
+  audioModeSelect.value = supportedModes.includes(state.mode) ? state.mode : "";
+
+  audioVolume.value = String(Math.round(state.volume));
+  audioVolumeValue.value = `${Math.round(state.volume)}%`;
+
+  audioProfileSelect.replaceChildren();
+  const defaultProfile = document.createElement("option");
+  defaultProfile.value = "default";
+  defaultProfile.textContent = t("audio.defaultProfile");
+  audioProfileSelect.append(defaultProfile);
+  for (const profile of state.profiles) {
+    const option = document.createElement("option");
+    option.value = profile.name;
+    option.textContent = profile.alias || profile.name;
+    audioProfileSelect.append(option);
+  }
+  audioProfileSelect.value = state.profile || "default";
+  document.getElementById("audio-profile-delete").disabled = !state.profile;
+
+  for (const input of audioCard.querySelectorAll("[data-audio-key]")) {
+    const value = parameters.get(input.dataset.audioKey);
+    input.disabled = value === undefined || value === null;
+    if (value === undefined || value === null) continue;
+    if (input.type === "checkbox") input.checked = value >= 0.5;
+    else input.value = String(value);
+    updateAudioValue(input);
+  }
+
+  const eqEnabled = parameters.get("eq_enabled");
+  for (const input of document.querySelectorAll("#audio-eq-controls input")) {
+    input.disabled = eqEnabled === undefined || eqEnabled === null || eqEnabled < 0.5;
+  }
+  const eqBandsAvailable = audioEqBands.every(([key]) => {
+    const value = parameters.get(`eq_${key}`);
+    return typeof value === "number" && Number.isFinite(value);
+  });
+  const eqEnabledAvailable = typeof eqEnabled === "number" && Number.isFinite(eqEnabled);
+  const eqIsEnabled = eqEnabledAvailable && eqEnabled >= 0.5;
+  audioPresetSelect.value = state.currentPreset || "custom";
+  audioPresetSelect.disabled = !eqIsEnabled || !eqBandsAvailable;
+
+  const inputEnhancement = document.getElementById("audio-input-enhancement");
+  inputEnhancement.checked = state.inputEnhancement === true;
+  inputEnhancement.disabled = state.inputEnhancement === null;
+  audioInputSelect.disabled = state.inputEndpoint === null;
+  document.getElementById("audio-input-profile").value = state.inputProfile || "headset";
+  document.getElementById("audio-input-profile").disabled = state.inputProfile === null;
+  const inputDns = document.getElementById("audio-input-dns");
+  inputDns.checked = state.inputDns === true;
+  inputDns.disabled = state.inputDns === null;
+
+  if (state.apoError) {
+    for (const control of audioCard.querySelectorAll(
+      "#audio-profile, #audio-mode, #audio-preset, #audio-profile-name, .audio-profile-actions button"
+    )) {
+      control.disabled = true;
+    }
+    setAudioStatus("audio.partial", "disabled");
+    setAudioMessage(`${t("audio.apoUnavailable")} ${state.apoError}`);
+  } else {
+    setAudioStatus("audio.ready", "enabled");
+    setAudioMessage(
+      !eqEnabledAvailable
+        ? t("audio.eqPresetUnavailable")
+        : !eqIsEnabled
+          ? t("audio.eqPresetEnableFirst")
+          : !eqBandsAvailable
+            ? t("audio.eqPresetUnavailable")
+            : ""
+    );
+  }
+  const enhancement = parameters.get("audio_enhancement");
+  setAudioEnhancementDependentControlsEnabled(
+    typeof enhancement === "number" && enhancement >= 0.5
+  );
+  audioChoiceSync.get("audio-mode")?.();
+  audioChoiceSync.get("audio-preset")?.();
+}
+
+function updateAudioValue(input) {
+  const output = audioCard.querySelector(`[data-audio-value-for="${input.dataset.audioKey}"]`);
+  if (!output) return;
+  const value = Number(input.value);
+  if (input.dataset.audioKey.startsWith("eq_")) {
+    const maxSliderValue = Math.max(Math.abs(Number(input.min)), Math.abs(Number(input.max)));
+    const displayDb = maxSliderValue > 0 ? value * (6 / maxSliderValue) : 0;
+    output.value = `${displayDb.toFixed(1)} dB`;
+    const meter = input.closest(".audio-eq-control")?.querySelector(".audio-eq-meter");
+    if (meter) {
+      const top = maxSliderValue > 0 ? ((maxSliderValue - value) / (maxSliderValue * 2)) * 100 : 50;
+      meter.style.setProperty("--eq-fill-top", value >= 0 ? `${top}%` : "50%");
+      const fillHeight = maxSliderValue > 0 ? (Math.abs(value) / (maxSliderValue * 2)) * 100 : 0;
+      meter.style.setProperty("--eq-fill-height", `${fillHeight}%`);
+    }
+  } else {
+    output.value = `${Math.round(value)}%`;
+  }
+}
+
+async function refreshAudioTuning() {
+  if (!audioCard || audioLoading) return;
+  audioLoading = true;
+  setAudioControlsEnabled(false);
+  setAudioStatus("audio.loading");
+  setAudioMessage();
+  try {
+    const devices = await invoke("audio_list_devices");
+    audioDevices = devices;
+    fillAudioDeviceSelect(audioOutputSelect, devices.outputs, audioOutputSelect.value || audioState?.outputEndpoint);
+    fillAudioDeviceSelect(audioInputSelect, devices.inputs, audioInputSelect.value || audioState?.inputEndpoint);
+    const state = await invoke("audio_read_settings", {
+      outputEndpoint: audioOutputSelect.value || null,
+      inputEndpoint: audioInputSelect.value || null,
+    });
+    renderAudioState(state);
+  } catch (error) {
+    setAudioControlsEnabled(false);
+    setAudioStatus("audio.unavailable", "error");
+    setAudioMessage(String(error));
+  } finally {
+    audioLoading = false;
+  }
+}
+
+async function runAudioAction(command, args, refresh = true) {
+  setAudioStatus("audio.applying");
+  setAudioMessage();
+  try {
+    await invoke(command, args);
+    setAudioStatus("audio.saved", "enabled");
+    if (refresh) await refreshAudioTuning();
+    return true;
+  } catch (error) {
+    setAudioStatus("audio.unavailable", "error");
+    setAudioMessage(String(error));
+    return false;
+  }
+}
+
+function audioOutputEndpoint() {
+  return audioOutputSelect.value || audioState?.outputEndpoint;
+}
+
+function audioInputEndpoint() {
+  return audioInputSelect.value;
+}
+
+renderAudioControls();
+setupAudioChoice("audio-mode");
+setupAudioChoice("audio-preset");
+setAudioControlsEnabled(false);
+document.getElementById("audio-refresh")?.addEventListener("click", refreshAudioTuning);
+document.querySelector('.nav-btn[data-page="audio"]')?.addEventListener("click", refreshAudioTuning);
+audioOutputSelect?.addEventListener("change", refreshAudioTuning);
+audioInputSelect?.addEventListener("change", refreshAudioTuning);
+
+document.querySelectorAll("[data-audio-tab]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const isInput = button.dataset.audioTab === "input";
+    document.getElementById("audio-tab-output").classList.toggle("active", !isInput);
+    document.getElementById("audio-tab-input").classList.toggle("active", isInput);
+    document.getElementById("audio-tab-output").setAttribute("aria-selected", String(!isInput));
+    document.getElementById("audio-tab-input").setAttribute("aria-selected", String(isInput));
+    document.getElementById("audio-output-panel").hidden = isInput;
+    document.getElementById("audio-input-panel").hidden = !isInput;
+  });
+});
+
+audioVolume?.addEventListener("input", () => {
+  audioVolumeValue.value = `${audioVolume.value}%`;
+});
+audioVolume?.addEventListener("change", () => {
+  runAudioAction("audio_set_volume", {
+    endpoint: audioOutputEndpoint(),
+    value: Number(audioVolume.value),
+  });
+});
+
+audioCard?.addEventListener("input", (event) => {
+  if (event.target.matches("[data-audio-key]")) updateAudioValue(event.target);
+});
+audioCard?.addEventListener("change", (event) => {
+  const input = event.target;
+  if (!input.matches("[data-audio-key]")) return;
+  if (input.dataset.audioKey === "audio_enhancement") {
+    const wasEnabled = Number(audioState?.parameters.find(
+      (parameter) => parameter.key === "audio_enhancement"
+    )?.value) >= 0.5;
+    if (!input.checked) setAudioEnhancementDependentControlsEnabled(false);
+    runAudioAction("audio_set_parameter", {
+      endpoint: audioOutputEndpoint(),
+      key: input.dataset.audioKey,
+      value: Number(input.checked),
+    }).then((applied) => {
+      if (!applied) {
+        input.checked = wasEnabled;
+        setAudioEnhancementDependentControlsEnabled(wasEnabled);
+        audioChoiceSync.get("audio-mode")?.();
+        audioChoiceSync.get("audio-preset")?.();
+      }
+    });
+    return;
+  }
+  runAudioAction("audio_set_parameter", {
+    endpoint: audioOutputEndpoint(),
+    key: input.dataset.audioKey,
+    value: input.type === "checkbox" ? Number(input.checked) : Number(input.value),
+  });
+});
+
+audioProfileSelect?.addEventListener("change", () => {
+  runAudioAction("audio_set_profile", {
+    endpoint: audioOutputEndpoint(),
+    profile: audioProfileSelect.value,
+  });
+});
+audioModeSelect?.addEventListener("change", async (event) => {
+  const mode = event.target.value;
+  if (!mode) return;
+  const previousMode = audioState?.mode || "";
+  const applied = await runAudioAction("audio_set_mode", {
+    endpoint: audioOutputEndpoint(),
+    mode,
+  });
+  if (!applied) {
+    audioModeSelect.value = previousMode;
+    audioChoiceSync.get("audio-mode")?.();
+  }
+});
+audioPresetSelect?.addEventListener("change", async (event) => {
+  const preset = event.target.value;
+  if (!preset || preset === "custom") return;
+  const applied = await runAudioAction("audio_apply_preset", {
+    endpoint: audioOutputEndpoint(),
+    preset,
+  });
+  if (!applied) {
+    event.target.value = audioState?.currentPreset || "custom";
+    audioChoiceSync.get("audio-preset")?.();
+  }
+});
+
+document.getElementById("audio-profile-create")?.addEventListener("click", async () => {
+  const input = document.getElementById("audio-profile-name");
+  const alias = input.value.trim();
+  if (!alias) {
+    setAudioMessage(t("audio.profileNameRequired"));
+    return;
+  }
+  setAudioStatus("audio.applying");
+  try {
+    await invoke("audio_create_profile", { endpoint: audioOutputEndpoint(), alias });
+    input.value = "";
+    await refreshAudioTuning();
+  } catch (error) {
+    setAudioStatus("audio.unavailable", "error");
+    setAudioMessage(String(error));
+  }
+});
+
+document.getElementById("audio-profile-delete")?.addEventListener("click", async () => {
+  const profile = audioProfileSelect.value;
+  if (!profile || !window.confirm(t("audio.confirmDeleteProfile"))) return;
+  setAudioStatus("audio.applying");
+  try {
+    if (audioState.profile === profile) {
+      await invoke("audio_set_profile", { endpoint: audioOutputEndpoint(), profile: "default" });
+    }
+    await invoke("audio_delete_profile", { endpoint: audioOutputEndpoint(), profile });
+    await refreshAudioTuning();
+  } catch (error) {
+    setAudioStatus("audio.unavailable", "error");
+    setAudioMessage(String(error));
+  }
+});
+
+document.getElementById("audio-profile-reset")?.addEventListener("click", () => {
+  if (!window.confirm(t("audio.confirmResetProfile"))) return;
+  runAudioAction("audio_reset_profile", { endpoint: audioOutputEndpoint() });
+});
+
+document.getElementById("audio-input-enhancement")?.addEventListener("change", (event) => {
+  runAudioAction("audio_set_input_setting", {
+    outputEndpoint: audioOutputEndpoint(),
+    inputEndpoint: audioInputEndpoint(),
+    key: "enhancement",
+    value: event.target.checked ? "on" : "off",
+  });
+});
+document.getElementById("audio-input-profile")?.addEventListener("change", (event) => {
+  runAudioAction("audio_set_input_setting", {
+    outputEndpoint: audioOutputEndpoint(),
+    inputEndpoint: audioInputEndpoint(),
+    key: "profile",
+    value: event.target.value,
+  });
+});
+document.getElementById("audio-input-dns")?.addEventListener("change", (event) => {
+  runAudioAction("audio_set_input_setting", {
+    outputEndpoint: audioOutputEndpoint(),
+    inputEndpoint: audioInputEndpoint(),
+    key: "dns",
+    value: event.target.checked ? "on" : "off",
+  });
+});
+
+window.addEventListener("nuctool-language-changed", () => {
+  if (audioDevices) {
+    fillAudioDeviceSelect(audioOutputSelect, audioDevices.outputs, audioOutputSelect.value);
+    fillAudioDeviceSelect(audioInputSelect, audioDevices.inputs, audioInputSelect.value);
+  }
+  if (audioState) renderAudioState(audioState);
+});
+
+
+// =====================================================
 // 键盘设置
 // =====================================================
 
