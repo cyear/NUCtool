@@ -1473,7 +1473,9 @@ fn fnhook() {
 
 #[tauri::command]
 fn audio_list_devices() -> Result<audio_tuning::app::AudioDeviceLists, String> {
-    audio_tuning::app::worker_request("list_devices", serde_json::json!({}))
+    let r = audio_tuning::app::worker_request("list_devices", serde_json::json!({}));
+    println!("[AUDIO] audio_list_devices: {:?}", r);
+    r
 }
 
 #[tauri::command]
@@ -1481,22 +1483,32 @@ fn audio_read_settings(
     output_endpoint: Option<String>,
     input_endpoint: Option<String>,
 ) -> Result<audio_tuning::app::AudioTuningState, String> {
-    audio_tuning::app::worker_request(
+    let r = audio_tuning::app::worker_request(
         "read_settings",
         serde_json::json!({
             "outputEndpoint": output_endpoint,
             "inputEndpoint": input_endpoint,
         }),
-    )
+    );
+    println!(
+        "[AUDIO] audio_read_settings: {{ output_endpoint: {:?}, input_endpoint: {:?} }} ==> {:?}",
+        output_endpoint, input_endpoint, r
+    );
+    r
+    
 }
 
 #[tauri::command]
 fn audio_list_presets() -> Vec<String> {
-    audio_tuning::app::presets()
+    let r = audio_tuning::app::presets();
+    println!("[AUDIO] audio_list_presets: {:?}", r);
+    r
+
 }
 
 #[tauri::command]
 fn audio_set_parameter(endpoint: String, key: String, value: f32) -> Result<(), String> {
+    println!("[AUDIO] audio_set_parameter: {{ endpoint: {}, key: {}, value: {} }}", endpoint, key, value);
     audio_tuning::app::worker_request(
         "set_parameter",
         serde_json::json!({ "endpoint": endpoint, "key": key, "value": value }),
@@ -1505,6 +1517,7 @@ fn audio_set_parameter(endpoint: String, key: String, value: f32) -> Result<(), 
 
 #[tauri::command]
 fn audio_apply_preset(endpoint: String, preset: String) -> Result<(), String> {
+    println!("[AUDIO] audio_apply_preset: {{ endpoint: {}, preset: {} }}", endpoint, preset);
     audio_tuning::app::worker_request(
         "apply_preset",
         serde_json::json!({ "endpoint": endpoint, "preset": preset }),
@@ -1513,6 +1526,7 @@ fn audio_apply_preset(endpoint: String, preset: String) -> Result<(), String> {
 
 #[tauri::command]
 fn audio_set_mode(endpoint: String, mode: String) -> Result<(), String> {
+    println!("[AUDIO] audio_set_mode: {{ endpoint: {}, mode: {} }}", endpoint, mode);
     audio_tuning::app::worker_request(
         "set_mode",
         serde_json::json!({ "endpoint": endpoint, "mode": mode }),
@@ -1521,6 +1535,7 @@ fn audio_set_mode(endpoint: String, mode: String) -> Result<(), String> {
 
 #[tauri::command]
 fn audio_set_profile(endpoint: String, profile: String) -> Result<(), String> {
+    println!("[AUDIO] audio_set_profile: {{ endpoint: {}, profile: {} }}", endpoint, profile);
     audio_tuning::app::worker_request(
         "set_profile",
         serde_json::json!({ "endpoint": endpoint, "profile": profile }),
@@ -1529,14 +1544,18 @@ fn audio_set_profile(endpoint: String, profile: String) -> Result<(), String> {
 
 #[tauri::command]
 fn audio_create_profile(endpoint: String, alias: String) -> Result<String, String> {
-    audio_tuning::app::worker_request(
+    let r =     audio_tuning::app::worker_request(
         "create_profile",
         serde_json::json!({ "endpoint": endpoint, "alias": alias }),
-    )
+    );
+    println!("[AUDIO] audio_create_profile: {{ endpoint: {}, alias: {} }} ==> {:?}", endpoint, alias, r);
+    r
+
 }
 
 #[tauri::command]
 fn audio_delete_profile(endpoint: String, profile: String) -> Result<(), String> {
+    println!("[AUDIO] audio_delete_profile: {{ endpoint: {}, profile: {} }}", endpoint, profile);
     audio_tuning::app::worker_request(
         "delete_profile",
         serde_json::json!({ "endpoint": endpoint, "profile": profile }),
@@ -1545,6 +1564,7 @@ fn audio_delete_profile(endpoint: String, profile: String) -> Result<(), String>
 
 #[tauri::command]
 fn audio_reset_profile(endpoint: String) -> Result<(), String> {
+    println!("[AUDIO] audio_reset_profile: {{ endpoint: {} }}", endpoint);
     audio_tuning::app::worker_request(
         "reset_profile",
         serde_json::json!({ "endpoint": endpoint }),
@@ -1553,10 +1573,13 @@ fn audio_reset_profile(endpoint: String) -> Result<(), String> {
 
 #[tauri::command]
 fn audio_set_volume(endpoint: String, value: f32) -> Result<f32, String> {
-    audio_tuning::app::worker_request(
+    let r = audio_tuning::app::worker_request(
         "set_volume",
         serde_json::json!({ "endpoint": endpoint, "value": value }),
-    )
+    );
+    println!("[AUDIO] audio_set_volume: {{ endpoint: {}, value: {} }} ==> {:?}", endpoint, value, r);
+    r
+
 }
 
 #[tauri::command]
@@ -1566,7 +1589,7 @@ fn audio_set_input_setting(
     key: String,
     value: String,
 ) -> Result<String, String> {
-    audio_tuning::app::worker_request(
+    let r = audio_tuning::app::worker_request(
         "set_input_setting",
         serde_json::json!({
             "outputEndpoint": output_endpoint,
@@ -1574,7 +1597,13 @@ fn audio_set_input_setting(
             "key": key,
             "value": value,
         }),
-    )
+    );
+    println!(
+        "[AUDIO] audio_set_volume: {{ output_endpoint: {}, input_endpoint: {}, key: {}, value: {} }} ==> {:?}",
+        output_endpoint, input_endpoint, key, value, r
+    );
+    r
+
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
