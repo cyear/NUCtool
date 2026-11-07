@@ -4203,11 +4203,50 @@ label {
   margin: 8px 0;
 }
 
+.battery-details {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
+.battery-details-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 8px 16px;
+  margin-top: 12px;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.battery-details-list > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.battery-details-list dt {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.battery-details-list dd {
+  max-width: 55%;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
 /* =========================================================
    电池充电限制项目
    ========================================================= */
 
-.battery-limit-item {
+.battery-limit-item,
+.battery-details-list {
   padding: 16px;
 
   background: rgba(255, 255, 255, 0.025);

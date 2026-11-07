@@ -167,6 +167,26 @@ const zhCN = {
   // 系统配置
   // ==========================================================
   system: {
+    batteryDetails: {
+      title: "电池详情",
+      fullOver24Hours: "满电超过 24 小时",
+      ermThresholdReached: "已达 ERM 阈值",
+      windowsPercent: "Windows 报告电量",
+      designCapacity: "设计容量",
+      fullChargeCapacity: "满充容量",
+      remainingCapacity: "剩余容量",
+      designVoltage: "设计电压",
+      voltage: "实时电压",
+      batteryCurrent: "电池电流",
+      cycleCount: "电池循环次数",
+      warning: "电池告警",
+      chargeLimit: "充电上限",
+      yes: "是",
+      no: "否",
+      normal: "正常",
+      warningActive: "告警",
+      capacityEstimate: "mAh 按设计电压估算",
+    },
     title: "系统配置",
     subtitle: "调整系统相关配置",
 

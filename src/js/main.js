@@ -9,6 +9,7 @@ import {
 } from "./i18n.js";
 
 import { initGscCheck } from "./gsc-check.js";
+import { initBatteryDetails } from "./battery-details.js";
 
 // ==============================================
 // 禁止右键菜单
@@ -5766,6 +5767,7 @@ window.initNewFanConfig =
 async function init() {
   // 初始化语言
   initI18n();
+  initBatteryDetails().catch((error) => console.error("Battery details:", error));
   await loadConfig();
   await initNewFanConfig();
   await initNewFanStatusListener();

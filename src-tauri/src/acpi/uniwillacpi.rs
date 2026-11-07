@@ -661,6 +661,93 @@ impl UniwillAcpiEc {
 
 }
 
+
+#[derive(Debug, Clone, Default, Serialize)]
+pub struct BatteryEcDetails {
+    full_over_24_hours: Option<bool>,
+    erm_threshold_reached: Option<bool>,
+    capacity_unit: Option<&'static str>,
+    design_capacity: Option<u16>,
+    full_charge_capacity: Option<u16>,
+    remaining_capacity: Option<u16>,
+    design_voltage_mv: Option<u16>,
+    voltage_mv: Option<u16>,
+    battery_current_ma: Option<i32>,
+    cycle_count: Option<u16>,
+    battery_warning: Option<u8>,
+    charge_limit: Option<u8>,
+}
+
+fn decode_battery_current_ma(status: u16, rate: u16) -> Option<i32> {
+    if rate >= 0x8000 {
+        return None;
+    }
+    // Uniwill reports the magnitude in 0x0434. The low status bits give its direction.
+    let magnitude = i32::from(rate);
+    match status & 0x03 {
+        0x01 => Some(-magnitude),
+        0x02 => Some(magnitude),
+        0x00 if rate == 0 => Some(0),
+        _ => None,
+    }
+}
+
+impl UniwillAcpiEc {
+    fn read_battery_word(&self, address: u16) -> Option<u16> {
+        let mut high = self.read_u8(address + 1).ok()?;
+        for _ in 0..3 {
+            let low = self.read_u8(address).ok()?;
+            let next_high = self.read_u8(address + 1).ok()?;
+            if high == next_high {
+                let word = u16::from_le_bytes([low, high]);
+                return (word != u16::MAX).then_some(word);
+            }
+            high = next_high;
+        }
+        None
+    }
+
+    pub fn read_battery_details(&self, battery_present: bool) -> BatteryEcDetails {
+        let flags = self.read_u8(0x07C6).ok();
+        let mut details = BatteryEcDetails {
+            full_over_24_hours: flags.map(|value| value & 0x08 != 0),
+            erm_threshold_reached: flags.map(|value| value & 0x10 != 0),
+            charge_limit: self.read_u8(0x07B9).ok().map(|value| match value & 0x7F {
+                level @ 1..=99 => level,
+                _ => 100,
+            }),
+            ..BatteryEcDetails::default()
+        };
+        if !battery_present {
+            return details;
+        }
+
+        details.capacity_unit = match self.read_battery_word(0x0400) {
+            Some(0) => Some("mWh"),
+            Some(1) => Some("mAh"),
+            _ => None,
+        };
+        details.design_capacity = self.read_battery_word(0x0402);
+        details.full_charge_capacity = self.read_battery_word(0x0404);
+        details.remaining_capacity = self.read_battery_word(0x0436);
+        details.design_voltage_mv = self.read_battery_word(0x0408).filter(|&voltage| voltage != 0);
+        details.cycle_count = self.read_battery_word(0x04A6);
+        details.battery_warning = self.read_u8(0x0494).ok();
+
+        let status = self.read_battery_word(0x0432);
+        let rate = self.read_battery_word(0x0434);
+        details.voltage_mv = self.read_battery_word(0x0438).filter(|&voltage| voltage != 0);
+        let status_after = self.read_battery_word(0x0432);
+        if status == status_after {
+            details.battery_current_ma = status
+                .zip(rate)
+                .and_then(|(status, rate)| decode_battery_current_ma(status, rate));
+        }
+        println!("[BAT]: {:?}", details);
+        details
+    }
+}
+
 impl Drop for UniwillAcpiEc {
     fn drop(&mut self) {
         unsafe {

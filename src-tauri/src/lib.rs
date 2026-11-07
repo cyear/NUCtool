@@ -8,6 +8,7 @@ const CREATE_NO_WINDOW: u32 = 0x08000000;
 mod logging;
 mod acpi;
 mod audio_tuning;
+mod battery_details;
 mod config;
 mod fan_control;
 mod osd;
@@ -1447,6 +1448,7 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     window_push::start_window_push_monitor(
         app.handle().clone(),
     );
+    battery_details::start(app.handle().clone());
     Ok(())
 }
 
@@ -1636,6 +1638,7 @@ pub fn run() {
         .manage(NewFanMonitorState::default())
         .manage(FanControlState::new())
         .manage(WindowPushState::new())
+        .manage(battery_details::BatteryDetailsPage::default())
         .invoke_handler(tauri::generate_handler![
             start_sensor_loop,
             load_fan_config,
@@ -1674,6 +1677,7 @@ pub fn run() {
             get_sys_arc_gpu_driver,
             get_sys_gsc_driver,
             get_battery_charging_level,
+            battery_details::set_battery_details_active,
             set_battery_charging_level,
             get_battery_mode,
             set_battery_mode,
