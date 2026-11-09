@@ -436,9 +436,15 @@ const enUS = {
     title: "Settings",
     subtitle: "Configure NUCtool",
 
-    autostartTitle: "Startup & Automatic Control",
+    autostartTitle: "Startup",
     autostartDescription:
-      "Automatically start fan control when NUCtool starts with Windows",
+      "Automatically run NUCtool after signing in to Windows",
+    autoFanTitle: "Fan control at startup",
+    autoFanDescription: "Fan control mode used when NUCtool starts with Windows or is launched manually with --fan-control",
+    autoFanOff: "Off",
+    autoFanLegacy: "Legacy fan control",
+    autoFanNew: "New fan control",
+    autoFanSaveFailed: "Failed to save the fan startup setting",
 
     autostartChecking: "Checking...",
 

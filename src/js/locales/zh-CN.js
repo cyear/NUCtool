@@ -427,8 +427,14 @@ const zhCN = {
     title: "设置",
     subtitle: "配置 NUCtool",
 
-    autostartTitle: "开机自启动 & 自动控制",
-    autostartDescription: "开机后NUCtool自动启动风扇控制",
+    autostartTitle: "开机自启动",
+    autostartDescription: "登录 Windows 后自动运行 NUCtool",
+    autoFanTitle: "风扇自启动",
+    autoFanDescription: "NUCtool 随 Windows 自启或手动带 --fan-control 启动时使用的风扇控制模式",
+    autoFanOff: "关闭",
+    autoFanLegacy: "旧风扇控制",
+    autoFanNew: "新风扇控制",
+    autoFanSaveFailed: "保存风扇自启动配置失败",
 
     autostartChecking: "检查中...",
 

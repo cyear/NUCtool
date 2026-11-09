@@ -1356,6 +1356,43 @@ if (autostartToggle) {
 
 
 // =====================================================
+// 风扇自启动
+// =====================================================
+
+const autoFanModeSelect = document.getElementById("auto-fan-mode-select");
+let savedAutoFanMode;
+
+async function loadAutoFanMode() {
+  try {
+    savedAutoFanMode = String(await invoke("get_auto_fan_mode"));
+    autoFanModeSelect.value = savedAutoFanMode;
+    autoFanModeSelect.disabled = false;
+  } catch (error) {
+    autoFanModeSelect.selectedIndex = -1;
+    document.getElementById("auto-fan-read-error").hidden = false;
+    console.error("读取风扇自启动配置失败:", error);
+  }
+}
+
+autoFanModeSelect.addEventListener("change", async () => {
+  const mode = autoFanModeSelect.value;
+  if (mode === savedAutoFanMode) return;
+
+  autoFanModeSelect.disabled = true;
+  try {
+    await invoke("set_auto_fan_mode", { mode: Number(mode) });
+    savedAutoFanMode = mode;
+  } catch (error) {
+    autoFanModeSelect.value = savedAutoFanMode;
+    console.error("保存风扇自启动配置失败:", error);
+    window.alert(t("settings.autoFanSaveFailed"));
+  } finally {
+    autoFanModeSelect.disabled = false;
+  }
+});
+
+
+// =====================================================
 // 显示设置
 // =====================================================
 
@@ -5767,6 +5804,7 @@ window.initNewFanConfig =
 async function init() {
   // 初始化语言
   initI18n();
+  loadAutoFanMode();
   initBatteryDetails().catch((error) => console.error("Battery details:", error));
   await loadConfig();
   await initNewFanConfig();

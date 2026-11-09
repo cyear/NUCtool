@@ -865,6 +865,16 @@ async fn set_autostart(app: tauri::AppHandle, enabled: bool) -> Result<(), Strin
 }
 
 #[tauri::command]
+fn get_auto_fan_mode() -> Result<u8, String> {
+    config::load_auto_fan_mode()
+}
+
+#[tauri::command]
+fn set_auto_fan_mode(mode: u8) -> Result<(), String> {
+    config::save_auto_fan_mode(mode)
+}
+
+#[tauri::command]
 async fn get_sys_model() -> String {
     let model = get_model().expect("get_model error");
     println!("get_model Model: {}", model);
@@ -1397,48 +1407,39 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // 风扇自启
-    let auto_fan_control = args.iter().any(|arg| arg == "--fan-control");
-    if auto_fan_control {
-        println!("检测到 --fan-control，自动启动风扇控制");
-        let fan_data = match config::load() {
-            Ok(data) => data,
-            Err(e) => {
-                eprintln!("auto_fan load config error: {}", e);
-                // 配置读取失败，不启动风扇控制
-                return Ok(());
-            }
-        };
+    if args.iter().any(|arg| arg == "--fan-control") {
+        let auto_fan_mode = config::load_auto_fan_mode();
         let app_handle = app.handle().clone();
         thread::spawn(move || {
-            let use_new_fan = match acpi_ec_worker().call(|ec| {
-                let t1 = ec.fan_read_custom_table_1();
-                let t2 = ec.fan_read_custom_table_2();
-                let v = t1 || t2;
-                println!("自启动二次验证: 1:{} 2:{} O: {}", t1, t2, v);
-                v
-            }) {
-                Ok(value) => {
-                    
-                    value
-                },
+            let mode = match auto_fan_mode {
+                Ok(0) => return,
+                Ok(mode) => mode,
                 Err(e) => {
                     eprintln!("风扇自启失败: {}", e);
                     return;
                 }
             };
-            if use_new_fan {
-                thread::sleep(Duration::from_millis(4000));
-                println!("启用新EC风扇");
-                start_newfan(&app_handle, fan_data);
-            } else {
-                thread::sleep(Duration::from_millis(4000));
-                println!("启用旧风扇控制");
-                let state = app_handle.state::<FanControlState>();
-                if let Err(e) =
-                    start_fan_control_internal(&app_handle, fan_data, &state)
-                {
-                    eprintln!("自动启动风扇控制失败: {}", e);
+            let fan_data = match config::load() {
+                Ok(data) => data,
+                Err(e) => {
+                    eprintln!("风扇自启失败: {}", e);
+                    return;
                 }
+            };
+            thread::sleep(Duration::from_secs(4));
+            match mode {
+                1 => {
+                    println!("启用旧风扇控制");
+                    let state = app_handle.state::<FanControlState>();
+                    if let Err(e) = start_fan_control_internal(&app_handle, fan_data, &state) {
+                        eprintln!("自动启动风扇控制失败: {}", e);
+                    }
+                }
+                2 => {
+                    println!("启用新EC风扇");
+                    start_newfan(&app_handle, fan_data);
+                }
+                _ => {}
             }
         });
     } else {
@@ -1652,6 +1653,8 @@ pub fn run() {
             get_fan_control_status,
             get_autostart,
             set_autostart,
+            get_auto_fan_mode,
+            set_auto_fan_mode,
             set_power_plan,
             set_display_mode,
             audio_list_devices,

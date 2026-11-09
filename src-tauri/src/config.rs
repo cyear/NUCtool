@@ -23,6 +23,37 @@ pub fn config_dir() -> PathBuf {
         .join("com.cyear.nuctool")
 }
 
+pub fn load_auto_fan_mode() -> Result<u8, String> {
+    let path = config_dir().join("autofan.conf");
+    match fs::read_to_string(path) {
+        Ok(value) => match value.trim() {
+            "0" => Ok(0),
+            "1" => Ok(1),
+            "2" => Ok(2),
+            _ => {
+                eprintln!("autofan.conf 的值无效，风扇自启动按关闭处理");
+                Ok(0)
+            }
+        },
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+            save_auto_fan_mode(0)?;
+            Ok(0)
+        }
+        Err(e) => Err(format!("读取 autofan.conf 失败: {e}")),
+    }
+}
+
+pub fn save_auto_fan_mode(mode: u8) -> Result<(), String> {
+    if mode > 2 {
+        return Err("风扇自启动模式只能是 0、1 或 2".into());
+    }
+
+    let dir = config_dir();
+    fs::create_dir_all(&dir).map_err(|e| format!("创建配置目录失败: {e}"))?;
+    fs::write(dir.join("autofan.conf"), mode.to_string())
+        .map_err(|e| format!("写入 autofan.conf 失败: {e}"))
+}
+
 pub fn dll_dir() -> Result<PathBuf, String> {
     let exe_path = std::env::current_exe()
         .map_err(|e| format!("获取程序路径失败：{e}"))?;

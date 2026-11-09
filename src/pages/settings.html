@@ -28,11 +28,11 @@
       <div>
 
         <div class="settings-card-title" data-i18n="settings.autostartTitle">
-          开机自启动 & 自动控制
+          开机自启动
         </div>
 
         <div class="settings-card-description" data-i18n="settings.autostartDescription">
-          开机后NUCtool自动启动风扇控制
+          登录 Windows 后自动运行 NUCtool
         </div>
 
       </div>
@@ -77,6 +77,30 @@
 
     </div>
 
+  </div>
+
+
+  <!-- 风扇自启动 -->
+  <div class="settings-card">
+    <div class="settings-option fan-mode-option">
+      <div class="settings-option-info">
+        <label for="auto-fan-mode-select" class="settings-option-title" data-i18n="settings.autoFanTitle">
+          风扇自启动
+        </label>
+        <div class="settings-option-description" data-i18n="settings.autoFanDescription">
+          NUCtool 随 Windows 自启或手动带 --fan-control 启动时使用的风扇控制模式
+        </div>
+      </div>
+
+      <select id="auto-fan-mode-select" class="settings-language-select" disabled>
+        <option value="0" data-i18n="settings.autoFanOff">关闭</option>
+        <option value="1" data-i18n="settings.autoFanLegacy">旧风扇控制</option>
+        <option value="2" data-i18n="settings.autoFanNew">新风扇控制</option>
+      </select>
+    </div>
+    <div id="auto-fan-read-error" class="settings-option-description" data-i18n="settings.readFailed" role="status" hidden>
+      读取失败
+    </div>
   </div>
 
 

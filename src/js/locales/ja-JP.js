@@ -432,9 +432,15 @@ const jaJP = {
     title: "設定",
     subtitle: "NUCtool を設定します",
 
-    autostartTitle: "スタートアップと自動制御",
+    autostartTitle: "スタートアップ",
     autostartDescription:
-      "Windows 起動時に NUCtool のファン制御を自動的に開始します",
+      "Windows へのサインイン後に NUCtool を自動的に起動します",
+    autoFanTitle: "ファン制御の自動起動",
+    autoFanDescription: "Windows とともに NUCtool が自動起動したとき、または --fan-control を付けて手動で起動したときに使用するファン制御モード",
+    autoFanOff: "オフ",
+    autoFanLegacy: "従来のファン制御",
+    autoFanNew: "新しいファン制御",
+    autoFanSaveFailed: "ファン制御の自動起動設定を保存できませんでした",
 
     autostartChecking: "確認中...",
 

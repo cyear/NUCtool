@@ -316,9 +316,15 @@ const ruRU = {
     title: "Настройки",
     subtitle: "Настройка NUCtool",
 
-    autostartTitle: "Запуск и автоматическое управление",
+    autostartTitle: "Автозапуск",
     autostartDescription:
-      "Автоматически запускать управление вентиляторами при старте NUCtool с Windows",
+      "Автоматически запускать NUCtool после входа в Windows",
+    autoFanTitle: "Автозапуск управления вентиляторами",
+    autoFanDescription: "Режим управления вентиляторами при автозапуске NUCtool вместе с Windows или при ручном запуске с параметром --fan-control",
+    autoFanOff: "Выключено",
+    autoFanLegacy: "Прежнее управление",
+    autoFanNew: "Новое управление",
+    autoFanSaveFailed: "Не удалось сохранить настройку автозапуска управления вентиляторами",
 
     autostartChecking: "Проверка...",
 
