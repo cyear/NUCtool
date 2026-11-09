@@ -94,9 +94,9 @@ const jaJP = {
     powerPlanDescription:
       "Windows の電源プランを選択します。表示されているプランは参考値であり、選択したプランとモードが適用されます。モード切替によって上書きされる場合があります。",
 
-    powerPlanDefault: "デフォルト",
-    powerPlanDefaultDescription:
-      "電源プランを変更しない",
+    powerPlanOther: "その他",
+    powerPlanOtherDescription:
+      "一覧にないプラン（選択不可）",
 
     powerSavingPlan: "省電力",
     powerSavingPlanDescription:
@@ -110,11 +110,11 @@ const jaJP = {
     highPerformancePlanDescription:
       "より高いパフォーマンスを提供",
 
-    benchmarkHighPerformancePlan:
-      "ベンチマーク高パフォーマンス",
+    ultimatePerformancePlan:
+      "究極のパフォーマンス",
 
-    benchmarkHighPerformancePlanDescription:
-      "ベンチマークテスト用",
+    ultimatePerformancePlanDescription:
+      "Windows の「究極のパフォーマンス」電源プラン",
 
     powerLimit: "電力制限",
     powerLimitDescription:

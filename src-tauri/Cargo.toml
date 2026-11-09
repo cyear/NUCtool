@@ -1,6 +1,6 @@
 [package]
 name = "nuctool"
-version = "1.1.5"
+version = "1.1.6"
 description = "NUCtool for Windows"
 authors = ["cyear"]
 edition = "2021"
@@ -25,6 +25,7 @@ windows = { version = "0.62.2", features = [
     "Win32_Storage_FileSystem",
     "Win32_System_IO",
     "Win32_System_Power",
+    "Win32_System_Registry",
     "Win32_Security",
     "Win32_UI_WindowsAndMessaging",
     "Win32_System_Com",

@@ -237,6 +237,7 @@ document.querySelectorAll(".nav-btn").forEach((button) => {
     document
       .getElementById(`page-${page}`)
       ?.classList.add("active");
+    syncTuningRefresh();
   });
 
 });
@@ -750,174 +751,126 @@ const tuningButtons =
   document.querySelectorAll(
     ".tuning-btn"
   );
-
-
-tuningButtons.forEach(
-  (button) => {
-
-    button.addEventListener(
-      "click",
-      async () => {
-        const mode = button.dataset.mode;
-        tuningButtons.forEach((btn) => { btn.classList.remove(); });
-        button.classList.add("active");
-        if (mode === "unspecified") {
-          console.log("性能模式: 默认");
-          return;
-        }
-        try {
-          await invoke("set_performance_mode", { mode: mode });
-          console.log("性能模式:", mode);
-        } catch (error) {
-          console.error("设置性能模式失败:", error);
-        }
-        loadPerformanceMode();
-      }
-    );
-
-  }
-);
-
-// 获取性能模式
-async function loadPerformanceMode() {
-  try {
-    let mode;
-
-    do {
-      mode = await invoke("get_performance_mode");
-
-      if (mode === 0) {
-        await new Promise((resolve) => {
-          setTimeout(resolve, 3000);
-        });
-      }
-    } while (mode === 0);
-
-    const modeMap = {
-      1: "performance",
-      2: "balanced",
-      3: "power-saving",
-      5: "benchmark-on"
-    };
-
-    tuningButtons.forEach((btn) => {
-      btn.classList.remove("active");
-    });
-
-    const modeName = modeMap[mode];
-
-    const activeButton = document.querySelector(
-      `.tuning-btn[data-mode="${modeName}"]`
-    );
-
-    if (activeButton) {
-      activeButton.classList.add("active");
-    }
-  } catch (error) {
-    console.error("获取性能模式失败:", error);
-  }
-}
-
-
-
-// =====================================================
-// 电源计划
-// =====================================================
-
 const powerPlanButtons =
   document.querySelectorAll(
     ".power-plan-btn"
   );
 
+const tuningPage = document.getElementById("page-tuning");
+const tuningModeNames = {
+  1: "performance",
+  2: "balanced",
+  3: "power-saving",
+  5: "benchmark-on",
+};
+let tuningWcfConnected = false;
+let tuningWindowAvailable = null;
+let tuningRefreshTimer = null;
+let tuningRefreshVersion = 0;
+let tuningRead = null;
+let tuningWriting = false;
 
-powerPlanButtons.forEach(
-  (button) => {
+function canRefreshTuning() {
+  return !tuningWriting
+    && tuningWindowAvailable === true
+    && tuningPage.classList.contains("active");
+}
 
-    button.addEventListener(
-      "click",
-      async () => {
-
-        const plan =
-          button.dataset.powerPlan;
-
-        // 更新选中状态
-        powerPlanButtons.forEach(
-          (btn) => {
-            btn.classList.remove(
-              "active"
-            );
-          }
-        );
-
-        button.classList.add(
-          "active"
-        );
-
-
-        // 默认：不修改电源计划
-        if (
-          plan === "unspecified"
-        ) {
-
-          console.log(
-            "电源计划: 默认"
-          );
-
-          return;
-        }
-
-
-        const value =
-          Number(plan);
-
-
-        if (
-          !Number.isInteger(value)
-        ) {
-
-          console.error(
-            "无效的电源计划:",
-            plan
-          );
-
-          return;
-        }
-
-
-        try {
-
-          await invoke(
-            "set_power_plan",
-            {
-              mode: value
-            }
-          );
-
-          console.log(
-            "电源计划:",
-            value
-          );
-
-        } catch (error) {
-
-          console.error(
-            "设置电源计划失败:",
-            error
-          );
-        }
-
-      }
-    );
-
+function syncTuningRefresh() {
+  if (!canRefreshTuning()) {
+    if (tuningRefreshTimer !== null) {
+      clearInterval(tuningRefreshTimer);
+      tuningRefreshTimer = null;
+      tuningRefreshVersion++;
+    }
+    return;
   }
-);
+  if (tuningRefreshTimer !== null) return;
 
+  tuningRefreshTimer = setInterval(refreshTuningStatus, 4000);
+  refreshTuningStatus();
+}
+
+function refreshTuningStatus() {
+  if (!canRefreshTuning() || tuningRead) return;
+
+  const version = tuningRefreshVersion;
+  tuningRead = Promise.allSettled([
+    tuningWcfConnected ? invoke("get_performance_mode") : null,
+    invoke("get_active_power_plan"),
+  ]).then(([mode, plan]) => {
+    if (version !== tuningRefreshVersion || !canRefreshTuning()) return;
+
+    if (mode.status === "rejected") {
+      console.error("获取性能模式失败:", mode.reason);
+    } else if (tuningModeNames[mode.value]) {
+      tuningButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.mode === tuningModeNames[mode.value]);
+      });
+    }
+
+    if (plan.status === "fulfilled") {
+      const activePlan = plan.value === null ? "other" : String(plan.value);
+      powerPlanButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.powerPlan === activePlan);
+      });
+    } else {
+      console.error("获取电源计划失败:", plan.reason);
+    }
+  }).finally(() => {
+    tuningRead = null;
+    // 恢复刷新时可能还有暂停前发出的请求。
+    if (version !== tuningRefreshVersion) refreshTuningStatus();
+  });
+}
+
+async function writeTuningSetting(command, mode) {
+  if (tuningWriting) return;
+
+  tuningWriting = true;
+  syncTuningRefresh();
+  try {
+    await tuningRead;
+    await invoke(command, { mode });
+  } catch (error) {
+    console.error(`${command} 失败:`, error);
+  } finally {
+    tuningWriting = false;
+    syncTuningRefresh();
+  }
+}
+
+tuningButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const mode = button.dataset.mode;
+    if (mode !== "unspecified") writeTuningSetting("set_performance_mode", mode);
+  });
+});
+
+powerPlanButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const mode = Number(button.dataset.powerPlan);
+    if (Number.isInteger(mode)) writeTuningSetting("set_power_plan", mode);
+  });
+});
+
+async function initTuningRefresh() {
+  await listen("window-push-changed", ({ payload }) => {
+    tuningWindowAvailable = payload;
+    syncTuningRefresh();
+  }, { target: "main" });
+  const available = await invoke("get_window_push_enabled");
+  // 若等待初始读数时已收到窗口事件，沿用事件中的状态。
+  if (tuningWindowAvailable === null) {
+    tuningWindowAvailable = available;
+    syncTuningRefresh();
+  }
+}
 
 // 服务连接失败置灰
 function disableTuningSections() {
   const targets = [
     { card: '.tuning-card',        header: '.tuning-header',        msg: 'UniwillService not detected as enabled' },
-    { card: '.power-plan-card',    header: '.power-plan-header',    msg: 'UniwillService not detected as enabled' },
     { card: '.display-card',       header: '.display-header',       msg: 'UniwillService not detected as enabled' },
     { card: '#battery-card',       header: '.tdp-header',           msg: 'UniwillService not detected as enabled' },
   ];
@@ -5814,20 +5767,22 @@ async function init() {
   await initFanControlStatus();
   updateControlState();
 
-  const connected = await invoke("is_wcf_is_connect");
-  console.log("UniwillService: " + connected);
-  if (connected === false) {
+  tuningWcfConnected = await invoke("is_wcf_is_connect").catch((error) => {
+    console.error("UniwillService 连接检查失败:", error);
+    return false;
+  });
+  console.log("UniwillService: " + tuningWcfConnected);
+  if (!tuningWcfConnected) {
     disableTuningSections();
-  } else {
-    loadPerformanceMode();
   }
-  
-  await loadBatteryHealthMode();
+  initTuningRefresh().catch((error) => console.error("初始化性能调优刷新失败:", error));
+
+  if (tuningWcfConnected) await loadBatteryHealthMode();
   loadFanMode();
   loadAutostartState();
   await initGscCheck();
   await initKeyboardLed();
-  if (model != "LAPAC71H" && model != "LAPAC71G") {
+  if (tuningWcfConnected && model != "LAPAC71H" && model != "LAPAC71G") {
     await initLightbar();
   }
   checkGithubVersion();

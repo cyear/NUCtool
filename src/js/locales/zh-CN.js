@@ -91,8 +91,8 @@ const zhCN = {
     powerPlanDescription:
       "选择 Windows 电源计划，显示的计划仅为显示，请以选择后以及模式为准(模式切换会覆盖)",
 
-    powerPlanDefault: "默认",
-    powerPlanDefaultDescription: "不修改电源计划",
+    powerPlanOther: "其他",
+    powerPlanOtherDescription: "列表外的计划，不可选",
 
     powerSavingPlan: "节能",
     powerSavingPlanDescription: "降低功耗，延长续航",
@@ -103,8 +103,8 @@ const zhCN = {
     highPerformancePlan: "高性能",
     highPerformancePlanDescription: "提供更高的性能",
 
-    benchmarkHighPerformancePlan: "基准高性能",
-    benchmarkHighPerformancePlanDescription: "基准测试使用",
+    ultimatePerformancePlan: "卓越性能",
+    ultimatePerformancePlanDescription: "Windows 卓越性能电源计划",
 
     powerLimit: "功耗限制",
     powerLimitDescription: "调整处理器与显卡的功耗限制",

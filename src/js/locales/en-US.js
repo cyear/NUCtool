@@ -93,9 +93,9 @@ const enUS = {
     powerPlanDescription:
       "Select a Windows power plan. The displayed plan is for reference only; the selected plan and mode take precedence. Mode switching may override it.",
 
-    powerPlanDefault: "Default",
-    powerPlanDefaultDescription:
-      "Do not modify the power plan",
+    powerPlanOther: "Other",
+    powerPlanOtherDescription:
+      "Unlisted plan (not selectable)",
 
     powerSavingPlan: "Power Saver",
     powerSavingPlanDescription:
@@ -109,11 +109,11 @@ const enUS = {
     highPerformancePlanDescription:
       "Provide higher performance",
 
-    benchmarkHighPerformancePlan:
-      "Benchmark High Performance",
+    ultimatePerformancePlan:
+      "Ultimate Performance",
 
-    benchmarkHighPerformancePlanDescription:
-      "For benchmark testing",
+    ultimatePerformancePlanDescription:
+      "Windows Ultimate Performance power plan",
 
     powerLimit: "Power Limits",
     powerLimitDescription:

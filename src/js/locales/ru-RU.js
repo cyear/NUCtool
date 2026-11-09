@@ -93,9 +93,9 @@ const ruRU = {
     powerPlanDescription:
       "Выберите схему электропитания Windows. Отображаемая схема носит справочный характер; приоритет имеют выбранная схема и режим. Переключение режима может их переопределить.",
 
-    powerPlanDefault: "По умолчанию",
-    powerPlanDefaultDescription:
-      "Не изменять схему электропитания",
+    powerPlanOther: "Другая",
+    powerPlanOtherDescription:
+      "Схема вне списка (недоступна для выбора)",
 
     powerSavingPlan: "Экономия энергии",
     powerSavingPlanDescription:
@@ -109,11 +109,11 @@ const ruRU = {
     highPerformancePlanDescription:
       "Повышенная производительность",
 
-    benchmarkHighPerformancePlan:
-      "Высокая производительность (бенчмарк)",
+    ultimatePerformancePlan:
+      "Максимальная производительность",
 
-    benchmarkHighPerformancePlanDescription:
-      "Для тестирования производительности",
+    ultimatePerformancePlanDescription:
+      "Схема электропитания Windows «Максимальная производительность»",
 
     powerLimit: "Лимиты мощности",
     powerLimitDescription:

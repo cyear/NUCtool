@@ -187,7 +187,7 @@ impl UniwillWcfEc {
     // ========================================================
 
     pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
-        let dll_path = dll_dir().expect("dll_dir 失败").join("NUCtoolV2.dll");
+        let dll_path = dll_dir()?.join("NUCtoolV2.dll");
         println!("DLL PATH: {:?}", &dll_path);
         let dll_data = fs::read(&dll_path)?;
         // 计算 SHA-256

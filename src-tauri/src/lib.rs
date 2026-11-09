@@ -49,8 +49,13 @@ use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     AppHandle, Emitter, Manager, State,
 };
+use windows::core::GUID;
 use windows::Win32::{
-    Foundation::HINSTANCE,
+    Foundation::{LocalFree, ERROR_ALREADY_EXISTS, ERROR_NO_MORE_ITEMS, HINSTANCE, HLOCAL},
+    System::Power::{
+        PowerDuplicateScheme, PowerEnumerate, PowerGetActiveScheme, PowerSetActiveScheme,
+        ACCESS_SCHEME,
+    },
     UI::WindowsAndMessaging::{
         DispatchMessageW, GetMessageW, SetWindowsHookExW, UnhookWindowsHookEx, MSG, WH_KEYBOARD_LL,
     },
@@ -455,68 +460,161 @@ async fn set_performance_mode(app: tauri::AppHandle, mode: String) {
 }
 
 #[tauri::command]
-async fn get_performance_mode() -> i32 {
-    let wcf = match UniwillWcfEc::new() {
-        Ok(wcf) => wcf,
-        Err(e) => {
-            eprintln!("加载 NUCtool DLL 失败: {}", e);
-            None
-        }
-        .expect("加载 NUCtool DLL 失败"),
-    };
-    let ret = wcf.connect();
+async fn get_performance_mode() -> Result<i32, String> {
+    let wcf = UniwillWcfEc::new().map_err(|err| format!("加载 NUCtool DLL 失败: {err}"))?;
+    wcf.connect();
+    if !wcf.is_connected() {
+        return Err("UniwillService 连接失败".into());
+    }
     let state = wcf.get_current_state();
-    println!("connect: {} get_performance_mode {:?}", ret, &state);
-    if state.benchmark_mode == 1 {
+    wcf.disconnect();
+    Ok(if state.benchmark_mode == 1 {
         5
     } else {
         state.selected_profile_index
+    })
+}
+
+const ULTIMATE_PERFORMANCE_TEMPLATE: GUID =
+    GUID::from_u128(0xe9a42b02_d5df_448d_aa00_03f14749eb61);
+// Stable destination so NUCtool can recognize and reuse its copy after a restart.
+const NUCTOOL_ULTIMATE_PERFORMANCE: GUID =
+    GUID::from_u128(0xb120d0db_4428_5277_b7f1_7d308b8feca3);
+const WINDOWS_POWER_PLANS: [(i32, GUID); 5] = [
+    (1, GUID::from_u128(0x8c5e7fda_e8bf_4a96_9a85_a6e23a8c635c)),
+    (2, GUID::from_u128(0x381b4222_f694_41f0_9685_ff5bb260df2e)),
+    (3, GUID::from_u128(0xa1841308_3541_4fab_bc81_f71556f20b4a)),
+    (4, ULTIMATE_PERFORMANCE_TEMPLATE),
+    (4, NUCTOOL_ULTIMATE_PERFORMANCE),
+];
+
+#[tauri::command]
+fn get_active_power_plan() -> Result<Option<i32>, String> {
+    let mut active = std::ptr::null_mut();
+    let status = unsafe { PowerGetActiveScheme(None, &mut active) };
+    if status.0 != 0 {
+        return Err(format!("PowerGetActiveScheme 失败: {}", status.0));
     }
+    if active.is_null() {
+        return Err("PowerGetActiveScheme 未返回 GUID".into());
+    }
+    let guid = unsafe {
+        let guid = *active;
+        LocalFree(Some(HLOCAL(active.cast())));
+        guid
+    };
+    Ok(WINDOWS_POWER_PLANS
+        .iter()
+        .find(|(_, plan)| *plan == guid)
+        .map(|(mode, _)| *mode))
+}
+
+/* Former WCF power-plan writer, retained for reference.
+fn set_wcf_power_plan(mode: i32) -> Result<(), String> {
+    let wcf = UniwillWcfEc::new().map_err(|err| format!("加载 NUCtool DLL 失败: {err}"))?;
+    wcf.connect();
+    if !wcf.is_connected() {
+        return Err("UniwillService 连接失败".into());
+    }
+    let status = wcf.set_power_plan(mode);
+    let result = if status == 0 {
+        let detail = wcf.last_error().unwrap_or_default();
+        Err(format!("WCF 设置电源计划失败 (返回值 {status}): {detail}"))
+    } else {
+        Ok(())
+    };
+    wcf.disconnect();
+    result
+}
+*/
+
+fn get_or_create_ultimate_power_plan() -> Result<GUID, String> {
+    let mut nuctool_plan_installed = false;
+    for index in 0.. {
+        let mut guid = GUID::default();
+        let mut size = std::mem::size_of::<GUID>() as u32;
+        let status = unsafe {
+            PowerEnumerate(
+                None,
+                None,
+                None,
+                ACCESS_SCHEME,
+                index,
+                Some((&mut guid as *mut GUID).cast()),
+                &mut size,
+            )
+        };
+        if status == ERROR_NO_MORE_ITEMS {
+            break;
+        }
+        if status.0 != 0 {
+            return Err(format!("PowerEnumerate 失败: {}", status.0));
+        }
+        if guid == ULTIMATE_PERFORMANCE_TEMPLATE {
+            println!("电源计划: 使用系统已有的卓越性能计划");
+            return Ok(guid);
+        }
+        nuctool_plan_installed |= guid == NUCTOOL_ULTIMATE_PERFORMANCE;
+    }
+    if nuctool_plan_installed {
+        println!("电源计划: 复用 NUCtool 的卓越性能计划");
+        return Ok(NUCTOOL_ULTIMATE_PERFORMANCE);
+    }
+
+    let mut guid = NUCTOOL_ULTIMATE_PERFORMANCE;
+    let mut destination = &mut guid as *mut GUID;
+    let status =
+        unsafe { PowerDuplicateScheme(None, &ULTIMATE_PERFORMANCE_TEMPLATE, &mut destination) };
+    // Another request may have created the fixed destination after enumeration.
+    if status.0 != 0 && status != ERROR_ALREADY_EXISTS {
+        return Err(format!(
+            "创建卓越性能电源计划失败 (PowerDuplicateScheme): {}",
+            status.0
+        ));
+    }
+    if status == ERROR_ALREADY_EXISTS {
+        println!("电源计划: 卓越性能副本已存在，继续使用");
+    } else {
+        println!("电源计划: 已创建卓越性能副本 {NUCTOOL_ULTIMATE_PERFORMANCE:?}");
+    }
+    Ok(NUCTOOL_ULTIMATE_PERFORMANCE)
 }
 
 #[tauri::command]
 async fn set_power_plan(app: tauri::AppHandle, mode: i32) -> Result<(), String> {
-    let wcf = match UniwillWcfEc::new() {
-        Ok(wcf) => wcf,
-        Err(e) => {
-            eprintln!("加载 NUCtool DLL 失败: {}", e);
-            None
-        }
-        .expect("加载 NUCtool DLL 失败"),
-    };
-    let ret = wcf.connect();
-    println!("connect: {}", ret);
-    match mode {
-        0 => {
-            wcf.set_power_plan(mode);
-            println!("电源计划切换: 关闭 {}", mode);
-            let _ = show_osd_i18n(&app, "powerPlan", "powerPlanOff");
-        }
-        1 => {
-            wcf.set_power_plan(mode);
-            println!("电源计划切换: 高性能 {}", mode);
-            let _ = show_osd_i18n(&app, "powerPlan", "powerPlanHighPerformance");
-        }
-        2 => {
-            wcf.set_power_plan(mode);
-            println!("电源计划切换: 平衡 {}", mode);
-            let _ = show_osd_i18n(&app, "powerPlan", "powerPlanBalanced");
-        }
-        3 => {
-            wcf.set_power_plan(mode);
-            println!("电源计划切换: 节能 {}", mode);
-            let _ = show_osd_i18n(&app, "powerPlan", "powerPlanPowerSaving");
-        }
-        4 => {
-            wcf.set_power_plan(mode);
-            println!("电源计划切换: 基准高性能 {}", mode);
-            let _ = show_osd_i18n(&app, "powerPlan", "powerPlanBenchmark");
-        }
+    println!("电源计划: 请求切换，mode={mode}");
+    let osd_key = match mode {
+        1 => "powerPlanHighPerformance",
+        2 => "powerPlanBalanced",
+        3 => "powerPlanPowerSaving",
+        4 => "powerPlanUltimatePerformance",
         _ => {
-            eprintln!("错误的电源计划: {}", mode);
+            let error = format!("无效的电源计划: {mode}");
+            eprintln!("电源计划切换失败: {error}");
+            return Err(error);
         }
+    };
+
+    let guid = if mode == 4 {
+        get_or_create_ultimate_power_plan().inspect_err(|error| {
+            eprintln!("电源计划切换失败 (mode={mode}): {error}");
+        })?
+    } else {
+        WINDOWS_POWER_PLANS
+            .iter()
+            .find(|(plan, _)| *plan == mode)
+            .map(|(_, guid)| *guid)
+            .ok_or_else(|| format!("无效的电源计划: {mode}"))?
+    };
+    let status = unsafe { PowerSetActiveScheme(None, Some(&guid)) };
+    if status.0 != 0 {
+        let error = format!("PowerSetActiveScheme 失败: {}", status.0);
+        eprintln!("电源计划切换失败 (mode={mode}, guid={guid:?}): {error}");
+        return Err(error);
     }
-    wcf.disconnect();
+
+    println!("电源计划切换成功 (mode={mode}, guid={guid:?})");
+    let _ = show_osd_i18n(&app, "powerPlan", osd_key);
     Ok(())
 }
 
@@ -1256,10 +1354,10 @@ async fn write_bios_nvram(password: String) -> Result<(), String> {
 async fn is_wcf_is_connect() -> bool {
     let wcf = match UniwillWcfEc::new() {
         Ok(wcf) => wcf,
-        Err(e) => {
-            eprintln!("加载 NUCtool DLL 失败: {}", e);
-            None
-        }.expect("加载 NUCtool DLL 失败"),
+        Err(err) => {
+            eprintln!("加载 NUCtool DLL 失败: {err}");
+            return false;
+        }
     };
     wcf.connect();
     let c = wcf.is_connected();
@@ -1656,6 +1754,8 @@ pub fn run() {
             get_auto_fan_mode,
             set_auto_fan_mode,
             set_power_plan,
+            get_active_power_plan,
+            window_push::get_window_push_enabled,
             set_display_mode,
             audio_list_devices,
             audio_read_settings,

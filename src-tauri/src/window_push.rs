@@ -3,7 +3,7 @@ use std::sync::{
     Arc,
 };
 
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager, State};
 
 /// NUCtool 全局窗口推送状态。
 ///
@@ -32,6 +32,11 @@ impl WindowPushState {
     }
 }
 
+
+#[tauri::command]
+pub fn get_window_push_enabled(state: State<'_, WindowPushState>) -> bool {
+    state.is_enabled()
+}
 
 /// 启动窗口状态监控
 /// 窗口可见且未最小化时，允许读取 EC 和向前端推送状态
@@ -67,6 +72,9 @@ pub fn start_window_push_monitor(app: AppHandle) {
                     );
 
                     last_enabled = Some(enabled);
+                    if let Err(error) = app.emit_to("main", "window-push-changed", enabled) {
+                        eprintln!("[WindowPush] 发送窗口状态失败: {error}");
+                    }
                 }
 
                 std::thread::sleep(
