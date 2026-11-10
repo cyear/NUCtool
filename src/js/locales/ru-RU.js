@@ -28,7 +28,28 @@ const ruRU = {
     keyboard: "Клавиатура",
     lightbar: "Настройки световой ленты",
     bios: "Настройки BIOS",
+    ecDebug: "Отладка EC",
     settings: "Настройки",
+  },
+
+  ecDebug: {
+    description: "Чтение и запись одного регистра через EC или WMI",
+    register: "Доступ к регистру",
+    channel: "Канал",
+    address: "Адрес (HEX)",
+    value: "Значение для записи (HEX)",
+    unlock: "Разрешить запись",
+    lock: "Заблокировать запись",
+    read: "Прочитать",
+    write: "Записать",
+    writeHint: "Перед записью проверьте канал, адрес и значение.",
+    result: "Результат",
+    reading: "{{channel}} · {{address}} · Байт {{byte}} ({{decimal}})",
+    raw: "Исходное значение WMI {{value}}",
+    readingInProgress: "Чтение…",
+    writing: "Запись…",
+    written: "Запрос на запись завершён",
+    failed: "Ошибка операции {{channel}}. {{error}}",
   },
 
   // ==========================================================

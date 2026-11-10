@@ -10,6 +10,7 @@ mod acpi;
 mod audio_tuning;
 mod battery_details;
 mod config;
+mod ec_debug;
 mod fan_control;
 mod osd;
 mod win;
@@ -1781,6 +1782,8 @@ pub fn run() {
             get_sys_gsc_driver,
             get_battery_charging_level,
             battery_details::set_battery_details_active,
+            ec_debug::ec_debug_read,
+            ec_debug::ec_debug_write,
             set_battery_charging_level,
             get_battery_mode,
             set_battery_mode,

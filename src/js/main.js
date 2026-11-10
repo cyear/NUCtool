@@ -10,6 +10,7 @@ import {
 
 import { initGscCheck } from "./gsc-check.js";
 import { initBatteryDetails } from "./battery-details.js";
+import { initEcDebug } from "./ec-debug.js";
 
 // ==============================================
 // 禁止右键菜单
@@ -5757,6 +5758,7 @@ window.initNewFanConfig =
 async function init() {
   // 初始化语言
   initI18n();
+  initEcDebug();
   loadAutoFanMode();
   initBatteryDetails().catch((error) => console.error("Battery details:", error));
   await loadConfig();

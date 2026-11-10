@@ -28,7 +28,28 @@ const enUS = {
     keyboard: "Keyboard",
     lightbar: "Lightbar",
     bios: "BIOS Configuration",
+    ecDebug: "EC Debug",
     settings: "Settings",
+  },
+
+  ecDebug: {
+    description: "Read or write a single register via EC or WMI",
+    register: "Register Access",
+    channel: "Channel",
+    address: "Address (hex)",
+    value: "Value to write (hex)",
+    unlock: "Unlock writes",
+    lock: "Lock writes",
+    read: "Read",
+    write: "Write",
+    writeHint: "Check the channel, address, and value before writing.",
+    result: "Result",
+    reading: "{{channel}} · {{address}} · Byte {{byte}} ({{decimal}})",
+    raw: "Raw WMI value {{value}}",
+    readingInProgress: "Reading…",
+    writing: "Writing…",
+    written: "Write request completed",
+    failed: "{{channel}} operation failed. {{error}}",
   },
 
   // ==========================================================

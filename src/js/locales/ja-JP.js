@@ -27,7 +27,28 @@ const jaJP = {
     keyboard: "キーボード設定",
     lightbar: "ライト設定",
     bios: "BIOS設定",
+    ecDebug: "EC デバッグ",
     settings: "設定",
+  },
+
+  ecDebug: {
+    description: "EC または WMI 経由でレジスタを 1 つ読み書きします",
+    register: "レジスタの読み書き",
+    channel: "接続方式",
+    address: "アドレス（16 進数）",
+    value: "書き込み値（16 進数）",
+    unlock: "書き込みを許可",
+    lock: "書き込みをロック",
+    read: "読み取り",
+    write: "書き込み",
+    writeHint: "書き込む前に接続方式、アドレス、値を確認してください。",
+    result: "結果",
+    reading: "{{channel}} · {{address}} · バイト {{byte}}（{{decimal}}）",
+    raw: "WMI の戻り値 {{value}}",
+    readingInProgress: "読み取り中…",
+    writing: "書き込み中…",
+    written: "書き込み要求が完了しました",
+    failed: "{{channel}} の操作に失敗しました。{{error}}",
   },
 
   // ==========================================================

@@ -12,6 +12,7 @@ const pages = [
   "keyboard",
   "lightbar",
   "bios",
+  "ec-debug",
   "settings",
 ];
 

@@ -1,0 +1,51 @@
+<section id="page-ec-debug" class="page">
+  <header class="page-header">
+    <div class="page-heading">
+      <h1 data-i18n="nav.ecDebug">EC 调试</h1>
+      <p class="page-subtitle" data-i18n="ecDebug.description">通过 EC 或 WMI 读写单个寄存器</p>
+    </div>
+  </header>
+
+  <section class="settings-card" aria-labelledby="ec-debug-heading">
+    <div class="settings-card-header">
+      <h2 class="settings-card-title" id="ec-debug-heading" data-i18n="ecDebug.register">寄存器读写</h2>
+    </div>
+
+    <div class="ec-debug-row">
+      <label class="ec-debug-field">
+        <span class="settings-option-title" data-i18n="ecDebug.channel">通道</span>
+        <select class="settings-language-select" id="ec-debug-channel">
+          <option value="ec">EC (ACPIDriver)</option>
+          <option value="wmi">WMI</option>
+        </select>
+      </label>
+      <button class="action-btn" id="ec-debug-lock" type="button">解锁写入</button>
+    </div>
+    <div class="ec-debug-row">
+      <label class="ec-debug-field">
+        <span class="settings-option-title" data-i18n="ecDebug.address">地址（十六进制）</span>
+        <input class="ec-debug-input" id="ec-debug-address" type="text" placeholder="043E"
+          autocomplete="off" spellcheck="false" aria-describedby="ec-debug-address-range">
+        <span class="ec-debug-range" id="ec-debug-address-range">0000–FFFF</span>
+      </label>
+      <label class="ec-debug-field">
+        <span class="settings-option-title" data-i18n="ecDebug.value">写入值（十六进制）</span>
+        <input class="ec-debug-input" id="ec-debug-value" type="text" placeholder="2A"
+          autocomplete="off" spellcheck="false" aria-describedby="ec-debug-value-range">
+        <span class="ec-debug-range" id="ec-debug-value-range">00–FF</span>
+      </label>
+    </div>
+    <div class="ec-debug-actions">
+      <button class="action-btn primary" id="ec-debug-read" type="button" data-i18n="ecDebug.read" disabled>读取</button>
+      <button class="action-btn danger" id="ec-debug-write" type="button" data-i18n="ecDebug.write" disabled>写入</button>
+    </div>
+    <p class="settings-card-description" data-i18n="ecDebug.writeHint">写入前请核对通道、地址和值。</p>
+
+    <div class="ec-debug-result" aria-live="polite" aria-atomic="true">
+      <h3 class="settings-option-title" data-i18n="ecDebug.result">结果</h3>
+      <p id="ec-debug-reading">—</p>
+      <p id="ec-debug-raw" hidden></p>
+      <p id="ec-debug-status" hidden></p>
+    </div>
+  </section>
+</section>

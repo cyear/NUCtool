@@ -28,7 +28,28 @@ const zhCN = {
     keyboard: "键盘设置",
     lightbar: "灯条设置",
     bios: "BIOS配置",
+    ecDebug: "EC 调试",
     settings: "设置",
+  },
+
+  ecDebug: {
+    description: "通过 EC 或 WMI 读写单个寄存器",
+    register: "寄存器读写",
+    channel: "通道",
+    address: "地址（十六进制）",
+    value: "写入值（十六进制）",
+    unlock: "解锁写入",
+    lock: "锁定写入",
+    read: "读取",
+    write: "写入",
+    writeHint: "写入前请核对通道、地址和值。",
+    result: "结果",
+    reading: "{{channel}} · {{address}} · 字节 {{byte}}（{{decimal}}）",
+    raw: "WMI 原始值 {{value}}",
+    readingInProgress: "正在读取…",
+    writing: "正在写入…",
+    written: "写入请求完成",
+    failed: "{{channel}} 操作失败。{{error}}",
   },
 
   // ==========================================================

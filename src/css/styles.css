@@ -132,11 +132,13 @@ body {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  overflow-y: auto;
 }
 
 .nav-btn {
   width: 100%;
   height: 42px;
+  flex-shrink: 0;
 
   display: flex;
   align-items: center;
@@ -2068,7 +2070,8 @@ body {
   width: 100%;
 }
 
-.audio-text-input {
+.audio-text-input,
+.ec-debug-input {
   width: min(240px, 100%);
   min-height: 34px;
   padding: 0 10px;
@@ -2081,8 +2084,80 @@ body {
   font-size: 12px;
 }
 
-.audio-text-input:focus {
+.audio-text-input:focus,
+.ec-debug-input:focus {
   border-color: var(--accent-border);
+}
+
+/* EC 调试 */
+.ec-debug-row,
+.ec-debug-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.ec-debug-row {
+  align-items: flex-end;
+}
+
+.ec-debug-field {
+  display: grid;
+  flex: 0 1 200px;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ec-debug-input,
+.ec-debug-field .settings-language-select {
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+}
+
+.ec-debug-input,
+.ec-debug-range,
+#ec-debug-reading,
+#ec-debug-raw {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+
+.ec-debug-range,
+.ec-debug-result p {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.ec-debug-input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.ec-debug-actions {
+  justify-content: flex-end;
+}
+
+#page-ec-debug :is(button, select, input):disabled {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+.ec-debug-result {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-main);
+  overflow-wrap: anywhere;
+}
+
+.ec-debug-result p {
+  margin-top: 6px;
+}
+
+.ec-debug-result .ec-debug-error {
+  color: var(--danger);
 }
 
 .audio-mode-header {
