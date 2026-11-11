@@ -4,6 +4,8 @@
   "startSplitPriority": "Вентиляторы по Доп. кривой",
   "startIndependent": "Индивидуальный режим работы",
   "startEcFan": "Режим вентилятора EC",
+  "fanConfigRetrySuccess": "Таблица вентиляторов исправлена",
+  "fanConfigMismatch": "Ошибка проверки вентиляторов",
   "stopFanControl": "Остановить",
   "fanMax": "Максимальная скорость вентилятора",
   "fanAuto": "Автоматическая скорость вентилятора",

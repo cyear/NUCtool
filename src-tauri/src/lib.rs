@@ -1122,9 +1122,23 @@ fn start_newfan(app: &tauri::AppHandle, fandata: FanData) {
     let app = app.clone();
     if let Err(e) = acpi_ec_worker().call(move |ec| { 
         ec.fan_write_init();
-        ec.fan_write_set(fandata);
-        println!("start_newfan: Ok");
+        ec.fan_write_set(fandata.clone());
         let _ = show_osd_i18n(&app, "fanControl", "startEcFan");
+        if ec.fan_compare_config(&fandata) {
+            println!("start_newfan: EC 风扇表与配置一致");
+        } else {
+            eprintln!("start_newfan: EC 风扇表与配置不一致，正在重写一次");
+            ec.fan_write_set(fandata.clone());
+            if ec.fan_compare_config(&fandata) {
+                println!("start_newfan: 重写后 EC 风扇表与配置一致");
+                let _ = show_osd_i18n(&app, "fanControl", "fanConfigRetrySuccess");
+            } else {
+                eprintln!("start_newfan: 重写后仍不一致，请查看 [FanEC] 日志");
+                ec.fan_write_manual(true);
+                ec.fan_write_close();
+                let _ = show_osd_i18n(&app, "fanControl", "fanConfigMismatch");
+            }
+        }
      }) {
         eprintln!("start_newfan 失败: {}", e);
     }

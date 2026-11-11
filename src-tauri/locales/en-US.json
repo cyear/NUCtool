@@ -4,6 +4,8 @@
   "startSplitPriority": "Start Separate Fan Priority",
   "startIndependent": "Start Independent",
   "startEcFan": "Start EC Fan",
+  "fanConfigRetrySuccess": "Fan table fixed",
+  "fanConfigMismatch": "Fan table check failed",
   "stopFanControl": "Stop",
   "fanMax": "Full Fan Speed",
   "fanAuto": "Auto Fan Speed",

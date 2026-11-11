@@ -78,6 +78,12 @@ pub const EC_FAN_GPU_DOWN_BASE: u16 = 0x0F40;
 // GPU 风扇占空比起始地址
 pub const EC_FAN_GPU_DUTY_BASE: u16 = 0x0F50;
 
+fn log_fan_write(addr: u16, value: u8, result: io::Result<()>) {
+    if let Err(error) = result {
+        eprintln!("[FanEC] 写入失败: addr={:#06X}, value={:#04X}, error={}", addr, value, error);
+    }
+}
+
 
 // Windows Flip 1
 // const EC_WINDOWS_MODE: u16 = 0x767;
@@ -539,23 +545,24 @@ impl UniwillAcpiEc {
     /// 风扇手动模式
     pub fn fan_write_manual(&self, enable: bool) {
         let ret = self.fan_read_mode().unwrap_or(0);
-        let _ = if enable {
+        let (addr, value, result) = if enable {
             if ret&0x40!=0 {
                 let w = ret & 0xBF;
                 println!("fan_write_manual 切换手动 自动 表可写: ret: {}, write: {}", ret, w);
-                self.write_u8(EC_ADDR_MANUAL_FAN_CTRL, w) // !(1 << 6)
+                (EC_ADDR_MANUAL_FAN_CTRL, w, self.write_u8(EC_ADDR_MANUAL_FAN_CTRL, w)) // !(1 << 6)
             } else {
-                Ok(())
+                return;
             }
         } else {
             if ret & 0x40 == 0 {
                 let w = ret | 0x40;
                 println!("fan_write_manual 切换自动 满转 风扇可写: ret: {}, write: {}", ret, w);
-                self.write_u8(EC_ADDR_MANUAL_FAN_CTRL, w) // 设置 bit 6
+                (EC_ADDR_MANUAL_FAN_CTRL, w, self.write_u8(EC_ADDR_MANUAL_FAN_CTRL, w)) // 设置 bit 6
             } else {
-                Ok(())
+                return;
             }
         };
+        log_fan_write(addr, value, result);
     }
 
     pub fn fan_read_manual(&self) -> bool {
@@ -565,31 +572,22 @@ impl UniwillAcpiEc {
     /// 双风扇独立控制
     pub fn fan_write_custom_table_1(&self, enable: bool) {
         println!("fan_write_custom_table_1: {}", enable);
-        let _ = if enable {
-            self.write_u8(EC__FAN_CUSTOM_TABLE_1, 0x80)
-        } else {
-            self.write_u8(EC__FAN_CUSTOM_TABLE_1, 0)
-        };
+        let value = if enable { 0x80 } else { 0 };
+        log_fan_write(EC__FAN_CUSTOM_TABLE_1, value, self.write_u8(EC__FAN_CUSTOM_TABLE_1, value));
     }
 
     /// 风扇表
     pub fn fan_write_custom_table_2(&self, enable: bool) {
         println!("fan_write_custom_table_2: {}", enable);
-        let _ = if enable {
-            self.write_u8(EC__FAN_CUSTOM_TABLE_2, 0x04)
-        } else {
-            self.write_u8(EC__FAN_CUSTOM_TABLE_2, 0)
-        };
+        let value = if enable { 0x04 } else { 0 };
+        log_fan_write(EC__FAN_CUSTOM_TABLE_2, value, self.write_u8(EC__FAN_CUSTOM_TABLE_2, value));
     }
 
     /// 分离风扇
     pub fn fan_write_split(&self, enable: bool) {
         println!("fan_write_split: {}", enable);
-        if enable {
-            let _ = self.write_u8(_EC_ADDR_AP_OEM_BYTE, 1);
-        } else {
-            let _ = self.write_u8(_EC_ADDR_AP_OEM_BYTE, 0);
-        }
+        let value = if enable { 1 } else { 0 };
+        log_fan_write(_EC_ADDR_AP_OEM_BYTE, value, self.write_u8(_EC_ADDR_AP_OEM_BYTE, value));
     }
     /// 是否启用双风扇独立控制
     pub fn fan_read_custom_table_1(&self) -> bool {
@@ -616,8 +614,8 @@ impl UniwillAcpiEc {
         } else {
             w = 0xFF;
         }
-        let _ = self.write_u8(EC_FAN_CPU_DUTY_BASE, w);
-        let _ = self.write_u8(EC_FAN_GPU_DUTY_BASE, w);
+        log_fan_write(EC_FAN_CPU_DUTY_BASE, w, self.write_u8(EC_FAN_CPU_DUTY_BASE, w));
+        log_fan_write(EC_FAN_GPU_DUTY_BASE, w, self.write_u8(EC_FAN_GPU_DUTY_BASE, w));
     }
 
     /// 新风扇初始化
@@ -637,26 +635,102 @@ impl UniwillAcpiEc {
     pub fn fan_write_set(&self, fandata: FanData) {
         let (left, right) = (fandata.left_fan, fandata.right_fan);
         println!("fan_write_set: L({:?}) R({:?})", left, right);
-        let _ = self.write_u8(EC_FAN_CPU_UP_BASE, 20);
-        let _ = self.write_u8(EC_FAN_CPU_DOWN_BASE, 17);
+        log_fan_write(EC_FAN_CPU_UP_BASE, 20, self.write_u8(EC_FAN_CPU_UP_BASE, 20));
+        log_fan_write(EC_FAN_CPU_DOWN_BASE, 17, self.write_u8(EC_FAN_CPU_DOWN_BASE, 17));
         for i in 1..16 {
-            let _ = self.write_u8(EC_FAN_CPU_UP_BASE + i as u16, left[i-1].temperature);
+            let addr = EC_FAN_CPU_UP_BASE + i as u16;
+            let value = left[i-1].temperature;
+            log_fan_write(addr, value, self.write_u8(addr, value));
             thread::sleep(Duration::from_millis(10));
-            let _ = self.write_u8(EC_FAN_CPU_DOWN_BASE + i as u16, left[i-1].temperature - 3);
+            let addr = EC_FAN_CPU_DOWN_BASE + i as u16;
+            let value = left[i-1].temperature - 3;
+            log_fan_write(addr, value, self.write_u8(addr, value));
             thread::sleep(Duration::from_millis(10));
-            let _ = self.write_u8(EC_FAN_CPU_DUTY_BASE + i as u16, left[i-1].speed * 2);
+            let addr = EC_FAN_CPU_DUTY_BASE + i as u16;
+            let value = left[i-1].speed * 2;
+            log_fan_write(addr, value, self.write_u8(addr, value));
             thread::sleep(Duration::from_millis(10));
         }
-        let _ = self.write_u8(EC_FAN_GPU_UP_BASE, 20);
-        let _ = self.write_u8(EC_FAN_GPU_DOWN_BASE, 17);
+        log_fan_write(EC_FAN_GPU_UP_BASE, 20, self.write_u8(EC_FAN_GPU_UP_BASE, 20));
+        log_fan_write(EC_FAN_GPU_DOWN_BASE, 17, self.write_u8(EC_FAN_GPU_DOWN_BASE, 17));
         for i in 1..16 {
-            let _ = self.write_u8(EC_FAN_GPU_UP_BASE + i as u16, right[i-1].temperature);
+            let addr = EC_FAN_GPU_UP_BASE + i as u16;
+            let value = right[i-1].temperature;
+            log_fan_write(addr, value, self.write_u8(addr, value));
             thread::sleep(Duration::from_millis(10));
-            let _ = self.write_u8(EC_FAN_GPU_DOWN_BASE + i as u16, right[i-1].temperature - 3);
+            let addr = EC_FAN_GPU_DOWN_BASE + i as u16;
+            let value = right[i-1].temperature - 3;
+            log_fan_write(addr, value, self.write_u8(addr, value));
             thread::sleep(Duration::from_millis(10));
-            let _ = self.write_u8(EC_FAN_GPU_DUTY_BASE + i as u16, right[i-1].speed * 2);
+            let addr = EC_FAN_GPU_DUTY_BASE + i as u16;
+            let value = right[i-1].speed * 2;
+            log_fan_write(addr, value, self.write_u8(addr, value));
             thread::sleep(Duration::from_millis(10));
         }
+    }
+
+    pub fn fan_compare_config(&self, fandata: &FanData) -> bool {
+        let mut matched = true;
+        let compare = |addr: u16, expected: u8| match self.read_u8(addr) {
+            Ok(actual) if actual == expected => true,
+            Ok(actual) => {
+                eprintln!(
+                    "[FanEC] 配置校验不一致: addr={:#06X}, expected={:#04X}, actual={:#04X}",
+                    addr, expected, actual
+                );
+                false
+            }
+            Err(error) => {
+                eprintln!(
+                    "[FanEC] 配置校验读取失败: addr={:#06X}, expected={:#04X}, error={}",
+                    addr, expected, error
+                );
+                false
+            }
+        };
+
+        matched &= compare(EC_FAN_CPU_UP_BASE, 20);
+        matched &= compare(EC_FAN_CPU_DOWN_BASE, 17);
+        matched &= compare(EC_FAN_GPU_UP_BASE, 20);
+        matched &= compare(EC_FAN_GPU_DOWN_BASE, 17);
+        matched &= compare(EC_FAN_CPU_DUTY_BASE, 0);
+        matched &= compare(EC_FAN_GPU_DUTY_BASE, 0);
+
+        for (index, point) in fandata.left_fan.iter().take(15).enumerate() {
+            let offset = index as u16 + 1;
+            matched &= compare(EC_FAN_CPU_UP_BASE + offset, point.temperature);
+            if let Some(value) = point.temperature.checked_sub(3) {
+                matched &= compare(EC_FAN_CPU_DOWN_BASE + offset, value);
+            } else {
+                matched = false;
+                eprintln!("[FanEC] 配置校验无法计算下降温度: CPU index={}, temperature={}", index, point.temperature);
+            }
+            matched &= compare(EC_FAN_CPU_DUTY_BASE + offset, point.speed * 2);
+        }
+        for (index, point) in fandata.right_fan.iter().take(15).enumerate() {
+            let offset = index as u16 + 1;
+            matched &= compare(EC_FAN_GPU_UP_BASE + offset, point.temperature);
+            if let Some(value) = point.temperature.checked_sub(3) {
+                matched &= compare(EC_FAN_GPU_DOWN_BASE + offset, value);
+            } else {
+                matched = false;
+                eprintln!("[FanEC] 配置校验无法计算下降温度: GPU index={}, temperature={}", index, point.temperature);
+            }
+            matched &= compare(EC_FAN_GPU_DUTY_BASE + offset, point.speed * 2);
+        }
+
+        if fandata.left_fan.len() != 15 || fandata.right_fan.len() != 15 {
+            matched = false;
+            eprintln!(
+                "[FanEC] 配置校验失败: fan_config.json 节点数应为 15，CPU={}, GPU={}",
+                fandata.left_fan.len(), fandata.right_fan.len()
+            );
+        }
+
+        if matched {
+            println!("[FanEC] 配置校验通过: EC 风扇表与 fan_config.json 一致");
+        }
+        matched
     }
 
     /// 退出
