@@ -145,7 +145,7 @@ const enUS = {
     write: "Apply",
 
     cpu: "CPU",
-    gpuIntelArc: "GPU (Intel ARC)",
+    gpuIntelArc: "GPU (AC ARC)",
     battery: "Battery",
 
     chargingLimit: "Charging Limit",

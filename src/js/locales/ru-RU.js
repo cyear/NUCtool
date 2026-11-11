@@ -145,7 +145,7 @@ const ruRU = {
     write: "Применить",
 
     cpu: "CPU",
-    gpuIntelArc: "GPU (Intel ARC)",
+    gpuIntelArc: "GPU (AC ARC)",
     battery: "Батарея",
 
     chargingLimit: "Лимит заряда",

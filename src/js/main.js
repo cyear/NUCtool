@@ -904,7 +904,7 @@ const tdpRefreshButton =
 
 const tdpSetButtons =
   document.querySelectorAll(
-    ".tdp-set-btn"
+    ".tdp-set-btn[data-tdp]"
   );
 
 
@@ -959,6 +959,8 @@ async function loadTdp() {
     ).value =
       tdp.psys_pl1;
 
+    await loadNvidiaPowerSnapshot();
+
   } catch (error) {
 
     console.error(
@@ -967,6 +969,42 @@ async function loadTdp() {
     );
   }
 }
+
+async function loadNvidiaPowerSnapshot() {
+  try {
+    const s = await invoke("get_nvidia_power_snapshot");
+    document.getElementById("nvidia-0743").value = s.control;
+    document.getElementById("nvidia-0744").value = s.ctgp;
+    document.getElementById("nvidia-0745").value = s.db_cpu_target;
+    document.getElementById("nvidia-0746").value = s.db_power;
+  } catch (error) {
+    console.error("读取 NVIDIA EC 配置失败:", error);
+  }
+}
+
+document.querySelectorAll("[data-nvidia-ec]").forEach((button) => {
+  button.addEventListener("click", async () => {
+    const address = Number(button.dataset.nvidiaEc);
+    const input = document.getElementById(`nvidia-${address.toString(16).padStart(4, "0")}`);
+    const value = Number(input?.value);
+    if (!Number.isInteger(value) || value < 0 || value > 255) {
+      if (input) input.setCustomValidity("请输入 0 到 255 的整数");
+      input?.reportValidity();
+      return;
+    }
+    input.setCustomValidity("");
+    button.disabled = true;
+    try {
+      const readback = await invoke("set_nvidia_ec_value", { address, value });
+      input.value = readback;
+      await loadNvidiaPowerSnapshot();
+    } catch (error) {
+      console.error(`写入 NVIDIA EC 地址 0x${address.toString(16).toUpperCase()} 失败:`, error);
+    } finally {
+      button.disabled = false;
+    }
+  });
+});
 
 
 

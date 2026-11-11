@@ -123,6 +123,7 @@ type WcfGetBatteryChargingLevelFn = unsafe extern "system" fn() -> c_int;
 type WcfSetBatteryChargingLevelFn = unsafe extern "system" fn(level: c_int) -> c_int;
 type WcfSetBatteryModeFn = unsafe extern "system" fn(mode: c_int) -> c_int;
 type WcfGetBatteryModeFn = unsafe extern "system" fn() -> c_int;
+type WcfEnableDisplayFn = unsafe extern "system" fn(enable: c_int) -> c_int;
 type WcfEnableDisplayModeMgmtFn = unsafe extern "system" fn(enable: c_int) -> c_int;
 type WcfSetDisplayModeFn = unsafe extern "system" fn(index: c_int) -> c_int;
 type WcfEnableKeyboardLedsFn = unsafe extern "system" fn(enable: c_int) -> c_int;
@@ -167,6 +168,7 @@ pub struct UniwillWcfEc {
     wcf_set_battery_charging_level: Symbol<'static, WcfSetBatteryChargingLevelFn>,
     wcf_set_battery_mode: Symbol<'static, WcfSetBatteryModeFn>,
     wcf_get_battery_mode: Symbol<'static, WcfGetBatteryModeFn>,
+    wcf_enable_display: Symbol<'static, WcfEnableDisplayFn>,
     wcf_enable_display_mode_mgmt: Symbol<'static, WcfEnableDisplayModeMgmtFn>,
     wcf_set_display_mode: Symbol<'static, WcfSetDisplayModeFn>,
     wcf_enable_keyboard_leds: Symbol<'static, WcfEnableKeyboardLedsFn>,
@@ -188,20 +190,21 @@ impl UniwillWcfEc {
 
     pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
         let dll_path = dll_dir()?.join("NUCtoolV2.dll");
-        println!("DLL PATH: {:?}", &dll_path);
         let dll_data = fs::read(&dll_path)?;
         // 计算 SHA-256
         let hash = Sha256::digest(&dll_data);
         let hash = hex::encode(hash);
-        println!("HASH: {}", hash);
         if !hash.eq_ignore_ascii_case(EXPECTED_HASH_V2) {
+            println!("DLL PATH: {:?}", &dll_path);
+            println!("HASH: {}", hash);
             return Err(std::io::Error::other(
                 "NUCtool.dll 完整性校验失败，文件可能已被修改或替换",
             )
             .into());
-        } else {
-            println!("NUCtool.dll 完整性校验成功");
         }
+        // } else {
+        //     println!("NUCtool.dll 完整性校验成功");
+        // }
         let lib = unsafe { Library::new(&dll_path)? };
         // Library 会被结构体持有，所以这里延长 Symbol 生命周期
         let lib_ref: &'static Library = unsafe { std::mem::transmute(&lib) };
@@ -220,6 +223,7 @@ impl UniwillWcfEc {
                 wcf_set_battery_charging_level: lib_ref.get(b"wcf_set_battery_charging_level")?,
                 wcf_set_battery_mode: lib_ref.get(b"wcf_set_battery_mode")?,
                 wcf_get_battery_mode: lib_ref.get(b"wcf_get_battery_mode")?,
+                wcf_enable_display: lib_ref.get(b"wcf_enable_display")?,
                 wcf_enable_display_mode_mgmt: lib_ref.get(b"wcf_enable_display_mode_mgmt")?,
                 wcf_set_display_mode: lib_ref.get(b"wcf_set_display_mode")?,
                 wcf_enable_keyboard_leds: lib_ref.get(b"wcf_enable_keyboard_leds")?,

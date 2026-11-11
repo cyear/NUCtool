@@ -135,7 +135,7 @@ const zhCN = {
     write: "写入",
 
     cpu: "CPU",
-    gpuIntelArc: "GPU(Intel ARC)",
+    gpuIntelArc: "GPU(AC ARC)",
     battery: "Battery",
 
     chargingLimit: "充电限制",

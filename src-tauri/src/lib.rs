@@ -83,6 +83,16 @@ pub struct TdpConfig {
 }
 
 #[derive(Debug, Serialize)]
+pub struct NvidiaPowerSnapshot {
+    pub control: u8,
+    pub ctgp: u8,
+    pub db_cpu_target: u8,
+    pub db_power: u8,
+    pub gpu_module: u8,
+    pub gpu_dstate: u8,
+}
+
+#[derive(Debug, Serialize)]
 pub struct GpuDriverInfo {
     pub name: String,
     pub version: String,
@@ -795,6 +805,44 @@ async fn get_tdp() -> Result<TdpConfig, String> {
         gpu_pl2,
         psys_pl1,
     })
+}
+
+#[tauri::command]
+async fn get_nvidia_power_snapshot() -> Result<NvidiaPowerSnapshot, String> {
+    let values = acpi_ec_worker()
+        .call(|ec| ec.nvidia_power_snapshot().map_err(|e| e.to_string()))
+        .map_err(|e| e.to_string())??;
+    Ok(NvidiaPowerSnapshot {
+        control: values[0],
+        ctgp: values[1],
+        db_cpu_target: values[2],
+        db_power: values[3],
+        gpu_module: values[4],
+        gpu_dstate: values[5],
+    })
+}
+
+#[tauri::command]
+async fn set_nvidia_ec_value(app: tauri::AppHandle, address: u16, value: u8) -> Result<u8, String> {
+    if !matches!(address, 0x0743 | 0x0744 | 0x0745 | 0x0746) {
+        return Err(format!("不允许写入 EC 地址 0x{address:04X}"));
+    }
+    let readback = acpi_ec_worker()
+        .call(move |ec| {
+            ec.write_u8(address, value)?;
+            ec.read_u8(address)
+        })
+        .map_err(|e| e.to_string())?
+        .map_err(|e| e.to_string())?;
+    let osd_key = match address {
+        0x0743 => "nvidiaControlByte",
+        0x0744 => "nvidiaCtgp",
+        0x0745 => "nvidiaDbCpuTarget",
+        0x0746 => "nvidiaDynamicBoost",
+        _ => unreachable!("address was validated above"),
+    };
+    let _ = show_osd_i18n_value(&app, "tdpSettings", osd_key, readback);
+    Ok(readback)
 }
 
 #[tauri::command]
@@ -1748,6 +1796,8 @@ pub fn run() {
             set_performance_mode,
             get_performance_mode,
             get_tdp,
+            get_nvidia_power_snapshot,
+            set_nvidia_ec_value,
             set_tdp,
             get_fan_control_status,
             get_autostart,

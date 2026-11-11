@@ -42,6 +42,10 @@
   "cpuPl4": "CPU PL4 = {value}W",
   "gpuPl1": "GPU PL1 = {value}W",
   "gpuPl2": "GPU PL2 = {value}W",
+  "nvidiaControlByte": "Байт управления NVIDIA = {value}",
+  "nvidiaCtgp": "NVIDIA CTGP = {value}W",
+  "nvidiaDbCpuTarget": "NVIDIA DB CPU Target = {value}",
+  "nvidiaDynamicBoost": "NVIDIA Dynamic Boost = {value}W",
   "psysPl1": "PSYS PL1 = {value}W",
 
   "batterySettings": "Настройки батареи",

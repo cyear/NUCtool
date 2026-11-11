@@ -146,7 +146,7 @@ const jaJP = {
     write: "適用",
 
     cpu: "CPU",
-    gpuIntelArc: "GPU (Intel ARC)",
+    gpuIntelArc: "GPU (AC ARC)",
     battery: "Battery",
 
     chargingLimit: "充電上限",

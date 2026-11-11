@@ -97,6 +97,14 @@ const EC_GPU_PL1: u16 = 0x072d;
 // GPU PL2 (W)
 const EC_GPU_PL2: u16 = 0x072e;
 
+// NVIDIA KC dynamic GPU power controls; setters are restricted to KC SKUs.
+const EC_NVIDIA_CONTROL: u16 = 0x0743;
+const EC_NVIDIA_CTGP: u16 = 0x0744;
+const EC_NVIDIA_DB_CPU_TARGET: u16 = 0x0745;
+const EC_NVIDIA_DB_POWER: u16 = 0x0746;
+const EC_NVIDIA_GPU_MODULE: u16 = 0x07d3;
+const EC_NVIDIA_GPU_DSTATE: u16 = 0x078b;
+
 // PSYS PL1 BYTE1 (W)
 // const EC_PSYS_PL1_1: u16 = 0x0720;
 
@@ -256,6 +264,7 @@ impl UniwillAcpiEc {
         .map_err(|_| io::Error::last_os_error())?;
         // 等待
         thread::sleep(Duration::from_millis(6));
+        println!("[ECW] {:#06x}({}) => {:#04X}({})", addr, addr, value, value);
         Ok(())
     }
 
@@ -400,6 +409,18 @@ impl UniwillAcpiEc {
     /// 写入 GPU PL2
     pub fn gpu_write_pl2(&self, w: u8) -> io::Result<()> {
         self.write_u8(EC_GPU_PL2, w)
+    }
+
+    /// Read-only snapshot for the NVIDIA KC protocol investigation.
+    pub fn nvidia_power_snapshot(&self) -> io::Result<[u8; 6]> {
+        Ok([
+            self.read_u8(EC_NVIDIA_CONTROL)?,
+            self.read_u8(EC_NVIDIA_CTGP)?,
+            self.read_u8(EC_NVIDIA_DB_CPU_TARGET)?,
+            self.read_u8(EC_NVIDIA_DB_POWER)?,
+            self.read_u8(EC_NVIDIA_GPU_MODULE)?,
+            self.read_u8(EC_NVIDIA_GPU_DSTATE)?,
+        ])
     }
 
     /// 读取 Battery Charging limit
