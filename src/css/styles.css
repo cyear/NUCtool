@@ -133,6 +133,28 @@ body {
   flex-direction: column;
   gap: 4px;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #2a303b transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 7px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: #2a303b;
+  background-clip: padding-box;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: #394352;
+  background-clip: padding-box;
 }
 
 .nav-btn {
