@@ -11,6 +11,7 @@ import {
 import { initGscCheck } from "./gsc-check.js";
 import { initBatteryDetails } from "./battery-details.js";
 import { initEcDebug } from "./ec-debug.js";
+import "./keyboard-hid.js";
 
 // ==============================================
 // 禁止右键菜单

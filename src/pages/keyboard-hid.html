@@ -1,0 +1,59 @@
+<section id="page-keyboard-hid" class="page">
+  <header class="page-header">
+    <div class="page-heading">
+      <h1 data-i18n="keyboardHid.title">键盘灯效（HID）</h1>
+      <p class="page-subtitle" data-i18n="keyboardHid.subtitle">独立 HID 控制 · 每 4 秒刷新设备状态</p>
+    </div>
+  </header>
+
+  <section class="kh-overview panel">
+    <div class="kh-overview-mark" aria-hidden="true">⌨</div>
+    <div class="kh-overview-copy">
+      <div class="kh-eyebrow" data-i18n="keyboardHid.device">键盘控制器</div>
+      <h2 id="kh-connection">正在读取设备…</h2>
+      <p id="kh-error" class="kh-error" hidden></p>
+    </div>
+    <div class="kh-readout-grid">
+      <div><span data-i18n="keyboardHid.firmware">固件</span><strong id="kh-firmware">—</strong></div>
+      <div><span data-i18n="keyboardHid.layout">布局</span><strong id="kh-layout">—</strong></div>
+      <div><span data-i18n="keyboardHid.refresh">刷新周期</span><strong>4 s</strong></div>
+      <div><span data-i18n="keyboardHid.effectNow">当前效果</span><strong id="kh-current-effect">—</strong></div>
+    </div>
+    <button id="kh-refresh" class="secondary" type="button" data-i18n="keyboardHid.refreshNow">立即读取</button>
+  </section>
+
+  <div class="kh-columns">
+    <section class="panel kh-card">
+      <div class="kh-card-heading"><div><span class="kh-eyebrow">DEVICE</span><h2 data-i18n="keyboardHid.powerTitle">灯光电源</h2></div><span class="kh-card-mark">01</span></div>
+      <div class="kh-switch-row"><div><strong data-i18n="keyboardHid.power">键盘灯开关</strong><small data-i18n="keyboardHid.powerHint">直接向键盘控制器发送开关指令</small></div><label class="kh-switch"><input id="kh-power" type="checkbox"><span></span></label></div>
+      <div class="kh-inline-control"><label for="kh-brightness" data-i18n="keyboardHid.brightness">亮度</label><input id="kh-brightness" type="range" min="0" max="100" value="75"><output id="kh-brightness-value">75%</output></div>
+      <div class="kh-card-heading kh-subheading"><div><span class="kh-eyebrow">TIMEOUT</span><h3 data-i18n="keyboardHid.timeout">定时熄灭</h3></div></div>
+      <div class="kh-timeout-row"><label class="kh-check"><input id="kh-timeout-enabled" type="checkbox"><span data-i18n="keyboardHid.timeoutEnabled">启用固件定时熄灭</span></label><label class="kh-time-input"><span data-i18n="keyboardHid.rawTime">固件时间值</span><input id="kh-timeout-time" type="number" min="0" max="255" value="4"></label></div>
+      <p class="kh-note" data-i18n="keyboardHid.timeoutHint">该控制器协议只确认时间字段为 0–255 原始值，具体计时单位由固件定义。</p>
+      <button id="kh-timeout-apply" class="secondary" type="button" data-i18n="keyboardHid.applyTimeout">写入熄灭设置</button>
+    </section>
+
+    <section class="panel kh-card">
+      <div class="kh-card-heading"><div><span class="kh-eyebrow">BUILT-IN</span><h2 data-i18n="keyboardHid.builtinTitle">内置灯效</h2></div><span class="kh-card-mark">02</span></div>
+      <div class="kh-field-grid">
+        <label><span data-i18n="keyboardHid.effect">灯效</span><select id="kh-effect"><option value="mono">单色</option><option value="breath">呼吸</option><option value="wave">波浪</option><option value="reactive">响应</option><option value="rainbow">彩虹</option><option value="ripple">涟漪</option><option value="raindrop">雨滴</option><option value="marquee">跑马灯</option><option value="aurora">极光</option><option value="spark">火花</option><option value="music" disabled>音乐（需持续运行）</option><option value="gaming">游戏</option></select></label>
+        <label><span data-i18n="keyboardHid.direction">方向</span><select id="kh-direction"><option value="none">无</option><option value="right">向右</option><option value="left">向左</option><option value="up">向上</option><option value="down">向下</option><option value="auto">自动</option><option value="press-any-key">按键触发</option></select></label>
+        <label class="kh-range-field"><span data-i18n="keyboardHid.speed">速度 <output id="kh-speed-value">5</output></span><input id="kh-speed" type="range" min="0" max="9" value="5"></label>
+        <label class="kh-range-field"><span data-i18n="keyboardHid.effectBrightness">亮度 <output id="kh-effect-brightness-value">75%</output></span><input id="kh-effect-brightness" type="range" min="0" max="100" value="75"></label>
+      </div>
+      <div class="kh-palette-heading"><span data-i18n="keyboardHid.palette">调色板（最多 7 色）</span><small data-i18n="keyboardHid.paletteHint">用于支持多色的动态效果</small></div>
+      <div class="kh-palette" id="kh-palette"></div>
+      <label class="kh-check kh-save"><input id="kh-save" type="checkbox" checked><span data-i18n="keyboardHid.save">保存到设备配置</span></label>
+      <button id="kh-apply-effect" class="primary" type="button" data-i18n="keyboardHid.writeBuiltin">写入内置灯效</button>
+    </section>
+
+    <section class="panel kh-card kh-extended">
+      <div class="kh-card-heading"><div><span class="kh-eyebrow">EXTENDED FRAME</span><h2 data-i18n="keyboardHid.extendedTitle">扩展灯效</h2></div><span class="kh-card-mark">03</span></div>
+      <div class="kh-extended-preview"><div class="kh-keyboard-art" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span data-i18n="keyboardHid.matrixHint">126 键矩阵 · 当前提供全键统一颜色帧</span></div>
+      <div class="kh-extended-controls"><label><span data-i18n="keyboardHid.frameColor">帧颜色</span><input id="kh-extended-color" type="color" value="#3478f6"></label><label><span data-i18n="keyboardHid.frameBrightness">帧亮度</span><input id="kh-extended-brightness" type="range" min="0" max="100" value="80"><output id="kh-extended-brightness-value">80%</output></label></div>
+      <p class="kh-note" data-i18n="keyboardHid.extendedHint">将颜色写入 126 个键位槽，作为静态扩展灯效帧。</p>
+      <button id="kh-apply-extended" class="primary" type="button" data-i18n="keyboardHid.writeExtended">写入扩展灯效</button>
+    </section>
+  </div>
+  <div id="kh-toast" class="kh-toast" role="status" aria-live="polite"></div>
+</section>

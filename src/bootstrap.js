@@ -10,6 +10,7 @@ const pages = [
   "display",
   "audio",
   "keyboard",
+  "keyboard-hid",
   "lightbar",
   "bios",
   "ec-debug",

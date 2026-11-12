@@ -40,6 +40,7 @@ sha2 = "0.10"
 hex = "0.4"
 winreg = "0.55"
 chrono = { version = "0.4", features = ["clock"] }
+kc-led-hid = { path = "../kc_led_hid_rust" }
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
 [profile.release]

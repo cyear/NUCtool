@@ -26,6 +26,7 @@ const enUS = {
     display: "Display",
     audio: "Audio Tuning",
     keyboard: "Keyboard",
+    keyboardHid: "Keyboard Lighting",
     lightbar: "Lightbar",
     bios: "BIOS Configuration",
     ecDebug: "EC Debug",
@@ -314,6 +315,17 @@ const enUS = {
 
     reading: "Reading...",
     readFailed: "Failed to read",
+  },
+  keyboardHid: {
+    title: "Keyboard Lighting (HID)", subtitle: "Independent HID control · device status refreshes every 4 seconds", device: "Keyboard Controller",
+    firmware: "Firmware", layout: "Layout", refresh: "Refresh", effectNow: "Current Effect", refreshNow: "Read Now",
+    powerTitle: "Lighting Power", power: "Keyboard Light", powerHint: "Send the switch command directly to the keyboard controller", brightness: "Brightness",
+    timeout: "Timed Shutdown", timeoutEnabled: "Enable firmware timed shutdown", rawTime: "Firmware time value", timeoutHint: "The protocol confirms a raw time value from 0–255; its unit is defined by firmware.",
+    applyTimeout: "Write Shutdown Setting", builtinTitle: "Built-in Effects", effect: "Effect", direction: "Direction", speed: "Speed",
+    effectBrightness: "Brightness", palette: "Palette (up to 7 colors)", paletteHint: "Used by multicolor dynamic effects", save: "Save to device profile",
+    writeBuiltin: "Write Built-in Effect", extendedTitle: "Extended Effect", matrixHint: "Select an individual key to edit its color",
+    frameColor: "Selected Key Color", frameBrightness: "Frame Brightness", extendedHint: "Set colors for each of the 126 key slots, or fill every key at once.", writeExtended: "Write Extended Effect",
+    fillKeys: "Fill All Keys",
   },
   lightbar: {
     title: "Light Bar Settings",

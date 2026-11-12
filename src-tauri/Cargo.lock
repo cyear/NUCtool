@@ -1947,6 +1947,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "kc-led-hid"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "windows 0.61.3",
+ "windows-sys 0.61.2",
+ "winreg",
+]
+
+[[package]]
 name = "keyboard-types"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2173,6 +2184,7 @@ dependencies = [
  "chrono",
  "dirs 7.0.0",
  "hex",
+ "kc-led-hid",
  "libloading 0.8.9",
  "powershell_script",
  "serde",

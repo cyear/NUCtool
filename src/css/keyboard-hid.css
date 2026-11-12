@@ -1,0 +1,170 @@
+#page-keyboard-hid {
+  --kh-accent: #548eff;
+  --kh-cyan: #54d9d0;
+  --kh-line: rgba(255, 255, 255, .09);
+  --kh-muted: #949eae;
+}
+
+#page-keyboard-hid .kh-overview,
+#page-keyboard-hid .kh-card {
+  background: linear-gradient(145deg, rgba(29, 36, 49, .96), rgba(22, 27, 37, .96));
+  border: 1px solid var(--kh-line);
+  border-radius: 13px;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, .12);
+}
+
+#page-keyboard-hid .kh-overview {
+  display: grid;
+  grid-template-columns: 64px minmax(190px, 1fr) minmax(340px, 1.8fr) auto;
+  align-items: center;
+  gap: 22px;
+  padding: 22px 24px;
+  margin-bottom: 18px;
+}
+
+#page-keyboard-hid .kh-overview-mark {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 1px solid rgba(84, 142, 255, .25);
+  border-radius: 12px;
+  color: var(--kh-cyan);
+  background: linear-gradient(145deg, rgba(84, 142, 255, .17), rgba(84, 217, 208, .07));
+  font-size: 29px;
+}
+
+#page-keyboard-hid .kh-eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--kh-cyan);
+  font: 700 10px/1.2 "Segoe UI", sans-serif;
+  letter-spacing: .14em;
+}
+
+#page-keyboard-hid .kh-overview h2,
+#page-keyboard-hid .kh-card h2,
+#page-keyboard-hid .kh-card h3 {
+  margin: 0;
+  color: #edf2fb;
+  font-size: 17px;
+  font-weight: 650;
+}
+
+#page-keyboard-hid #kh-connection {
+  color: #f0b66d;
+  font-size: 16px;
+}
+
+#page-keyboard-hid #kh-connection.connected { color: #70d5a8; }
+#page-keyboard-hid .kh-error { max-width: 320px; margin: 7px 0 0; color: #ef958a; font-size: 11px; overflow-wrap: anywhere; }
+
+#page-keyboard-hid .kh-readout-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(76px, 1fr));
+  gap: 10px;
+}
+
+#page-keyboard-hid .kh-readout-grid div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding-left: 12px;
+  border-left: 1px solid var(--kh-line);
+}
+
+#page-keyboard-hid .kh-readout-grid span,
+#page-keyboard-hid .kh-extended-preview > span { color: var(--kh-muted); font-size: 10px; }
+#page-keyboard-hid .kh-readout-grid strong { color: #e0e7f1; font: 600 12px/1.3 "Segoe UI", "Microsoft YaHei", sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#page-keyboard-hid button { white-space: nowrap; cursor: pointer; font: 600 11px/1.2 "Segoe UI", "Microsoft YaHei", sans-serif; transition: background .16s ease, border-color .16s ease, color .16s ease, transform .16s ease; }
+#page-keyboard-hid button.primary,
+#page-keyboard-hid button.secondary {
+  min-height: 34px;
+  padding: 8px 13px;
+  border: 1px solid #36577f;
+  border-radius: 7px;
+  color: #80b4ff;
+  background: #253650;
+}
+#page-keyboard-hid button.primary:hover,
+#page-keyboard-hid button.secondary:hover { border-color: #5685bd; color: #b4d3ff; background: #2d4160; }
+#page-keyboard-hid button.primary:active,
+#page-keyboard-hid button.secondary:active { transform: translateY(1px); }
+#page-keyboard-hid button.secondary { border-color: #3a4352; color: #d3dce9; background: #262d39; }
+#page-keyboard-hid button.secondary:hover { border-color: #566275; color: #f1f5fb; background: #303948; }
+#page-keyboard-hid .kh-columns { display: grid; grid-template-columns: minmax(260px, .9fr) minmax(380px, 1.25fr); gap: 18px; align-items: start; }
+#page-keyboard-hid .kh-card { min-width: 0; padding: 21px; }
+#page-keyboard-hid .kh-extended { grid-column: 1 / -1; }
+#page-keyboard-hid .kh-card-heading { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+#page-keyboard-hid .kh-card-mark { color: rgba(255, 255, 255, .15); font: 600 18px/1 "Segoe UI", sans-serif; }
+#page-keyboard-hid .kh-switch-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 18px; border-bottom: 1px solid var(--kh-line); }
+#page-keyboard-hid .kh-switch-row strong { display: block; color: #e8edf6; font-size: 13px; font-weight: 600; }
+#page-keyboard-hid .kh-switch-row small { display: block; margin-top: 5px; color: var(--kh-muted); font-size: 10px; }
+#page-keyboard-hid .kh-switch { position: relative; display: inline-flex; flex: 0 0 auto; width: 42px; height: 23px; }
+#page-keyboard-hid .kh-switch input { position: absolute; opacity: 0; }
+#page-keyboard-hid .kh-switch > span { width: 42px; border: 1px solid rgba(255,255,255,.14); border-radius: 20px; background: #343c4a; transition: .18s ease; }
+#page-keyboard-hid .kh-switch > span::after { content: ""; display: block; width: 17px; height: 17px; margin: 2px; border-radius: 50%; background: #b6bfcb; transition: .18s ease; }
+#page-keyboard-hid .kh-switch input:checked + span { border-color: var(--kh-accent); background: var(--kh-accent); }
+#page-keyboard-hid .kh-switch input:checked + span::after { transform: translateX(19px); background: white; }
+#page-keyboard-hid .kh-switch input:focus-visible + span { outline: 2px solid white; outline-offset: 3px; }
+#page-keyboard-hid .kh-inline-control { display: grid; grid-template-columns: 52px 1fr 42px; align-items: center; gap: 12px; padding: 18px 0; color: #d9e0eb; font-size: 12px; }
+#page-keyboard-hid input[type="range"] { width: 100%; accent-color: var(--kh-accent); }
+#page-keyboard-hid output { color: #c9d8f3; font: 600 11px/1 "Segoe UI", sans-serif; text-align: right; }
+#page-keyboard-hid .kh-subheading { margin: 3px 0 13px; padding-top: 17px; border-top: 1px solid var(--kh-line); }
+#page-keyboard-hid .kh-card h3 { font-size: 14px; }
+#page-keyboard-hid .kh-timeout-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+#page-keyboard-hid .kh-check { display: inline-flex; align-items: center; gap: 8px; color: #dce4ef; font-size: 11px; }
+#page-keyboard-hid .kh-check input { accent-color: var(--kh-accent); }
+#page-keyboard-hid .kh-time-input { display: inline-flex; align-items: center; gap: 8px; color: var(--kh-muted); font-size: 10px; }
+#page-keyboard-hid .kh-time-input input { width: 62px; padding: 7px 8px; border: 1px solid var(--kh-line); border-radius: 6px; color: #eef3fc; background: #171d28; }
+#page-keyboard-hid .kh-note { margin: 10px 0 14px; color: #8490a1; font-size: 10px; line-height: 1.55; }
+#page-keyboard-hid .kh-field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
+#page-keyboard-hid .kh-field-grid label { display: grid; gap: 8px; color: var(--kh-muted); font-size: 10px; }
+#page-keyboard-hid select { width: 100%; min-height: 34px; padding: 6px 9px; border: 1px solid var(--kh-line); border-radius: 6px; color: #e8eef8; background: #171d28; }
+#page-keyboard-hid .kh-range-field span { display: flex; justify-content: space-between; align-items: center; color: #d3dae6; }
+#page-keyboard-hid .kh-palette-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 20px 0 10px; color: #d9e2ef; font-size: 11px; }
+#page-keyboard-hid .kh-palette-heading small { color: var(--kh-muted); font-size: 9px; }
+#page-keyboard-hid .kh-palette { display: grid; grid-template-columns: repeat(7, minmax(28px, 1fr)); gap: 8px; }
+#page-keyboard-hid .kh-palette input { width: 100%; height: 28px; padding: 2px; border: 1px solid var(--kh-line); border-radius: 5px; background: #171d28; cursor: pointer; }
+#page-keyboard-hid .kh-save { margin: 16px 0; }
+#page-keyboard-hid .kh-extended-preview { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding: 17px; border: 1px solid var(--kh-line); border-radius: 9px; background: linear-gradient(110deg, rgba(84,142,255,.05), rgba(84,217,208,.035)); }
+#page-keyboard-hid .kh-keyboard-art { display: grid; grid-template-columns: repeat(14, 11px); gap: 4px; padding: 9px; border: 1px solid rgba(255,255,255,.09); border-radius: 6px; background: rgba(8,12,18,.4); transform: skewX(-7deg); }
+#page-keyboard-hid .kh-keyboard-art i { height: 10px; border-radius: 2px; background: linear-gradient(145deg, #558fff, #40c9cb); opacity: .8; box-shadow: 0 0 7px rgba(77,161,255,.22); }
+#page-keyboard-hid .kh-keyboard-art i:nth-child(5n) { opacity: .33; }
+#page-keyboard-hid .kh-keyboard-art i:nth-child(7n) { background: #66d6b2; }
+#page-keyboard-hid .kh-keyboard-art { grid-template-columns: repeat(21, minmax(8px, 1fr)); width: min(100%, 720px); transform: none; }
+#page-keyboard-hid .kh-key-cell { min-width: 8px; height: clamp(12px, 2vw, 21px); padding: 0; border: 1px solid rgba(255,255,255,.12); border-radius: 3px; background: var(--key-color); opacity: .84; box-shadow: 0 0 7px color-mix(in srgb, var(--key-color), transparent 70%); }
+#page-keyboard-hid .kh-key-cell:hover, #page-keyboard-hid .kh-key-cell.selected { opacity: 1; outline: 2px solid #fff; outline-offset: 1px; }
+#page-keyboard-hid .kh-fill-keys { margin-top: 10px; }
+#page-keyboard-hid .kh-extended-controls { display: grid; grid-template-columns: minmax(140px, 1fr) 2fr; gap: 24px; margin: 18px 0 8px; }
+#page-keyboard-hid .kh-extended-controls label { display: grid; align-items: center; grid-template-columns: 74px 1fr auto; gap: 12px; color: #d9e0eb; font-size: 11px; }
+#page-keyboard-hid .kh-extended-controls label:first-child { grid-template-columns: 74px 44px; }
+#page-keyboard-hid .kh-extended-controls input[type="color"] { width: 42px; height: 28px; padding: 2px; border: 1px solid var(--kh-line); border-radius: 5px; background: #171d28; }
+#page-keyboard-hid .kh-toast { position: fixed; right: 28px; bottom: 25px; z-index: 100; max-width: 420px; padding: 11px 16px; border: 1px solid rgba(84,142,255,.36); border-radius: 8px; color: #eaf0fa; background: #202b3b; box-shadow: 0 8px 28px #0006; font-size: 11px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: .18s ease; }
+#page-keyboard-hid .kh-toast.visible { opacity: 1; transform: translateY(0); }
+#page-keyboard-hid .kh-toast.error { border-color: rgba(237,105,94,.6); background: #392427; }
+#page-keyboard-hid :is(button, input, select):focus-visible { outline: 2px solid var(--kh-cyan); outline-offset: 2px; }
+
+@media (max-width: 1050px) {
+  #page-keyboard-hid .kh-overview { grid-template-columns: 52px 1fr auto; }
+  #page-keyboard-hid .kh-overview-mark { width: 48px; height: 48px; }
+  #page-keyboard-hid .kh-readout-grid { grid-column: 1 / -1; grid-row: 2; }
+  #page-keyboard-hid .kh-overview > button { grid-column: 3; grid-row: 1; }
+}
+@media (max-width: 760px) {
+  #page-keyboard-hid .kh-overview { grid-template-columns: 48px 1fr; gap: 14px; padding: 16px; }
+  #page-keyboard-hid .kh-overview > button { grid-column: 1 / -1; grid-row: auto; justify-self: start; }
+  #page-keyboard-hid .kh-readout-grid { grid-template-columns: 1fr 1fr; }
+  #page-keyboard-hid .kh-columns { grid-template-columns: 1fr; }
+  #page-keyboard-hid .kh-extended { grid-column: auto; }
+  #page-keyboard-hid .kh-extended-controls { grid-template-columns: 1fr; gap: 14px; }
+}
+@media (max-width: 420px) {
+  #page-keyboard-hid .kh-card { padding: 16px; }
+  #page-keyboard-hid .kh-field-grid { grid-template-columns: 1fr; }
+  #page-keyboard-hid .kh-palette { gap: 4px; }
+  #page-keyboard-hid .kh-keyboard-art { grid-template-columns: repeat(14, 8px); gap: 3px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #page-keyboard-hid *, #page-keyboard-hid *::before, #page-keyboard-hid *::after { transition-duration: .01ms !important; }
+}

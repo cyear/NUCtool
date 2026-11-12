@@ -26,6 +26,7 @@ const zhCN = {
     audio: "音频调优",
     system: "系统配置",
     keyboard: "键盘设置",
+    keyboardHid: "键盘灯效",
     lightbar: "灯条设置",
     bios: "BIOS配置",
     ecDebug: "EC 调试",
@@ -303,6 +304,17 @@ const zhCN = {
 
     reading: "读取中...",
     readFailed: "读取失败",
+  },
+  keyboardHid: {
+    title: "键盘灯效（HID）", subtitle: "独立 HID 控制 · 每 4 秒刷新设备状态", device: "键盘控制器",
+    firmware: "固件", layout: "布局", refresh: "刷新周期", effectNow: "当前效果", refreshNow: "立即读取",
+    powerTitle: "灯光电源", power: "键盘灯开关", powerHint: "直接向键盘控制器发送开关指令", brightness: "亮度",
+    timeout: "定时熄灭", timeoutEnabled: "启用固件定时熄灭", rawTime: "固件时间值", timeoutHint: "该控制器协议只确认时间字段为 0–255 原始值，具体计时单位由固件定义。",
+    applyTimeout: "写入熄灭设置", builtinTitle: "内置灯效", effect: "灯效", direction: "方向", speed: "速度",
+    effectBrightness: "亮度", palette: "调色板（最多 7 色）", paletteHint: "用于支持多色的动态效果", save: "保存到设备配置",
+    writeBuiltin: "写入内置灯效", extendedTitle: "扩展灯效", matrixHint: "点击单键选择并设置颜色",
+    frameColor: "选中键颜色", frameBrightness: "帧亮度", extendedHint: "可单独为 126 个键位设置颜色，或填充全部键位。", writeExtended: "写入扩展灯效",
+    fillKeys: "填充全部键位",
   },
   // ==========================================================
   // 灯条设置

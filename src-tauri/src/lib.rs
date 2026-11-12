@@ -12,6 +12,7 @@ mod battery_details;
 mod config;
 mod ec_debug;
 mod fan_control;
+mod keyboard_hid;
 mod osd;
 mod win;
 mod window_push;
@@ -229,7 +230,10 @@ fn start_fan_control_internal(
             }
         };
 
-        if let Err(e) = acpi_ec_worker().call(|ec| { ec.fan_write_manual(false) })
+        if let Err(e) = acpi_ec_worker().call(|ec| { 
+                ec.fan_write_close();
+                ec.fan_write_manual(false)
+            })
         {
             eprintln!("切换FAN手动模式失败: {}", e);
         };
@@ -1802,6 +1806,12 @@ pub fn run() {
         .manage(WindowPushState::new())
         .manage(battery_details::BatteryDetailsPage::default())
         .invoke_handler(tauri::generate_handler![
+            keyboard_hid::get_keyboard_hid_info,
+            keyboard_hid::set_keyboard_hid_power,
+            keyboard_hid::set_keyboard_hid_brightness,
+            keyboard_hid::set_keyboard_hid_effect,
+            keyboard_hid::set_keyboard_hid_extended,
+            keyboard_hid::set_keyboard_hid_timeout,
             start_sensor_loop,
             load_fan_config,
             save_fan_config,
