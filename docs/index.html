@@ -17,7 +17,7 @@
 
     <title>NUCtool — Intel NUC X15 Tool</title>
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css"><style>.compatibility-table{overflow-x:auto}.compatibility-table .table-head,.compatibility-table .table-row{min-width:760px;grid-template-columns:2.3fr 1fr 1.2fr 1fr}.compatibility-table .table-row span:first-child{padding:12px 8px 12px 0}.compatibility-table strong{font-size:12px}.feature-card p{line-height:1.65}</style><style>.language-picker select{background:#141416;color:#f4f4f5;border:1px solid #343439;border-radius:8px;padding:8px}.sr-only{position:absolute;width:1px;height:1px;position:absolute;clip:rect(0,0,0,0)}</style>
 </head>
 
 <body>
@@ -31,10 +31,10 @@
         </a>
 
         <nav>
-            <a href="#features">功能</a>
-            <a href="#support">支持</a>
-            <a href="#install">安装</a>
-            <a
+            <a href="#features" data-i18n="navFeatures">功能</a>
+            <a href="#support" data-i18n="navSupport">支持</a>
+            <a href="#install" data-i18n="navInstall">安装</a>
+            <a href="gsc-driver-stutter-fix.html" data-i18n="navGuide">GSC 修复指南</a><label class="language-picker"><span class="sr-only">Language</span><select id="language-select" aria-label="Language"><option value="zh-CN">简体中文</option><option value="en-US">English</option><option value="ru-RU">Русский</option></select></label><a
                 href="https://github.com/cyear/NUCtool"
                 target="_blank"
                 rel="noopener"
@@ -64,7 +64,7 @@
                 <span>Control your NUC.</span>
             </h1>
 
-            <p class="hero-description">
+            <p class="hero-description" data-i18n="hero">
                 面向 Intel NUC X15 系列笔记本的硬件控制工具。
                 提供风扇曲线、功耗控制、温度监控、模式切换等功能。
             </p>
@@ -393,75 +393,43 @@
             </div>
 
 
-            <div class="hardware-table">
-
-                <div class="table-head">
-                    <span>功能</span>
-                    <span>LAPAC71H</span>
-                    <span>其他机型</span>
-                </div>
-
-
-                <div class="table-row">
-                    <span>风扇控制</span>
-                    <strong class="yes">✓</strong>
-                    <strong class="yes">—</strong>
-                </div>
-
-
-                <div class="table-row">
-                    <span>CPU 功耗控制</span>
-                    <strong class="yes">✓</strong>
-                    <strong class="yes">—</strong>
-                </div>
-
-
-                <div class="table-row">
-                    <span>GPU 功耗控制</span>
-                    <strong class="yes">✓</strong>
-                    <strong class="yes">—</strong>
-                </div>
-
-
-                <div class="table-row">
-                    <span>键盘 LED</span>
-                    <strong class="yes">✓</strong>
-                    <strong class="yes">—</strong>
-                </div>
-
-
-                <div class="table-row">
-                    <span>性能模式</span>
-                    <strong class="yes">✓</strong>
-                    <strong class="yes">—</strong>
-                </div>
-
-
-                <div class="table-row">
-                    <span>硬件监控</span>
-                    <strong class="yes">✓</strong>
-                    <strong class="yes">—</strong>
-                </div>
-
-
-                <div class="table-row">
-                    <span>更多功能</span>
-                    <strong class="yes">开发中</strong>
-                    <strong class="yes">开发中</strong>
-                </div>
-
-            </div>
-
-
-            <p class="table-note">
-                ✓ 已实现 / 支持　　— 未经过任何测试以及反馈
-            </p>
+            <div class="hardware-table compatibility-table">
+  <div class="table-head"><span>功能</span><span>LAPAC71H</span><span>LAPKC71F</span><span>其他 NUC X15</span></div>
+  <div class="table-row"><span>实时监控：CPU/GPU 温度、APC_WATT、双风扇转速</span><strong class="yes">✓ 已验证</strong><strong>部分/未完整验证</strong><strong>未测试</strong></div>
+  <div class="table-row"><span>风扇控制（旧版与新版 Beta）</span><strong class="yes">✓ 已验证</strong><strong class="yes">✓ README 标记支持</strong><strong>未测试</strong></div>
+  <div class="table-row"><span>CPU 功耗：PL1 / PL2 / PL4</span><strong class="yes">✓ 已验证</strong><strong class="yes">✓ README 标记支持</strong><strong>未测试</strong></div>
+  <div class="table-row"><span>CPU PSYS PL1</span><strong class="yes">✓</strong><strong>⚠ 读数无效</strong><strong>未测试</strong></div>
+  <div class="table-row"><span>GPU 功耗：PL1 / PL2</span><strong class="yes">✓</strong><strong>未测试</strong><strong>未测试</strong></div>
+  <div class="table-row"><span>性能/平衡/省电/基准模式与 Fn 快捷键</span><strong class="yes">✓ 已验证</strong><strong>模式支持；快捷键理论可用</strong><strong>未测试</strong></div>
+  <div class="table-row"><span>键盘 RGB / LED 设置</span><strong class="yes">✓</strong><strong>未测试</strong><strong>未测试</strong></div>
+  <div class="table-row"><span>灯条设置</span><strong>不适用</strong><strong class="yes">✓</strong><strong>未测试</strong></div>
+  <div class="table-row"><span>显示模式与显示设置</span><strong>部分支持</strong><strong>部分支持</strong><strong>未测试</strong></div>
+  <div class="table-row"><span>BIOS NVRAM 读取/导出/写入</span><strong class="yes">✓</strong><strong>写入未测试</strong><strong>未测试</strong></div>
+  <div class="table-row"><span>音频调优 / DIY OSD / DIY 快捷键</span><strong class="yes">✓ 可用</strong><strong>部分或未测试</strong><strong>未测试</strong></div>
+  <div class="table-row"><span>电池充电上限 / 电池健康优化器 / 电池详细信息</span><strong class="yes">✓ README 标记支持</strong><strong class="yes">✓ README 标记支持</strong><strong>未测试</strong></div>
+  <div class="table-row"><span>开机自启 / 多语言</span><strong class="yes">✓ 可用</strong><strong>理论可用</strong><strong>未测试</strong></div>
+</div>
+<p class="table-note">✓/支持表示 README 中记录为可用或支持；“部分”“未测试”代表功能覆盖或验证不足。项目作者目前仅有 LAPAC71H 实机，其他机型结果请以实际硬件、EC/BIOS 固件和软件版本为准。</p>
 
         </div>
 
     </section>
 
 
+    <section class="section dark-section">
+        <div class="container">
+            <div class="section-header">
+                <div class="eyebrow">PLATFORMS</div>
+                <h2>平台与运行要求</h2>
+                <p>Windows 桌面端提供完整的 NUCtool 控制界面；Linux 目前提供独立工具，功能范围与 Windows 应用不同。</p>
+            </div>
+            <div class="feature-grid">
+                <article class="feature-card"><div class="feature-icon">▣</div><h3>Windows 桌面应用</h3><p>README 标注支持 Windows 11。依赖 UniwillService、UWACPIDriver 与 WebView2；Windows 10 1803 及更新版本通常已包含 WebView2。硬件控制能力仍取决于机型与固件。</p><code>Windows 11 · Tauri 2</code></article>
+                <article class="feature-card"><div class="feature-icon">⌘</div><h3>Linux 独立工具</h3><p>仓库另提供 Linux 风扇控制工具；Linux 音效 Beta 面向 Arch Linux x86_64、PipeWire/WirePlumber、48 kHz 双声道和 SoundEdge Music mode-0。它们不是 Windows 桌面应用的完整 Linux 移植。</p><code>Linux utilities · limited scope</code></article>
+                <article class="feature-card"><div class="feature-icon">⚙</div><h3>设备与固件差异</h3><p>低层操作依赖 EC、BIOS、驱动及设备硬件。BIOS NVRAM 写入、功耗和风扇设置可能影响启动与稳定性；操作前请阅读项目说明并备份重要数据。</p><code>LAPAC71H · LAPKC71F · NUC X15</code></article>
+            </div>
+        </div>
+    </section>
     <!-- Installation -->
 
     <section id="install" class="section install-section">
@@ -545,7 +513,7 @@
 
     </section>
 
-</main>
+<section class="section"><div class="container"><div class="install-card"><div><div class="eyebrow">TROUBLESHOOTING</div><h2>GSC 驱动卡顿修复</h2><p>Intel NUC X15 图形控制器驱动导致音频爆音或画面卡顿？查看分步排查与修复指南。</p></div><div class="install-buttons"><a class="button secondary" href="gsc-driver-stutter-fix.html">打开修复指南</a></div></div></div></section></main>
 
 
 <footer>
@@ -605,5 +573,35 @@
 </footer>
 
 
-</body>
+<script>
+const copy={
+"zh-CN":{
+nav:["功能","支持","安装","GSC 修复指南"],tagline:"Control your NUC.",eyebrows:["功能","架构","硬件","平台","开始使用","故障排查"],hero:"面向 Intel NUC X15 系列笔记本的硬件控制工具。提供风扇曲线、功耗控制、温度监控、模式切换等功能。",heroButtons:["下载 NUCtool","查看源码"],featureCodes:["温度 → 风扇转速","CPU PL1 / PL2 / PL4","CPU · GPU · 风扇","键盘灯","性能配置","托盘 · 自启动"],platformCodes:["Windows 11 · Tauri 2","Linux 独立工具 · 功能有限","LAPAC71H · LAPKC71F · NUC X15"],
+features:["控制你的 NUC X15","从系统监控到 EC 控制，将常用的硬件控制功能集中到一个简洁的桌面应用中。"],cards:[["风扇控制","自定义 CPU / GPU 温度对应的风扇转速，创建自己的 Fan Curve，并支持自动控制。"],["功耗控制","对支持的 NUC X15 机型进行处理器和 GPU 功耗参数控制。"],["实时监控","查看 CPU、GPU 温度以及风扇转速等硬件运行状态。"],["键盘 LED","对支持的设备控制键盘灯状态，并与 NUCtool 设置界面集成。"],["模式切换","根据硬件支持情况切换不同的性能和电源模式。"],["后台运行","支持系统托盘、开机自启以及后台风扇控制。"]],
+architecture:["为硬件控制而设计","NUCtool 使用 Rust + Tauri 构建，Windows 平台通过底层硬件接口实现设备控制。",["前端","Tauri","Rust","底层"]],
+support:["硬件支持","支持范围按机型拆分列出；部分特性依赖设备型号、EC/BIOS 固件和驱动。项目当前主要以 LAPAC71H 实机验证。"],
+tableHeader:["功能","LAPAC71H","LAPKC71F","其他 NUC X15"],tableRows:[["实时监控：CPU/GPU 温度、APC_WATT、双风扇转速","✓ 已验证","部分/未完整验证","未测试"],["风扇控制（旧版与新版 Beta）","✓ 已验证","✓ README 标记支持","未测试"],["CPU 功耗：PL1 / PL2 / PL4","✓ 已验证","✓ README 标记支持","未测试"],["CPU PSYS PL1","✓","⚠ 读数无效","未测试"],["GPU 功耗：PL1 / PL2","✓","未测试","未测试"],["性能/平衡/省电/基准模式与 Fn 快捷键","✓ 已验证","模式支持；快捷键理论可用","未测试"],["键盘 RGB / LED 设置","✓","未测试","未测试"],["灯条设置","不适用","✓","未测试"],["显示模式与显示设置","部分支持","部分支持","未测试"],["BIOS NVRAM 读取/导出/写入","✓","写入未测试","未测试"],["音频调优 / DIY OSD / DIY 快捷键","✓ 可用","部分或未测试","未测试"],["电池充电上限 / 电池健康优化器 / 电池详细信息","✓ README 标记支持","✓ README 标记支持","未测试"],["开机自启 / 多语言","✓ 可用","理论可用","未测试"]],tableNote:"✓/支持表示 README 中记录为可用或支持；“部分”“未测试”代表功能覆盖或验证不足。项目作者目前仅有 LAPAC71H 实机，其他机型结果请以实际硬件、EC/BIOS 固件和软件版本为准。",
+platform:["平台与运行要求","Windows 桌面端提供完整的 NUCtool 控制界面；Linux 目前提供独立工具，功能范围与 Windows 应用不同。",["Windows 桌面应用","README 标注支持 Windows 11。依赖 UniwillService、UWACPIDriver 与 WebView2；Windows 10 1803 及更新版本通常已包含 WebView2。硬件控制能力仍取决于机型与固件。","Linux 独立工具","仓库另提供 Linux 风扇控制工具；Linux 音效 Beta 面向 Arch Linux x86_64、PipeWire/WirePlumber、48 kHz 双声道和 SoundEdge Music mode-0。它们不是 Windows 桌面应用的完整 Linux 移植。","设备与固件差异","低层操作依赖 EC、BIOS、驱动及设备硬件。BIOS NVRAM 写入、功耗和风扇设置可能影响启动与稳定性；操作前请阅读项目说明并备份重要数据。"]],
+install:["开始使用 NUCtool","前往 GitHub Releases 获取最新构建版本。","Issues"],warning:["硬件控制风险","NUCtool 会与设备底层硬件接口进行交互。不正确的功耗、温度或风扇配置可能导致系统不稳定、过热、死机或硬件损坏。","使用前请确认你的设备型号以及相关参数。对硬件造成的损坏及数据损失，请使用者自行承担风险。"],guide:["GSC 驱动卡顿修复","Intel NUC X15 图形控制器驱动导致音频爆音或画面卡顿？查看分步排查与修复指南。","打开修复指南"],footer:"Intel NUC X15 硬件控制工具。"},
+"en-US":{
+nav:["Features","Compatibility","Install","GSC driver fix"],tagline:"Control your NUC.",eyebrows:["FEATURES","ARCHITECTURE","HARDWARE","PLATFORMS","GET STARTED","TROUBLESHOOTING"],hero:"Hardware control for Intel NUC X15 laptops, including fan curves, power limits, temperature monitoring, and profile switching.",heroButtons:["Download NUCtool","View source"],featureCodes:["Temperature → Fan RPM","CPU PL1 / PL2 / PL4","CPU · GPU · FAN","Keyboard LED","Performance profile","Tray · Startup"],platformCodes:["Windows 11 · Tauri 2","Linux utilities · limited scope","LAPAC71H · LAPKC71F · NUC X15"],
+features:["Control your NUC X15","Bring system monitoring and EC controls together in one streamlined desktop app."],cards:[["Fan control","Set fan speeds against CPU/GPU temperatures, create custom fan curves, and enable automatic control."],["Power limits","Adjust processor and GPU power limits on supported NUC X15 models."],["Live monitoring","View CPU/GPU temperatures, fan speeds, and other hardware readings."],["Keyboard lighting","Control keyboard lighting on supported devices from NUCtool settings."],["Performance profiles","Switch performance and power profiles where the hardware supports them."],["Background operation","Use the system tray, launch at sign-in, and run fan control in the background."]],
+architecture:["Built for hardware control","NUCtool is built with Rust and Tauri. On Windows, low-level hardware interfaces provide device control.",["Frontend","Tauri","Rust","Hardware"]],support:["Hardware compatibility","Compatibility is listed by model. Some features depend on the device, EC/BIOS firmware, and drivers. LAPAC71H is the primary model tested by the author."],tableHeader:["Feature","LAPAC71H","LAPKC71F","Other NUC X15"],tableRows:[["Live readings: CPU/GPU temperature, APC_WATT, both fan speeds","✓ Tested","Partial / not fully verified","Untested"],["Legacy and beta fan control","✓ Tested","✓ Listed as supported in README","Untested"],["CPU power limits: PL1 / PL2 / PL4","✓ Tested","✓ Listed as supported in README","Untested"],["CPU PSYS PL1","✓","⚠ Reading is invalid","Untested"],["GPU power limits: PL1 / PL2","✓","Untested","Untested"],["Performance, balanced, saver, benchmark profiles and Fn keys","✓ Tested","Profiles supported; Fn keys theoretical","Untested"],["Keyboard RGB / LED","✓","Untested","Untested"],["Light bar","Not applicable","✓","Untested"],["Display modes and settings","Partially supported","Partially supported","Untested"],["BIOS NVRAM read / export / write","✓","Writes untested","Untested"],["Audio tuning / custom OSD / hotkeys","✓ Available","Partial or untested","Untested"],["Charge limit / battery health optimizer / battery details","✓ Listed as supported in README","✓ Listed as supported in README","Untested"],["Startup / multiple languages","✓ Available","Theoretical","Untested"]],tableNote:"✓/Supported means the README lists the feature as available. Partial and untested indicate limited coverage or verification. The author currently has only a LAPAC71H; results on other models may vary by hardware, EC/BIOS firmware, and software version.",
+platform:["Platforms and requirements","The Windows desktop app provides the full NUCtool interface. Linux currently has separate utilities with a different feature scope.",["Windows desktop app","The README lists Windows 11 support. Requires UniwillService, UWACPIDriver, and WebView2. WebView2 is generally included with Windows 10 version 1803 and later. Hardware controls vary by model and firmware." ,"Standalone Linux tools","The repository also provides a Linux fan utility. The Linux audio beta targets Arch Linux x86_64, PipeWire/WirePlumber, 48 kHz stereo, and SoundEdge Music mode-0. These are not a full Linux port of the Windows desktop app.","Hardware and firmware differences","Low-level controls depend on the EC, BIOS, drivers, and device hardware. BIOS NVRAM writes and power or fan settings may affect boot and system stability. Read the project guidance and back up important data first."]],install:["Get started with NUCtool","Visit GitHub Releases for the latest builds.","Issues"],warning:["Hardware control risks","NUCtool interacts with low-level device interfaces. Incorrect power, temperature, or fan settings may cause instability, overheating, crashes, or hardware damage.","Confirm your device model and settings before use. You assume responsibility for hardware damage or data loss."],guide:["Fix GSC driver stutter","Audio crackling or image freezes on Intel NUC X15? Read the step-by-step graphics controller driver troubleshooting guide.","Open the fix guide"],footer:"Hardware control tool for Intel NUC X15."},
+"ru-RU":{
+nav:["Возможности","Совместимость","Установка","Исправление GSC"],tagline:"Управляйте NUC.",eyebrows:["ВОЗМОЖНОСТИ","АРХИТЕКТУРА","ОБОРУДОВАНИЕ","ПЛАТФОРМЫ","НАЧАЛО РАБОТЫ","УСТРАНЕНИЕ НЕПОЛАДОК"],hero:"Управление оборудованием ноутбуков Intel NUC X15: кривые вентиляторов, лимиты мощности, мониторинг температуры и переключение режимов.",heroButtons:["Скачать NUCtool","Исходный код"],featureCodes:["Температура → обороты вентилятора","CPU PL1 / PL2 / PL4","CPU · GPU · вентиляторы","Подсветка клавиатуры","Режим производительности","Трей · автозапуск"],platformCodes:["Windows 11 · Tauri 2","Утилиты Linux · ограниченный набор","LAPAC71H · LAPKC71F · NUC X15"],
+features:["Управляйте NUC X15","Мониторинг системы и управление EC объединены в одном удобном настольном приложении."],cards:[["Управление вентиляторами","Настройте скорость вентиляторов по температуре CPU/GPU, создавайте кривые и включайте автоматику."],["Лимиты мощности","Настраивайте лимиты мощности процессора и GPU на поддерживаемых моделях NUC X15."],["Мониторинг в реальном времени","Следите за температурой CPU/GPU, скоростью вентиляторов и другими параметрами."],["Подсветка клавиатуры","Управляйте подсветкой клавиатуры поддерживаемых устройств в настройках NUCtool."],["Режимы производительности","Переключайте режимы производительности и питания, если это поддерживает оборудование."],["Работа в фоне","Используйте системный трей, автозапуск и фоновое управление вентиляторами."]],architecture:["Создано для управления оборудованием","NUCtool построен на Rust и Tauri. В Windows управление устройствами выполняется через низкоуровневые интерфейсы.",["Интерфейс","Tauri","Rust","Оборудование"]],support:["Совместимость оборудования","Совместимость указана по моделям. Некоторые функции зависят от устройства, прошивки EC/BIOS и драйверов. Автор в основном проверял LAPAC71H."],tableHeader:["Функция","LAPAC71H","LAPKC71F","Другие NUC X15"],tableRows:[["Мониторинг: температура CPU/GPU, APC_WATT, скорость двух вентиляторов","✓ Проверено","Частично / не полностью проверено","Не тестировалось"],["Старое и бета-управление вентиляторами","✓ Проверено","✓ Указано как поддерживаемое в README","Не тестировалось"],["Лимиты CPU: PL1 / PL2 / PL4","✓ Проверено","✓ Указано как поддерживаемое в README","Не тестировалось"],["CPU PSYS PL1","✓","⚠ Некорректные показания","Не тестировалось"],["Лимиты GPU: PL1 / PL2","✓","Не тестировалось","Не тестировалось"],["Режимы производительности, баланса, экономии, теста и клавиши Fn","✓ Проверено","Режимы поддерживаются; Fn теоретически","Не тестировалось"],["RGB / LED клавиатуры","✓","Не тестировалось","Не тестировалось"],["Световая панель","Не применимо","✓","Не тестировалось"],["Режимы и настройки дисплея","Частичная поддержка","Частичная поддержка","Не тестировалось"],["Чтение / экспорт / запись BIOS NVRAM","✓","Запись не тестировалась","Не тестировалось"],["Настройка аудио / OSD / горячих клавиш","✓ Доступно","Частично или не тестировалось","Не тестировалось"],["Лимит заряда / оптимизатор батареи / данные батареи","✓ Указано как поддерживаемое в README","✓ Указано как поддерживаемое в README","Не тестировалось"],["Автозапуск / несколько языков","✓ Доступно","Теоретически","Не тестировалось"]],tableNote:"✓/Поддерживается означает, что функция указана как доступная в README. Частично и не тестировалось означают ограниченную проверку. У автора есть только LAPAC71H; результаты других моделей зависят от оборудования, EC/BIOS и версии ПО.",
+platform:["Платформы и требования","Настольное приложение Windows предоставляет полный интерфейс NUCtool. Для Linux есть отдельные утилиты с другим набором функций.",["Приложение Windows","В README указана поддержка Windows 11. Требуются UniwillService, UWACPIDriver и WebView2. WebView2 обычно включён в Windows 10 версии 1803 и новее. Возможности зависят от модели и прошивки.","Отдельные утилиты Linux","В репозитории есть утилита управления вентиляторами Linux. Бета аудио предназначена для Arch Linux x86_64, PipeWire/WirePlumber, стерео 48 кГц и SoundEdge Music mode-0. Это не полный порт Windows-приложения.","Различия оборудования и прошивок","Низкоуровневые функции зависят от EC, BIOS, драйверов и устройства. Запись BIOS NVRAM и настройки питания или вентиляторов могут повлиять на запуск и стабильность. Перед использованием прочитайте документацию и сохраните важные данные."]],install:["Начало работы с NUCtool","Последние сборки доступны в GitHub Releases.","Проблемы"],warning:["Риски управления оборудованием","NUCtool взаимодействует с низкоуровневыми интерфейсами устройства. Неверные настройки питания, температуры или вентиляторов могут вызвать нестабильность, перегрев, сбои или повреждение оборудования.","Перед использованием проверьте модель устройства и параметры. Ответственность за повреждение оборудования и потерю данных лежит на пользователе."],guide:["Исправление зависаний драйвера GSC","Треск звука или зависание изображения на Intel NUC X15? Откройте пошаговое руководство по устранению проблем графического драйвера.","Открыть руководство"],footer:"Утилита управления оборудованием Intel NUC X15."}
+};
+const select=document.getElementById("language-select");
+function setText(selector,value,root=document){const nodes=root.querySelectorAll(selector);if(Array.isArray(value))nodes.forEach((node,i)=>{if(value[i]!==undefined)node.textContent=value[i]});else if(nodes[0])nodes[0].textContent=value}
+function setLanguage(lang){const d=copy[lang]||copy["zh-CN"];document.documentElement.lang=lang;document.title=lang==="zh-CN"?"NUCtool — Intel NUC X15 Tool":lang==="ru-RU"?"NUCtool — управление Intel NUC X15":"NUCtool — Intel NUC X15 Tool";document.querySelector('meta[name="description"]').content=d.hero;select.setAttribute("aria-label",lang==="zh-CN"?"语言":lang==="ru-RU"?"Язык":"Language");select.previousElementSibling.textContent=lang==="zh-CN"?"语言":lang==="ru-RU"?"Язык":"Language";
+setText("nav a[href^='#']",d.nav.slice(0,3));setText("nav a[data-i18n='navGuide']",d.nav[3]);setText(".hero h1 span",d.tagline);setText(".hero-description",d.hero);setText(".hero-buttons a",d.heroButtons);
+setText("#features .section-header .eyebrow",d.eyebrows[0]);setText("#features .section-header h2",d.features[0]);setText("#features .section-header p",d.features[1]);setText("#features .feature-card h3",d.cards.map(x=>x[0]));setText("#features .feature-card p",d.cards.map(x=>x[1]));setText("#features .feature-card code",d.featureCodes);
+const darkSections=document.querySelectorAll("main > section.dark-section");const archSection=darkSections[0];setText(".section-header .eyebrow",d.eyebrows[1],archSection);setText(".section-header h2",d.architecture[0],archSection);setText(".section-header p",d.architecture[1],archSection);setText(".architecture-item strong",d.architecture[2],archSection);
+setText("#support .section-header .eyebrow",d.eyebrows[2]);setText("#support .section-header h2",d.support[0]);setText("#support .section-header p",d.support[1]);setText(".compatibility-table .table-head span",d.tableHeader);document.querySelectorAll(".compatibility-table .table-row").forEach((row,i)=>{row.querySelectorAll("span,strong").forEach((cell,j)=>{if(d.tableRows[i]&&d.tableRows[i][j]!==undefined)cell.textContent=d.tableRows[i][j]})});setText(".table-note",d.tableNote);
+const platformSection=darkSections[1];if(platformSection){setText(".section-header .eyebrow",d.eyebrows[3],platformSection);setText(".section-header h2",d.platform[0],platformSection);setText(".section-header p",d.platform[1],platformSection);const cards=platformSection.querySelectorAll(".feature-card");cards.forEach((c,i)=>{c.querySelector("h3").textContent=d.platform[2][i*3];c.querySelector("p").textContent=d.platform[2][i*3+1];c.querySelector("code").textContent=d.platformCodes[i]})}
+setText("#install .eyebrow",d.eyebrows[4]);setText("#install h2",d.install[0]);setText("#install p",d.install[1]);setText("#install .install-buttons .button.secondary",d.install[2]);setText(".warning-title",d.warning[0]);setText(".warning p",d.warning.slice(1));const guide=document.querySelector("main > section:last-of-type");setText(".eyebrow",d.eyebrows[5],guide);setText("h2",d.guide[0],guide);setText("p",d.guide[1],guide);setText("a.button",d.guide[2],guide);setText(".footer-inner p",d.footer);try{localStorage.setItem("nuctool-lang",lang)}catch{}}
+select.addEventListener("change",()=>setLanguage(select.value));try{select.value=localStorage.getItem("nuctool-lang")||"zh-CN"}catch{select.value="zh-CN"}setLanguage(select.value);
+</script></body>
 </html>
