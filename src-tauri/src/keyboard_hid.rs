@@ -1,4 +1,4 @@
-use kc_led_hid::{Direction, Effect, KcKeyboard, NativeHid, Profile, Supply};
+use kc_led_hid::{Direction, Effect, KeyLayout, KcKeyboard, NativeHid, Profile, Supply};
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -6,6 +6,7 @@ pub struct KeyboardHidInfo {
     connected: bool,
     firmware: String,
     layout: String,
+    keymap: Vec<Option<String>>,
     power: Option<bool>,
     effect: String,
     effect_id: u8,
@@ -23,19 +24,56 @@ pub struct KeyboardHidInfo {
 
 #[tauri::command]
 pub fn get_keyboard_hid_info() -> Result<KeyboardHidInfo, String> {
-    let mut keyboard = KcKeyboard::new(NativeHid::open().map_err(|e| e.to_string())?)
-        .map_err(|e| e.to_string())?;
-    let version = keyboard.firmware_version().map_err(|e| e.to_string())?;
-    let layout = keyboard.keyboard_layout().map_err(|e| e.to_string())?;
-    let effect_live = keyboard.read_effect().ok();
+    println!("[KeyboardHID] 开始探测兼容设备 048d:6006 / FF03:0001");
+    let hid = NativeHid::open().map_err(|error| {
+        eprintln!("[KeyboardHID] HID 打开失败: {error}");
+        format!("HID_OPEN: {error}")
+    })?;
+    println!("[KeyboardHID] HID 设备已打开");
+    let mut keyboard = KcKeyboard::new(hid).map_err(|error| {
+        eprintln!("[KeyboardHID] HID 报告校验失败: {error}");
+        format!("HID_REPORT: {error}")
+    })?;
+    let firmware = match keyboard.firmware_version() {
+        Ok(version) => {
+            println!("[KeyboardHID] 固件版本: {}.{}.{}.{}", version[0], version[1], version[2], version[3]);
+            format!("{}.{}.{}.{}", version[0], version[1], version[2], version[3])
+        }
+        Err(error) => {
+            eprintln!("[KeyboardHID] HID 已连接，但固件版本回读失败: {error}");
+            "回读不可用".into()
+        }
+    };
+
+    // The X15 HID path has no dependency on the factory ACPIDriver layout query.
+    // Use the SDK's 85-key US key map, matching the pictured X15/Galleria keyboard.
+    let mut keymap = vec![None; kc_led_hid::KEY_COUNT];
+    for (name, slots) in KeyLayout::Us.keys() {
+        for slot in *slots {
+            if let Some(target) = keymap.get_mut(*slot) {
+                *target = Some((*name).to_string());
+            }
+        }
+    }
+    let effect_live = match keyboard.read_effect() {
+        Ok(report) => {
+            println!("[KeyboardHID] 实时效果回读: {:?}", report);
+            Some(report)
+        }
+        Err(error) => {
+            eprintln!("[KeyboardHID] 固件不支持或拒绝 0x88 实时回读: {error}");
+            None
+        }
+    };
     let brightness_live = effect_live.map(|r| r[5]);
     let effect_code = effect_live.map(|r| r[3]);
     let effect = effect_code
         .and_then(|code| Effect::ALL.iter().copied().find(|effect| effect.hid_code() == code));
     Ok(KeyboardHidInfo {
         connected: true,
-        firmware: format!("{}.{}.{}.{}", version[0], version[1], version[2], version[3]),
-        layout: match layout { 85 => "US", 86 => "ISO", 87 => "JIS", 88 => "88-key", _ => "Unknown" }.into(),
+        firmware,
+        layout: "US / 85-key map".into(),
+        keymap,
         power: brightness_live.map(|value| value > 0),
         effect: effect.map(|effect| effect.name()).unwrap_or("unknown").into(),
         effect_id: effect_code.unwrap_or(0),
@@ -58,13 +96,25 @@ pub fn get_keyboard_hid_info() -> Result<KeyboardHidInfo, String> {
 pub fn set_keyboard_hid_power(enabled: bool, restore_level: u8) -> Result<(), String> {
     let level = if enabled { restore_level } else { 0 };
     let mut keyboard = open()?;
-    keyboard.set_brightness(level).map_err(|e| e.to_string())
+    println!("[KeyboardHID] 设置灯光电源: enabled={enabled}, brightness={level}");
+    keyboard.set_brightness(level).map_err(|error| {
+        eprintln!("[KeyboardHID] 设置灯光电源失败: {error}");
+        format!("HID_WRITE_POWER: {error}")
+    })?;
+    println!("[KeyboardHID] 灯光电源写入成功");
+    Ok(())
 }
 
 #[tauri::command]
 pub fn set_keyboard_hid_brightness(level: u8) -> Result<(), String> {
     let mut keyboard = open()?;
-    keyboard.set_brightness(level).map_err(|e| e.to_string())
+    println!("[KeyboardHID] 设置亮度: {level}%");
+    keyboard.set_brightness(level).map_err(|error| {
+        eprintln!("[KeyboardHID] 设置亮度失败: {error}");
+        format!("HID_WRITE_BRIGHTNESS: {error}")
+    })?;
+    println!("[KeyboardHID] 亮度写入成功");
+    Ok(())
 }
 
 #[tauri::command]
@@ -82,9 +132,15 @@ pub fn set_keyboard_hid_effect(
         brightness_ac: brightness, brightness_dc: brightness,
         ..Profile::default()
     };
+    println!("[KeyboardHID] 写入内置灯效: effect={}, speed={speed}, direction={}, brightness={brightness}, colors={}, save={save}", effect.name(), direction.name(), profile.palette.len());
     let mut keyboard = open()?;
     keyboard.apply_profile(&profile, Supply::current().map_err(|e| e.to_string())?, save)
-        .map_err(|e| e.to_string())
+        .map_err(|error| {
+            eprintln!("[KeyboardHID] 内置灯效写入失败: {error}");
+            format!("HID_WRITE_EFFECT: {error}")
+        })?;
+    println!("[KeyboardHID] 内置灯效写入成功");
+    Ok(())
 }
 
 #[tauri::command]
@@ -96,18 +152,34 @@ pub fn set_keyboard_hid_extended(colors: Vec<[u8; 3]>, brightness: u8, save: boo
     profile.brightness_ac = brightness;
     profile.brightness_dc = brightness;
     profile.key_colors = colors;
+    println!("[KeyboardHID] 写入扩展灯效: {} 键位, brightness={brightness}, save={save}", profile.key_colors.len());
     let mut keyboard = open()?;
     keyboard.apply_profile(&profile, Supply::current().map_err(|e| e.to_string())?, save)
-        .map_err(|e| e.to_string())
+        .map_err(|error| {
+            eprintln!("[KeyboardHID] 扩展灯效写入失败: {error}");
+            format!("HID_WRITE_EXTENDED: {error}")
+        })?;
+    println!("[KeyboardHID] 扩展灯效写入成功");
+    Ok(())
 }
 
 #[tauri::command]
 pub fn set_keyboard_hid_timeout(enabled: bool, raw_time: u8, save: bool) -> Result<(), String> {
     let mut keyboard = open()?;
-    keyboard.set_timeout_with_save(enabled, raw_time, save).map_err(|e| e.to_string())
+    println!("[KeyboardHID] 设置固件熄灯计时: enabled={enabled}, raw_time={raw_time}, save={save}");
+    keyboard.set_timeout_with_save(enabled, raw_time, save).map_err(|error| {
+        eprintln!("[KeyboardHID] 固件熄灯计时设置失败: {error}");
+        format!("HID_WRITE_TIMEOUT: {error}")
+    })?;
+    println!("[KeyboardHID] 固件熄灯计时写入成功");
+    Ok(())
 }
 
 fn open() -> Result<KcKeyboard<NativeHid>, String> {
-    let hid = NativeHid::open().map_err(|e| e.to_string())?;
-    KcKeyboard::new(hid).map_err(|e| e.to_string())
+    println!("[KeyboardHID] 打开设备以执行写入");
+    let hid = NativeHid::open().map_err(|error| {
+        eprintln!("[KeyboardHID] HID 打开失败: {error}");
+        format!("HID_OPEN: {error}")
+    })?;
+    KcKeyboard::new(hid).map_err(|error| format!("HID_REPORT: {error}"))
 }

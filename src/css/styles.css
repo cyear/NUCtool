@@ -1569,6 +1569,11 @@ body {
   border-top: 1px solid var(--border);
 }
 
+#page-settings .log-option {
+  border-top: 0;
+  padding-top: 0;
+}
+
 .settings-option-info {
   min-width: 0;
   padding-right: 20px;

@@ -54,6 +54,29 @@ pub fn save_auto_fan_mode(mode: u8) -> Result<(), String> {
         .map_err(|e| format!("写入 autofan.conf 失败: {e}"))
 }
 
+pub fn load_log_enabled() -> Result<bool, String> {
+    let path = config_dir().join("log.conf");
+    match fs::read_to_string(&path) {
+        Ok(value) => match value.trim() {
+            "0" => Ok(false),
+            "1" => Ok(true),
+            _ => Err("log.conf 的值只能是 0 或 1".into()),
+        },
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            save_log_enabled(false)?;
+            Ok(false)
+        }
+        Err(error) => Err(format!("读取 log.conf 失败: {error}")),
+    }
+}
+
+pub fn save_log_enabled(enabled: bool) -> Result<(), String> {
+    let dir = config_dir();
+    fs::create_dir_all(&dir).map_err(|e| format!("创建配置目录失败: {e}"))?;
+    fs::write(dir.join("log.conf"), if enabled { "1" } else { "0" })
+        .map_err(|e| format!("写入 log.conf 失败: {e}"))
+}
+
 pub fn dll_dir() -> Result<PathBuf, String> {
     let exe_path = std::env::current_exe()
         .map_err(|e| format!("获取程序路径失败：{e}"))?;

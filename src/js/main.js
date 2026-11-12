@@ -1384,6 +1384,30 @@ autoFanModeSelect.addEventListener("change", async () => {
   }
 });
 
+const logToggle = document.getElementById("log-toggle");
+if (logToggle) {
+  logToggle.disabled = true;
+  invoke("get_log_enabled").then((enabled) => {
+    logToggle.checked = enabled;
+    logToggle.disabled = false;
+  }).catch((error) => {
+    document.getElementById("log-read-error").hidden = false;
+    console.error("读取日志配置失败:", error);
+  });
+  logToggle.addEventListener("change", async () => {
+    logToggle.disabled = true;
+    try {
+      await invoke("set_log_enabled", { enabled: logToggle.checked });
+    } catch (error) {
+      logToggle.checked = !logToggle.checked;
+      console.error("保存日志配置失败:", error);
+      window.alert(t("settings.logSaveFailed"));
+    } finally {
+      logToggle.disabled = false;
+    }
+  });
+}
+
 
 // =====================================================
 // 显示设置

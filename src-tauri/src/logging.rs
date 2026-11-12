@@ -3,20 +3,21 @@ use std::{
     panic,
     process,
     io::Write,
-    sync::{Mutex, OnceLock},
+    sync::{atomic::{AtomicBool, Ordering}, Mutex, OnceLock},
     fs::{self, File, OpenOptions},
     time::{SystemTime, UNIX_EPOCH},
 };
 use chrono::Local;
 
 static LOG_FILE: OnceLock<Mutex<File>> = OnceLock::new();
-static LOG_ENABLED: OnceLock<bool> = OnceLock::new();
+static LOG_ENABLED: AtomicBool = AtomicBool::new(false);
 
 /// 初始化日志系统。
 /// 只有命令行包含 --log 时，才创建日志文件。
 pub fn init_log() -> std::io::Result<()> {
-    let enabled = std::env::args().any(|arg| arg == "--log");
-    let _ = LOG_ENABLED.set(enabled);
+    let configured_enabled = crate::config::load_log_enabled().unwrap_or(false);
+    let enabled = std::env::args().any(|arg| arg == "--log") || configured_enabled;
+    LOG_ENABLED.store(enabled, Ordering::Relaxed);
     println!("--log参数 : {}", enabled);
     if !enabled || LOG_FILE.get().is_some() {
         return Ok(());
@@ -38,9 +39,23 @@ pub fn init_log() -> std::io::Result<()> {
     Ok(())
 }
 
+pub fn set_log_enabled(enabled: bool) -> Result<(), String> {
+    crate::config::save_log_enabled(enabled)?;
+    LOG_ENABLED.store(enabled, Ordering::Relaxed);
+    if enabled && LOG_FILE.get().is_none() {
+        let path = config_dir().join("NUCtool.log");
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        }
+        let file = OpenOptions::new().create(true).append(true).open(path).map_err(|e| e.to_string())?;
+        let _ = LOG_FILE.set(Mutex::new(file));
+    }
+    Ok(())
+}
+
 /// 写入日志文件；未启用 --log 时不写入文件。
 pub fn write_log(level: &str, message: &str) {
-    if !LOG_ENABLED.get().copied().unwrap_or(false) {
+    if !LOG_ENABLED.load(Ordering::Relaxed) {
         return;
     }
 

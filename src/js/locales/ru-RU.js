@@ -346,6 +346,9 @@ const ruRU = {
     autoFanLegacy: "Прежнее управление",
     autoFanNew: "Новое управление",
     autoFanSaveFailed: "Не удалось сохранить настройку автозапуска управления вентиляторами",
+    logTitle: "Ведение журнала",
+    logDescription: "Записывать журналы в NUCtool.log; также можно запустить с параметром --log",
+    logSaveFailed: "Не удалось сохранить настройку журнала",
 
     autostartChecking: "Проверка...",
 

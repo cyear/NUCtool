@@ -1828,6 +1828,8 @@ pub fn run() {
             set_autostart,
             get_auto_fan_mode,
             set_auto_fan_mode,
+            get_log_enabled,
+            set_log_enabled,
             set_power_plan,
             get_active_power_plan,
             window_push::get_window_push_enabled,
@@ -1890,4 +1892,14 @@ pub fn run() {
             }
         }
     })
+}
+
+#[tauri::command]
+fn get_log_enabled() -> Result<bool, String> {
+    config::load_log_enabled()
+}
+
+#[tauri::command]
+fn set_log_enabled(enabled: bool) -> Result<(), String> {
+    logging::set_log_enabled(enabled)
 }

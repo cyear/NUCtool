@@ -462,6 +462,9 @@ const jaJP = {
     autoFanLegacy: "従来のファン制御",
     autoFanNew: "新しいファン制御",
     autoFanSaveFailed: "ファン制御の自動起動設定を保存できませんでした",
+    logTitle: "ログ記録",
+    logDescription: "ログを NUCtool.log に保存します。--log を付けて起動することもできます",
+    logSaveFailed: "ログ設定を保存できませんでした",
 
     autostartChecking: "確認中...",
 
