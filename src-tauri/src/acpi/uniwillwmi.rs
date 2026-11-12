@@ -177,7 +177,7 @@ pub fn get_model() -> Result<String, Box<dyn Error>> {
     let model: String =
         object.get_property("Name")?.try_into()?;
 
-    Ok(String::from("LAPKC71F"))
+    Ok(model)
 }
 
 pub fn get_gpu_driver() -> Result<Vec<(String, String)>, Box<dyn Error>> {
