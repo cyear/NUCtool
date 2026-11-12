@@ -28,9 +28,9 @@
       <div class="kh-switch-row"><div><strong data-i18n="keyboardHid.power">键盘灯开关</strong><small data-i18n="keyboardHid.powerHint">直接向键盘控制器发送开关指令</small></div><label class="kh-switch"><input id="kh-power" type="checkbox"><span></span></label></div>
       <div class="kh-inline-control"><label for="kh-brightness" data-i18n="keyboardHid.brightness">亮度</label><input id="kh-brightness" type="range" min="0" max="100" value="75"><output id="kh-brightness-value">75%</output></div>
       <div class="kh-card-heading kh-subheading"><div><span class="kh-eyebrow">TIMEOUT</span><h3 data-i18n="keyboardHid.timeout">定时熄灭</h3></div></div>
-      <div class="kh-timeout-row"><label class="kh-check"><input id="kh-timeout-enabled" type="checkbox"><span data-i18n="keyboardHid.timeoutEnabled">启用固件定时熄灭</span></label><label class="kh-time-input"><span data-i18n="keyboardHid.rawTime">固件时间值</span><input id="kh-timeout-time" type="number" min="0" max="255" value="4"></label></div>
-      <p class="kh-note" data-i18n="keyboardHid.timeoutHint">该控制器协议只确认时间字段为 0–255 原始值，具体计时单位由固件定义。</p>
-      <button id="kh-timeout-apply" class="secondary" type="button" data-i18n="keyboardHid.applyTimeout">写入熄灭设置</button>
+      <div class="kh-timeout-row"><label class="kh-check"><input id="kh-timeout-enabled" type="checkbox"><span data-i18n="keyboardHid.timeoutEnabled">启用空闲熄灯</span></label><label class="kh-time-input"><span data-i18n="keyboardHid.timeoutDuration">空闲时长</span><select id="kh-timeout-time"><option value="60" data-i18n="keyboardHid.minute1">1 分钟</option><option value="180" data-i18n="keyboardHid.minute3">3 分钟</option><option value="300" selected data-i18n="keyboardHid.minute5">5 分钟</option><option value="600" data-i18n="keyboardHid.minute10">10 分钟</option><option value="900" data-i18n="keyboardHid.minute15">15 分钟</option><option value="1800" data-i18n="keyboardHid.minute30">30 分钟</option><option value="3600" data-i18n="keyboardHid.hour1">1 小时</option></select></label></div>
+      <label class="kh-check kh-timeout-restore"><input id="kh-timeout-restore" type="checkbox"><span data-i18n="keyboardHid.timeoutRestore">活动恢复时重新写入当前灯效</span></label>
+      <p class="kh-note" data-i18n="keyboardHid.timeoutHint">仅由 NUCtool 监测本机空闲时间并控制键盘灯，不修改系统或其他程序设置。</p>
     </section>
 
     <section class="panel kh-card">

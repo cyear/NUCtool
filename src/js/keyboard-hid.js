@@ -164,6 +164,106 @@ if (keyGrid) {
 let refreshing = false;
 let lastInfo = null;
 let lastNonZeroBrightness = 75;
+let activeLighting = null;
+let timeoutExpired = false;
+let checkingIdle = false;
+
+const timeoutSettings = {
+  enabled: $("kh-timeout-enabled"),
+  duration: $("kh-timeout-time"),
+  restore: $("kh-timeout-restore"),
+};
+try {
+  const saved = JSON.parse(localStorage.getItem("keyboard-hid-idle-settings") || "null");
+  if (saved) {
+    if (timeoutSettings.enabled) timeoutSettings.enabled.checked = Boolean(saved.enabled);
+    if (timeoutSettings.duration && [...timeoutSettings.duration.options].some((o) => Number(o.value) === saved.duration)) {
+      timeoutSettings.duration.value = String(saved.duration);
+    }
+    if (timeoutSettings.restore) timeoutSettings.restore.checked = Boolean(saved.restore);
+    if (saved.activeLighting && ["builtin", "extended"].includes(saved.activeLighting.type)) {
+      activeLighting = saved.activeLighting;
+    }
+  }
+} catch (error) {
+  console.warn("[KeyboardHID] 无法读取空闲熄灯设置:", error);
+}
+
+function saveTimeoutSettings() {
+  try {
+    localStorage.setItem("keyboard-hid-idle-settings", JSON.stringify({
+      enabled: Boolean(timeoutSettings.enabled?.checked),
+      duration: Number(timeoutSettings.duration?.value || 300),
+      restore: Boolean(timeoutSettings.restore?.checked),
+      activeLighting,
+    }));
+  } catch (error) {
+    console.warn("[KeyboardHID] 无法保存空闲熄灯设置:", error);
+  }
+}
+
+function builtinLightingSnapshot() {
+  return {
+    type: "builtin",
+    effect: $("kh-effect").value,
+    speed: Number($("kh-speed").value),
+    brightness: Number($("kh-effect-brightness").value),
+    direction: $("kh-direction").value,
+    colors: [...paletteRoot.querySelectorAll("input")].map((input) => rgb(input.value)),
+  };
+}
+
+async function restoreLighting() {
+  const lighting = activeLighting ?? builtinLightingSnapshot();
+  if (lighting.type === "extended") {
+    await invoke("set_keyboard_hid_extended", {
+      colors: lighting.colors.map((color) => [...color]),
+      brightness: lighting.brightness,
+      save: false,
+    });
+  } else {
+    const { type: _type, ...settings } = lighting.type === "builtin" ? lighting : builtinLightingSnapshot();
+    await invoke("set_keyboard_hid_effect", { ...settings, save: false });
+  }
+  console.info("[KeyboardHID] 活动恢复，已重写灯效配置");
+}
+
+async function checkIdleShutdown() {
+  if (!timeoutSettings.enabled?.checked || checkingIdle) return;
+  checkingIdle = true;
+  try {
+    const idleSeconds = await invoke("get_keyboard_hid_idle_seconds");
+    const duration = Number(timeoutSettings.duration?.value || 300);
+    if (!timeoutExpired && idleSeconds >= duration) {
+      timeoutExpired = true;
+      await invoke("set_keyboard_hid_brightness", { level: 0 });
+      console.info(`[KeyboardHID] 本机空闲 ${idleSeconds}s，已关闭键盘灯`);
+      if ($("page-keyboard-hid")?.classList.contains("active")) refresh();
+    } else if (timeoutExpired && idleSeconds < duration) {
+      timeoutExpired = false;
+      if (timeoutSettings.restore?.checked) {
+        try {
+          await restoreLighting();
+          if ($("page-keyboard-hid")?.classList.contains("active")) refresh();
+        } catch (error) {
+          console.error("[KeyboardHID] 活动恢复时重写灯效失败:", error);
+          message(`恢复灯效失败：${error}`, true);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("[KeyboardHID] 监测本机空闲时间失败:", error);
+  } finally {
+    checkingIdle = false;
+  }
+}
+
+for (const control of Object.values(timeoutSettings)) {
+  control?.addEventListener("change", () => {
+    timeoutExpired = false;
+    saveTimeoutSettings();
+  });
+}
 
 function rgb(hex) {
   return [1, 3, 5].map((offset) => parseInt(hex.slice(offset, offset + 2), 16));
@@ -185,6 +285,7 @@ async function refresh() {
   let info;
   try {
     info = await invoke("get_keyboard_hid_info");
+    if (!info) return;
     lastInfo = info;
   } catch (error) {
     const detail = String(error);
@@ -250,60 +351,74 @@ async function run(command, args, success) {
     await invoke(command, args);
     message(success);
     await refresh();
+    return true;
   } catch (error) {
     message(String(error), true);
+    return false;
   }
 }
 
 listen("kh-refresh", "click", refresh);
-listen("kh-power", "change", (event) =>
-  run("set_keyboard_hid_power", {
-    enabled: event.target.checked,
-    restoreLevel: Number($("kh-brightness").value) || lastNonZeroBrightness,
-  }, "键盘灯开关已写入"));
+listen("kh-power", "change", async (event) => {
+  const enabled = event.target.checked;
+  const brightness = Number($("kh-brightness").value) || lastNonZeroBrightness;
+  if (enabled) {
+    activeLighting = { ...builtinLightingSnapshot(), brightness };
+    saveTimeoutSettings();
+  }
+  await run("set_keyboard_hid_power", {
+    enabled,
+    restoreLevel: brightness,
+  }, "键盘灯开关已写入");
+});
 listen("kh-brightness", "input", (event) => {
   setValue("kh-brightness-value", `${event.target.value}%`);
   if (Number(event.target.value) > 0) lastNonZeroBrightness = Number(event.target.value);
 });
-listen("kh-brightness", "change", (event) =>
-  run("set_keyboard_hid_brightness", { level: Number(event.target.value) }, "亮度已写入"));
+listen("kh-brightness", "change", async (event) => {
+  const level = Number(event.target.value);
+  if (activeLighting?.type === "extended") activeLighting.brightness = level;
+  else activeLighting = { ...builtinLightingSnapshot(), brightness: level };
+  saveTimeoutSettings();
+  await run("set_keyboard_hid_brightness", { level }, "亮度已写入");
+});
 listen("kh-speed", "input", (event) => setValue("kh-speed-value", event.target.value));
 listen("kh-effect-brightness", "input", (event) => setValue("kh-effect-brightness-value", `${event.target.value}%`));
 listen("kh-extended-brightness", "input", (event) => setValue("kh-extended-brightness-value", `${event.target.value}%`));
 
-listen("kh-apply-effect", "click", () => {
+listen("kh-apply-effect", "click", async () => {
   const colors = [...paletteRoot.querySelectorAll("input")].map((input) => rgb(input.value));
-  run("set_keyboard_hid_effect", {
+  const settings = {
     effect: $("kh-effect").value,
     speed: Number($("kh-speed").value),
     brightness: Number($("kh-effect-brightness").value),
     direction: $("kh-direction").value,
     colors,
     save: $("kh-save").checked,
-  }, "内置灯效已发送");
+  };
+  if (await run("set_keyboard_hid_effect", settings, "内置灯效已发送")) {
+    activeLighting = { type: "builtin", ...settings };
+    delete activeLighting.save;
+    saveTimeoutSettings();
+  }
 });
 
-listen("kh-apply-extended", "click", () =>
-  run("set_keyboard_hid_extended", {
+listen("kh-apply-extended", "click", async () => {
+  const settings = {
     colors: extensionColors,
     brightness: Number($("kh-extended-brightness").value),
+  };
+  if (await run("set_keyboard_hid_extended", {
+    ...settings,
     save: $("kh-save").checked,
-  }, "126 键扩展灯效帧已发送"));
-
-listen("kh-timeout-apply", "click", () => {
-  const rawTime = Number($("kh-timeout-time").value);
-  if (!Number.isInteger(rawTime) || rawTime < 0 || rawTime > 255) {
-    message("固件时间值必须为 0–255", true);
-    return;
+  }, "126 键扩展灯效帧已发送")) {
+    activeLighting = { type: "extended", colors: settings.colors.map((color) => [...color]), brightness: settings.brightness };
+    saveTimeoutSettings();
   }
-  run("set_keyboard_hid_timeout", {
-    enabled: $("kh-timeout-enabled").checked,
-    rawTime,
-    save: $("kh-save").checked,
-  }, "定时熄灭设置已写入");
 });
 
 refresh();
 setInterval(() => {
   if ($("page-keyboard-hid")?.classList.contains("active")) refresh();
 }, 4000);
+setInterval(checkIdleShutdown, 1000);

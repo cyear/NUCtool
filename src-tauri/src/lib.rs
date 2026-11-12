@@ -13,6 +13,7 @@ mod config;
 mod ec_debug;
 mod fan_control;
 mod keyboard_hid;
+mod keyboard_activity;
 mod osd;
 mod win;
 mod window_push;
@@ -1811,7 +1812,7 @@ pub fn run() {
             keyboard_hid::set_keyboard_hid_brightness,
             keyboard_hid::set_keyboard_hid_effect,
             keyboard_hid::set_keyboard_hid_extended,
-            keyboard_hid::set_keyboard_hid_timeout,
+            keyboard_hid::get_keyboard_hid_idle_seconds,
             start_sensor_loop,
             load_fan_config,
             save_fan_config,

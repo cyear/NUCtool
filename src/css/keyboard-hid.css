@@ -116,7 +116,8 @@
 #page-keyboard-hid .kh-check { display: inline-flex; align-items: center; gap: 8px; color: #dce4ef; font-size: 11px; }
 #page-keyboard-hid .kh-check input { accent-color: var(--kh-accent); }
 #page-keyboard-hid .kh-time-input { display: inline-flex; align-items: center; gap: 8px; color: var(--kh-muted); font-size: 10px; }
-#page-keyboard-hid .kh-time-input input { width: 62px; padding: 7px 8px; border: 1px solid var(--kh-line); border-radius: 6px; color: #eef3fc; background: #171d28; }
+#page-keyboard-hid .kh-time-input select { width: 110px; min-height: 31px; padding: 5px 7px; border: 1px solid var(--kh-line); border-radius: 6px; color: #eef3fc; background: #171d28; }
+#page-keyboard-hid .kh-timeout-restore { margin-top: 14px; }
 #page-keyboard-hid .kh-note { margin: 10px 0 14px; color: #8490a1; font-size: 10px; line-height: 1.55; }
 #page-keyboard-hid .kh-field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
 #page-keyboard-hid .kh-field-grid label { display: grid; gap: 8px; color: var(--kh-muted); font-size: 10px; }
