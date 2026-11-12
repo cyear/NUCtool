@@ -1029,7 +1029,17 @@ fn set_auto_fan_mode(mode: u8) -> Result<(), String> {
 #[tauri::command]
 async fn get_sys_model() -> String {
     let model = get_model().expect("get_model error");
-    println!("get_model Model: {}", model);
+    let keyboard_page = if model.to_uppercase().contains("LAPKC") {
+        "HID 键盘灯效"
+    } else {
+        "旧版键盘设置"
+    };
+    let lightbar_status = if model.to_uppercase().contains("LAPKC") {
+        "显示"
+    } else {
+        "隐藏"
+    };
+    println!("[KeyboardPage] 检测机型: {model}; 选择页面: {keyboard_page}; 灯条页面: {lightbar_status}");
     model
 }
 

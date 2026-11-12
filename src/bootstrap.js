@@ -34,8 +34,20 @@ async function loadPages() {
     throw new Error("Main content container not found");
   }
   const model = await invoke("get_sys_model");
+  window.__NUCTOOL_MODEL__ = String(model ?? "");
+  const isLapkc = window.__NUCTOOL_MODEL__.toUpperCase().includes("LAPKC");
+
+  const keyboardNav = document.querySelector('.nav-btn[data-page="keyboard"]');
+  const keyboardHidNav = document.querySelector('.nav-btn[data-page="keyboard-hid"]');
+  const lightbarNav = document.querySelector('.nav-btn[data-page="lightbar"]');
+  (isLapkc ? keyboardNav : keyboardHidNav)?.remove();
+  if (!isLapkc) lightbarNav?.remove();
+
   for (const page of pages) {
-    if (page === "lightbar" && (model === "LAPAC71H" || model == "LAPAC71G")) {
+    if ((page === "keyboard" && isLapkc) || (page === "keyboard-hid" && !isLapkc)) {
+      continue;
+    }
+    if (page === "lightbar" && !isLapkc) {
       continue;
     }
     const html = await loadPage(page);

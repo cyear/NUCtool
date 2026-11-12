@@ -11,7 +11,12 @@ import {
 import { initGscCheck } from "./gsc-check.js";
 import { initBatteryDetails } from "./battery-details.js";
 import { initEcDebug } from "./ec-debug.js";
-import "./keyboard-hid.js";
+
+const model = String(window.__NUCTOOL_MODEL__ ?? "");
+const isLapkc = model.toUpperCase().includes("LAPKC");
+if (isLapkc) {
+  await import("./keyboard-hid.js");
+}
 
 // ==============================================
 // 禁止右键菜单
@@ -4712,18 +4717,6 @@ async function initLightbar() {
 }
 
 
-const model = await invoke("get_sys_model");
-if (model === "LAPAC71H" || model == "LAPAC71G") {
-  const lightbarNav = document.querySelector(
-    '.nav-btn[data-page="lightbar"]'
-  );
-
-  if (lightbarNav) {
-    lightbarNav.remove();
-  }
-}
-
-
 // =====================================================
 // 电池健康优化器
 // =====================================================
@@ -5846,8 +5839,8 @@ async function init() {
   loadFanMode();
   loadAutostartState();
   await initGscCheck();
-  await initKeyboardLed();
-  if (tuningWcfConnected && model != "LAPAC71H" && model != "LAPAC71G") {
+  if (!isLapkc) await initKeyboardLed();
+  if (tuningWcfConnected && isLapkc) {
     await initLightbar();
   }
   checkGithubVersion();
