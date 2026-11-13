@@ -106,7 +106,7 @@ const EC_GPU_PL2: u16 = 0x072e;
 // NVIDIA KC dynamic GPU power controls; setters are restricted to KC SKUs.
 const EC_NVIDIA_CONTROL: u16 = 0x0743;
 const EC_NVIDIA_CTGP: u16 = 0x0744;
-const EC_NVIDIA_DB_CPU_TARGET: u16 = 0x0745;
+const EC_NVIDIA_TPP_OFFSET: u16 = 0x0745;
 const EC_NVIDIA_DB_POWER: u16 = 0x0746;
 const EC_NVIDIA_GPU_MODULE: u16 = 0x07d3;
 const EC_NVIDIA_GPU_DSTATE: u16 = 0x078b;
@@ -422,7 +422,7 @@ impl UniwillAcpiEc {
         Ok([
             self.read_u8(EC_NVIDIA_CONTROL)?,
             self.read_u8(EC_NVIDIA_CTGP)?,
-            self.read_u8(EC_NVIDIA_DB_CPU_TARGET)?,
+            self.read_u8(EC_NVIDIA_TPP_OFFSET)?,
             self.read_u8(EC_NVIDIA_DB_POWER)?,
             self.read_u8(EC_NVIDIA_GPU_MODULE)?,
             self.read_u8(EC_NVIDIA_GPU_DSTATE)?,

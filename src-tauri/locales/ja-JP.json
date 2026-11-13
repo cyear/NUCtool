@@ -47,7 +47,7 @@
   "gpuPl2": "GPU PL2 = {value}W",
   "nvidiaControlByte": "NVIDIA 制御バイト = {value}",
   "nvidiaCtgp": "NVIDIA CTGP = {value}W",
-  "nvidiaDbCpuTarget": "NVIDIA DB CPU Target = {value}",
+  "nvidiaTppOffset": "NVIDIA TPP Offset = {value}",
   "nvidiaDynamicBoost": "NVIDIA Dynamic Boost = {value}W",
   "psysPl1": "PSYS PL1 = {value}W",
 

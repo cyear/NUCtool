@@ -88,7 +88,7 @@ pub struct TdpConfig {
 pub struct NvidiaPowerSnapshot {
     pub control: u8,
     pub ctgp: u8,
-    pub db_cpu_target: u8,
+    pub tpp_offset: u8,
     pub db_power: u8,
     pub gpu_module: u8,
     pub gpu_dstate: u8,
@@ -820,7 +820,7 @@ async fn get_nvidia_power_snapshot() -> Result<NvidiaPowerSnapshot, String> {
     Ok(NvidiaPowerSnapshot {
         control: values[0],
         ctgp: values[1],
-        db_cpu_target: values[2],
+        tpp_offset: values[2],
         db_power: values[3],
         gpu_module: values[4],
         gpu_dstate: values[5],
@@ -842,7 +842,7 @@ async fn set_nvidia_ec_value(app: tauri::AppHandle, address: u16, value: u8) -> 
     let osd_key = match address {
         0x0743 => "nvidiaControlByte",
         0x0744 => "nvidiaCtgp",
-        0x0745 => "nvidiaDbCpuTarget",
+        0x0745 => "nvidiaTppOffset",
         0x0746 => "nvidiaDynamicBoost",
         _ => unreachable!("address was validated above"),
     };

@@ -981,7 +981,7 @@ async function loadNvidiaPowerSnapshot() {
     const s = await invoke("get_nvidia_power_snapshot");
     document.getElementById("nvidia-0743").value = s.control;
     document.getElementById("nvidia-0744").value = s.ctgp;
-    document.getElementById("nvidia-0745").value = s.db_cpu_target;
+    document.getElementById("nvidia-0745").value = s.tpp_offset;
     document.getElementById("nvidia-0746").value = s.db_power;
   } catch (error) {
     console.error("读取 NVIDIA EC 配置失败:", error);
