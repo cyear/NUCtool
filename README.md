@@ -245,6 +245,8 @@ sudo ./nuctool-fan --fan
 
 ## Thank
 
+> 致谢 [cyear/NUCtool.wiki](https://github.com/cyear/NUCtool/wiki)
+>
 > 致谢 [Carey Evans(Rust)](https://users.rust-lang.org/u/carey/summary)
 >
 > 致谢 [Wer-Wolf/uniwill-laptop](https://github.com/Wer-Wolf/uniwill-laptop)
