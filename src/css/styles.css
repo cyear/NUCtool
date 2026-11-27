@@ -4811,3 +4811,294 @@ label {
     0 0 0 3px rgba(255, 92, 92, 0.10),
     0 0 8px rgba(255, 92, 92, 0.30);
 }
+
+/* =========================================================
+   ARC 调优页面
+   ========================================================= */
+
+.arc-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.arc-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.arc-card + .arc-card {
+  margin-top: 16px;
+}
+
+.arc-banner {
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 180, 60, 0.35);
+  border-radius: 10px;
+  background: rgba(255, 180, 60, 0.08);
+  color: #ffd080;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.arc-limit-flags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.arc-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 11px;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+.arc-pill.active {
+  border-color: rgba(255, 92, 92, 0.45);
+  background: rgba(255, 92, 92, 0.14);
+  color: #ff9c9c;
+}
+
+.arc-telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.arc-stat {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.025);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.arc-stat-label {
+  font-size: 11px;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.55));
+}
+
+.arc-stat-value {
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.arc-throttle-row {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.arc-throttle-text {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.arc-freq-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.arc-unified-box {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(57, 135, 229, 0.25);
+  background: rgba(57, 135, 229, 0.06);
+}
+
+.arc-unified-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.arc-preset-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.arc-preset-btn,
+.arc-chip-btn,
+.arc-mini-btn {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.arc-preset-btn:hover,
+.arc-chip-btn:hover,
+.arc-mini-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.arc-mini-btn.active {
+  border-color: rgba(61, 214, 140, 0.45);
+  background: rgba(61, 214, 140, 0.14);
+  color: #7eeab5;
+}
+
+.arc-unified-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.arc-inline-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.arc-inline-field .tdp-input {
+  width: 72px;
+  flex: none;
+}
+
+.arc-target-checks {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.arc-target-checks label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.arc-locations-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.arc-loc-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.arc-kv-list {
+  font-size: 12px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.arc-feedback {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.arc-feedback.ok {
+  border: 1px solid rgba(61, 214, 140, 0.35);
+  background: rgba(61, 214, 140, 0.08);
+  color: #8eecc0;
+}
+
+.arc-feedback.err {
+  border: 1px solid rgba(255, 92, 92, 0.35);
+  background: rgba(255, 92, 92, 0.08);
+  color: #ff9c9c;
+}
+
+.arc-details {
+  margin-top: 12px;
+}
+
+.arc-details summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.arc-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.arc-diag-toolbar {
+  margin: 10px 0;
+}
+
+.arc-table-wrap {
+  margin-top: 10px;
+  max-height: 300px;
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+.arc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.arc-table th,
+.arc-table td {
+  padding: 7px 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.arc-table th {
+  position: sticky;
+  top: 0;
+  background: rgba(24, 26, 32, 0.96);
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+}
+
+@media (max-width: 1080px) {
+  .arc-telemetry-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .arc-locations-grid,
+  .arc-freq-controls {
+    grid-template-columns: 1fr;
+  }
+}

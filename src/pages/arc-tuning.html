@@ -1,0 +1,281 @@
+<!-- ===================================================
+     ARC 调优（仅限 AC 机型）
+     =================================================== -->
+<section id="page-arc-tuning" class="page">
+
+  <header class="page-header arc-page-header">
+    <div class="page-heading">
+      <h1 data-i18n="arcTuning.title">ARC 调优</h1>
+      <p class="page-subtitle" id="arc-device-subtitle" data-i18n="arcTuning.subtitle">
+        Intel Arc 独显功耗与核心频率精细控制（Sysman / IGCL / EC）
+      </p>
+    </div>
+    <div class="arc-header-actions">
+      <button id="arc-watch-btn" class="action-btn" type="button" data-i18n="arcTuning.watchOff">
+        实时监控：关
+      </button>
+      <button id="arc-refresh-btn" class="action-btn primary" type="button" data-i18n="arcTuning.refreshAll">
+        读取全部
+      </button>
+    </div>
+  </header>
+
+  <div id="arc-errors-banner" class="arc-banner" hidden></div>
+
+  <!-- ===================================================
+       1. 实时遥测状态
+       =================================================== -->
+  <div class="settings-card arc-card">
+    <div class="settings-card-header">
+      <div>
+        <div class="settings-card-title" data-i18n="arcTuning.telemetryTitle">实时遥测</div>
+        <div class="settings-card-description" id="arc-device-meta">--</div>
+      </div>
+      <div class="arc-limit-flags">
+        <span id="arc-flag-pwr" class="arc-pill" data-i18n="arcTuning.powerLimitFlag">功耗限制: --</span>
+        <span id="arc-flag-thm" class="arc-pill" data-i18n="arcTuning.tempLimitFlag">温度限制: --</span>
+      </div>
+    </div>
+
+    <div class="arc-telemetry-grid">
+      <div class="arc-stat">
+        <span class="arc-stat-label" data-i18n="arcTuning.actualFreq">实际频率</span>
+        <span class="arc-stat-value" id="arc-tel-clock">--</span>
+      </div>
+      <div class="arc-stat">
+        <span class="arc-stat-label" data-i18n="arcTuning.requestTdpFreq">请求 / TDP 频率</span>
+        <span class="arc-stat-value" id="arc-tel-req-tdp">--</span>
+      </div>
+      <div class="arc-stat">
+        <span class="arc-stat-label" data-i18n="arcTuning.gpuPower">GPU 功耗</span>
+        <span class="arc-stat-value" id="arc-tel-power">--</span>
+      </div>
+      <div class="arc-stat">
+        <span class="arc-stat-label" data-i18n="arcTuning.systemPower">整机 APC 功耗</span>
+        <span class="arc-stat-value" id="arc-tel-sys-power">--</span>
+      </div>
+      <div class="arc-stat">
+        <span class="arc-stat-label" data-i18n="arcTuning.gpuTemp">GPU 温度 (SDK / EC)</span>
+        <span class="arc-stat-value" id="arc-tel-temp">--</span>
+      </div>
+      <div class="arc-stat">
+        <span class="arc-stat-label" data-i18n="arcTuning.gpuVoltage">核心电压</span>
+        <span class="arc-stat-value" id="arc-tel-volt">--</span>
+      </div>
+      <div class="arc-stat">
+        <span class="arc-stat-label" data-i18n="arcTuning.vramClock">显存频率 / 带宽</span>
+        <span class="arc-stat-value" id="arc-tel-vram">--</span>
+      </div>
+      <div class="arc-stat">
+        <span class="arc-stat-label" data-i18n="arcTuning.peciReadback">PECI 生效 PL1 / PL2</span>
+        <span class="arc-stat-value" id="arc-tel-peci">--</span>
+      </div>
+    </div>
+
+    <div class="arc-throttle-row">
+      <span class="arc-stat-label" data-i18n="arcTuning.throttleReasons">降频原因 (Throttle)</span>
+      <span id="arc-tel-throttle" class="arc-throttle-text">--</span>
+    </div>
+  </div>
+
+  <!-- ===================================================
+       2. 频率限制与锁定（Sysman -> GuC SLPC）
+       =================================================== -->
+  <div class="settings-card arc-card">
+    <div class="settings-card-header">
+      <div>
+        <div class="settings-card-title" data-i18n="arcTuning.freqTitle">核心频率限制 (Sysman SLPC)</div>
+        <div class="settings-card-description" id="arc-freq-summary">--</div>
+      </div>
+      <button id="arc-freq-reset-btn" class="action-btn" type="button" data-i18n="arcTuning.freqReset">
+        恢复默认区间
+      </button>
+    </div>
+
+    <div class="arc-freq-controls">
+      <div class="tdp-item">
+        <div class="tdp-item-header">
+          <span class="tdp-label" data-i18n="arcTuning.freqRangeTitle">自定义频率范围</span>
+          <span class="tdp-current" id="arc-freq-current-range">--</span>
+        </div>
+        <div class="tdp-input-row">
+          <input id="arc-freq-min" class="tdp-input" type="number" min="100" step="1" placeholder="Min MHz" />
+          <span class="tdp-unit">~</span>
+          <input id="arc-freq-max" class="tdp-input" type="number" min="100" step="1" placeholder="Max MHz" />
+          <span class="tdp-unit">MHz</span>
+          <button id="arc-freq-range-btn" class="tdp-set-btn" type="button" data-i18n="arcTuning.applyRange">
+            设置范围
+          </button>
+        </div>
+      </div>
+
+      <div class="tdp-item">
+        <div class="tdp-item-header">
+          <span class="tdp-label" data-i18n="arcTuning.freqQuickTitle">快速上限 / 定频锁定</span>
+          <span class="tdp-current" id="arc-freq-hw-range">--</span>
+        </div>
+        <div class="tdp-input-row">
+          <input id="arc-freq-single" class="tdp-input" type="number" min="100" step="1" placeholder="MHz" />
+          <span class="tdp-unit">MHz</span>
+          <button id="arc-freq-cap-btn" class="tdp-set-btn" type="button" data-i18n="arcTuning.capMax">
+            限制最高频
+          </button>
+          <button id="arc-freq-lock-btn" class="tdp-set-btn" type="button" data-i18n="arcTuning.lockFreq">
+            定频锁定
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <details class="arc-details">
+      <summary id="arc-freq-steps-summary" data-i18n="arcTuning.freqSteps">可用频率步进档位（点击填入）</summary>
+      <div id="arc-freq-steps-grid" class="arc-chip-list"></div>
+    </details>
+
+    <div id="arc-freq-feedback" class="arc-feedback" hidden></div>
+  </div>
+
+  <!-- ===================================================
+       3. 功耗限制读取与写入（分位置 + 一键写入）
+       =================================================== -->
+  <div class="settings-card arc-card">
+    <div class="settings-card-header">
+      <div>
+        <div class="settings-card-title" data-i18n="arcTuning.powerTitle">功耗限制（分位置控制 / 一键同步）</div>
+        <div class="settings-card-description" data-i18n="arcTuning.powerDesc">
+          分别读取与写入 Uniwill EC、Level Zero Sysman、IGCL 的功耗上限；移动版 Arc 受 PCODE/IFWI 固件约束以实际回读为准
+        </div>
+      </div>
+    </div>
+
+    <!-- 一键写入 -->
+    <div class="arc-unified-box">
+      <div class="arc-unified-header">
+        <span class="tdp-label" data-i18n="arcTuning.unifiedWrite">一键多位置同步写入</span>
+        <div class="arc-preset-row">
+          <button class="arc-preset-btn" type="button" data-arc-watts="45">45W</button>
+          <button class="arc-preset-btn" type="button" data-arc-watts="65">65W</button>
+          <button class="arc-preset-btn" type="button" data-arc-watts="80">80W</button>
+          <button class="arc-preset-btn" type="button" data-arc-watts="100">100W</button>
+          <button class="arc-preset-btn" type="button" data-arc-watts="120">120W</button>
+        </div>
+      </div>
+
+      <div class="arc-unified-controls">
+        <label class="arc-inline-field">
+          <span>PL1</span>
+          <input id="arc-all-pl1" class="tdp-input" type="number" min="1" max="300" step="1" placeholder="W" />
+          <span class="tdp-unit">W</span>
+        </label>
+        <label class="arc-inline-field">
+          <span>PL2</span>
+          <input id="arc-all-pl2" class="tdp-input" type="number" min="1" max="300" step="1" placeholder="W" />
+          <span class="tdp-unit">W</span>
+        </label>
+        <div class="arc-target-checks">
+          <label><input id="arc-chk-ec" type="checkbox" checked /> EC</label>
+          <label><input id="arc-chk-sysman" type="checkbox" checked /> Sysman</label>
+          <label><input id="arc-chk-igcl" type="checkbox" checked /> IGCL</label>
+        </div>
+        <button id="arc-all-apply-btn" class="action-btn primary" type="button" data-i18n="arcTuning.applySelected">
+          一键写入选中位置
+        </button>
+      </div>
+      <div id="arc-power-feedback" class="arc-feedback" hidden></div>
+    </div>
+
+    <!-- 分位置读取与单独写入 -->
+    <div class="arc-locations-grid">
+      <!-- EC -->
+      <div class="tdp-item arc-loc-card">
+        <div class="tdp-item-header">
+          <span class="tdp-label">Uniwill EC (0x072D / 0x072E)</span>
+          <button id="arc-ec-takeover-btn" class="arc-mini-btn" type="button">--</button>
+        </div>
+        <div class="arc-kv-list" id="arc-loc-ec-info">--</div>
+        <div class="tdp-input-row">
+          <input id="arc-ec-pl1" class="tdp-input" type="number" min="1" max="255" step="1" placeholder="PL1 W" />
+          <input id="arc-ec-pl2" class="tdp-input" type="number" min="1" max="255" step="1" placeholder="PL2 W" />
+          <button id="arc-ec-apply-btn" class="tdp-set-btn" type="button" data-i18n="arcTuning.writeEc">写入 EC</button>
+        </div>
+      </div>
+
+      <!-- Sysman -->
+      <div class="tdp-item arc-loc-card">
+        <div class="tdp-item-header">
+          <span class="tdp-label">Level Zero Sysman</span>
+          <span class="tdp-current" id="arc-loc-sysman-ctrl">--</span>
+        </div>
+        <div class="arc-kv-list" id="arc-loc-sysman-info">--</div>
+        <div class="tdp-input-row">
+          <input id="arc-sys-pl1" class="tdp-input" type="number" min="1" max="300" step="1" placeholder="PL1 W" />
+          <input id="arc-sys-pl2" class="tdp-input" type="number" min="1" max="300" step="1" placeholder="PL2 W" />
+          <input id="arc-sys-tau" class="tdp-input" type="number" min="1" max="128000" step="100" placeholder="Tau ms" />
+          <button id="arc-sys-apply-btn" class="tdp-set-btn" type="button" data-i18n="arcTuning.writeSysman">写入 Sysman</button>
+        </div>
+      </div>
+
+      <!-- IGCL -->
+      <div class="tdp-item arc-loc-card">
+        <div class="tdp-item-header">
+          <span class="tdp-label">Intel IGCL (KmdSysman)</span>
+          <span class="tdp-current" id="arc-loc-igcl-ctrl">--</span>
+        </div>
+        <div class="arc-kv-list" id="arc-loc-igcl-info">--</div>
+        <div class="tdp-input-row">
+          <input id="arc-igcl-pl" class="tdp-input" type="number" min="1" max="300" step="1" placeholder="Power W" />
+          <span class="tdp-unit">W</span>
+          <button id="arc-igcl-apply-btn" class="tdp-set-btn" type="button" data-i18n="arcTuning.writeIgcl">写入 IGCL</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================
+       4. 扩展诊断（多域频率表 & EC PECI 仲裁链寄存器）
+       =================================================== -->
+  <div class="settings-card arc-card">
+    <details class="arc-details" id="arc-diag-domains-details">
+      <summary data-i18n="arcTuning.domainsDiag">扩展：Sysman 全频率域详情</summary>
+      <div class="arc-table-wrap">
+        <table class="arc-table">
+          <thead>
+            <tr>
+              <th>Domain</th>
+              <th>canCtrl</th>
+              <th>HW Range (MHz)</th>
+              <th>Current Range</th>
+              <th>Actual / Req / TDP</th>
+              <th>Volt</th>
+              <th>Throttle</th>
+            </tr>
+          </thead>
+          <tbody id="arc-domains-tbody"></tbody>
+        </table>
+      </div>
+    </details>
+
+    <details class="arc-details" id="arc-diag-ec-details">
+      <summary data-i18n="arcTuning.ecDiag">扩展：Uniwill EC GPU PECI 仲裁链寄存器</summary>
+      <div class="arc-diag-toolbar">
+        <button id="arc-ec-dump-btn" class="action-btn" type="button" data-i18n="arcTuning.refreshEcRegs">
+          读取全部 EC 寄存器
+        </button>
+      </div>
+      <div class="arc-table-wrap">
+        <table class="arc-table">
+          <thead>
+            <tr>
+              <th>Addr</th>
+              <th>Dec</th>
+              <th>Hex</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody id="arc-ec-regs-tbody"></tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+
+</section>

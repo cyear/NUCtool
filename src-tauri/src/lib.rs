@@ -21,7 +21,9 @@ use acpi::{
     uniwillfnkeyhook,
     UniwillWcfEc, UniwillWmiEc,
     get_model, get_gpu_driver, get_gsc_driver,
-    KeyboardBacklight,NativeLightbarProfile, acpi_ec_worker
+    KeyboardBacklight,NativeLightbarProfile, acpi_ec_worker,
+    ArcFreqWriteResult, ArcPowerWriteRequest, ArcPowerWriteResult,
+    ArcSnapshot, ArcState, ArcTelemetry,
 };
 use config::FanData;
 use fan_control::{calculate_speed, FanControlState};
@@ -1785,6 +1787,61 @@ fn audio_set_input_setting(
 
 }
 
+#[tauri::command]
+async fn arc_get_snapshot(
+    state: State<'_, ArcState>,
+    include_ec_regs: Option<bool>,
+) -> Result<ArcSnapshot, String> {
+    let arc = state.inner().clone();
+    let include_regs = include_ec_regs.unwrap_or(false);
+    tauri::async_runtime::spawn_blocking(move || arc.snapshot(include_regs))
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn arc_get_telemetry(state: State<'_, ArcState>) -> Result<ArcTelemetry, String> {
+    let arc = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || arc.telemetry())
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn arc_set_frequency(
+    state: State<'_, ArcState>,
+    mode: String,
+    min_mhz: Option<f64>,
+    max_mhz: Option<f64>,
+) -> Result<ArcFreqWriteResult, String> {
+    let arc = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || arc.set_frequency(&mode, min_mhz, max_mhz))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
+#[tauri::command]
+async fn arc_set_power_limits(
+    state: State<'_, ArcState>,
+    request: ArcPowerWriteRequest,
+) -> Result<ArcPowerWriteResult, String> {
+    let arc = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || arc.set_power_limits(&request))
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn arc_set_ec_takeover(
+    state: State<'_, ArcState>,
+    enabled: bool,
+) -> Result<u8, String> {
+    let arc = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || arc.set_ec_takeover(enabled))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     if std::env::args().nth(1).as_deref() == Some("--nuctool-audio-worker") {
@@ -1816,6 +1873,7 @@ pub fn run() {
         .manage(FanControlState::new())
         .manage(WindowPushState::new())
         .manage(battery_details::BatteryDetailsPage::default())
+        .manage(ArcState::default())
         .invoke_handler(tauri::generate_handler![
             keyboard_hid::get_keyboard_hid_info,
             keyboard_hid::set_keyboard_hid_power,
@@ -1887,7 +1945,12 @@ pub fn run() {
             read_bios_nvram,
             export_nvram,
             write_bios_nvram,
-            is_wcf_is_connect
+            is_wcf_is_connect,
+            arc_get_snapshot,
+            arc_get_telemetry,
+            arc_set_frequency,
+            arc_set_power_limits,
+            arc_set_ec_takeover
         ])
         .setup(setup)
         .build(tauri::generate_context!())

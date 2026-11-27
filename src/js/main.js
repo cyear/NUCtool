@@ -13,10 +13,13 @@ import { initBatteryDetails } from "./battery-details.js";
 import { initEcDebug } from "./ec-debug.js";
 
 const model = String(window.__NUCTOOL_MODEL__ ?? "");
-const isLapkc = model.toUpperCase().includes("LAPKC");
+const modelUpper = model.toUpperCase();
+const isLapkc = modelUpper.includes("LAPKC");
+const isLapac = modelUpper.includes("LAPAC");
 if (isLapkc) {
   await import("./keyboard-hid.js");
 }
+const arcTuningModule = isLapac ? await import("./arc-tuning.js") : null;
 
 // ==============================================
 // 禁止右键菜单
@@ -245,6 +248,7 @@ document.querySelectorAll(".nav-btn").forEach((button) => {
       .getElementById(`page-${page}`)
       ?.classList.add("active");
     syncTuningRefresh();
+    arcTuningModule?.syncArcTuningRefresh?.();
   });
 
 });
@@ -5839,6 +5843,9 @@ async function init() {
   loadFanMode();
   loadAutostartState();
   await initGscCheck();
+  if (arcTuningModule) {
+    await arcTuningModule.initArcTuning();
+  }
   if (!isLapkc) await initKeyboardLed();
   if (tuningWcfConnected && isLapkc) {
     await initLightbar();

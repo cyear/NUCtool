@@ -4,6 +4,7 @@ const { invoke } = tauri.core;
 const pages = [
   "monitor",
   "tuning",
+  "arc-tuning",
   "fan",
   "newfan",
   "system",
@@ -35,19 +36,26 @@ async function loadPages() {
   }
   const model = await invoke("get_sys_model");
   window.__NUCTOOL_MODEL__ = String(model ?? "");
-  const isLapkc = window.__NUCTOOL_MODEL__.toUpperCase().includes("LAPKC");
+  const modelUpper = window.__NUCTOOL_MODEL__.toUpperCase();
+  const isLapkc = modelUpper.includes("LAPKC");
+  const isLapac = modelUpper.includes("LAPAC");
 
   const keyboardNav = document.querySelector('.nav-btn[data-page="keyboard"]');
   const keyboardHidNav = document.querySelector('.nav-btn[data-page="keyboard-hid"]');
   const lightbarNav = document.querySelector('.nav-btn[data-page="lightbar"]');
+  const arcTuningNav = document.querySelector('.nav-btn[data-page="arc-tuning"]');
   (isLapkc ? keyboardNav : keyboardHidNav)?.remove();
   if (!isLapkc) lightbarNav?.remove();
+  if (!isLapac) arcTuningNav?.remove();
 
   for (const page of pages) {
     if ((page === "keyboard" && isLapkc) || (page === "keyboard-hid" && !isLapkc)) {
       continue;
     }
     if (page === "lightbar" && !isLapkc) {
+      continue;
+    }
+    if (page === "arc-tuning" && !isLapac) {
       continue;
     }
     const html = await loadPage(page);
