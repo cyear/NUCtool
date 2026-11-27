@@ -423,74 +423,83 @@ async fn get_fan_mode_file() -> i32 {
 
 #[tauri::command]
 async fn set_performance_mode(app: tauri::AppHandle, mode: String) {
-    let wcf = match UniwillWcfEc::new() {
-        Ok(wcf) => wcf,
-        Err(e) => {
-            eprintln!("加载 NUCtool DLL 失败: {}", e);
-            None
+    let _ = tauri::async_runtime::spawn_blocking(move || {
+        if let Err(err) = UniwillWcfEc::with_locked(|wcf| {
+            let ret = wcf.connect();
+            println!("connect: {}", ret);
+            match mode.as_str() {
+                "power-saving" => {
+                    println!("省电模式");
+                    println!(
+                        "benchmark_off apply_profile: {}",
+                        wcf.apply_benchmark_mode(0)
+                    );
+                    let _ = show_osd_i18n(&app, "powerSavingMode", "empty");
+                    println!("quiet apply_profile: {}", wcf.apply_profile(3));
+                }
+                "balanced" => {
+                    println!("平衡模式");
+                    println!(
+                        "benchmark_off apply_profile: {}",
+                        wcf.apply_benchmark_mode(0)
+                    );
+                    let _ = show_osd_i18n(&app, "balancedMode", "empty");
+                    println!("balanced apply_profile: {}", wcf.apply_profile(2));
+                }
+                "performance" => {
+                    println!("性能模式");
+                    println!(
+                        "benchmark_off apply_profile: {}",
+                        wcf.apply_benchmark_mode(0)
+                    );
+                    let _ = show_osd_i18n(&app, "performanceMode", "empty");
+                    println!("performance apply_profile: {}", wcf.apply_profile(1));
+                }
+                "benchmark-on" => {
+                    println!("基准模式");
+                    println!(
+                        "benchmark_on apply_profile: {}",
+                        wcf.apply_benchmark_mode(1)
+                    );
+                    let _ = show_osd_i18n(&app, "benchmarkMode", "empty");
+                }
+                _ => {
+                    eprintln!("未知性能模式: {}", mode);
+                }
+            }
+            wcf.disconnect();
+        }) {
+            eprintln!("{err}");
         }
-        .expect("加载 NUCtool DLL 失败"),
-    };
-    let ret = wcf.connect();
-    println!("connect: {}", ret);
-    match mode.as_str() {
-        "power-saving" => {
-            println!("省电模式");
-            println!(
-                "benchmark_off apply_profile: {}",
-                wcf.apply_benchmark_mode(0)
-            );
-            let _ = show_osd_i18n(&app, "powerSavingMode", "empty");
-            println!("quiet apply_profile: {}", wcf.apply_profile(3));
-        }
-        "balanced" => {
-            println!("平衡模式");
-            println!(
-                "benchmark_off apply_profile: {}",
-                wcf.apply_benchmark_mode(0)
-            );
-            let _ = show_osd_i18n(&app, "balancedMode", "empty");
-            println!("balanced apply_profile: {}", wcf.apply_profile(2));
-        }
-        "performance" => {
-            println!("性能模式");
-            println!(
-                "benchmark_off apply_profile: {}",
-                wcf.apply_benchmark_mode(0)
-            );
-            let _ = show_osd_i18n(&app, "performanceMode", "empty");
-            println!("performance apply_profile: {}", wcf.apply_profile(1));
-        }
-        "benchmark-on" => {
-            println!("基准模式");
-            println!(
-                "benchmark_on apply_profile: {}",
-                wcf.apply_benchmark_mode(1)
-            );
-            let _ = show_osd_i18n(&app, "benchmarkMode", "empty");
-        }
-        _ => {
-            eprintln!("未知性能模式: {}", mode);
-            return;
-        }
-    }
-    wcf.disconnect();
+    })
+    .await;
 }
 
 #[tauri::command]
 async fn get_performance_mode() -> Result<i32, String> {
-    let wcf = UniwillWcfEc::new().map_err(|err| format!("加载 NUCtool DLL 失败: {err}"))?;
-    wcf.connect();
-    if !wcf.is_connected() {
-        return Err("UniwillService 连接失败".into());
-    }
-    let state = wcf.get_current_state();
-    wcf.disconnect();
-    Ok(if state.benchmark_mode == 1 {
-        5
-    } else {
-        state.selected_profile_index
+    tauri::async_runtime::spawn_blocking(|| {
+        UniwillWcfEc::with_locked(|wcf| {
+            let ret = wcf.connect();
+            if ret == 0 || !wcf.is_connected() {
+                let detail = wcf.last_error().unwrap_or_default();
+                wcf.disconnect();
+                return if detail.is_empty() {
+                    Err("UniwillService 连接失败".into())
+                } else {
+                    Err(format!("UniwillService 连接失败: {detail}"))
+                };
+            }
+            let state = wcf.get_current_state();
+            wcf.disconnect();
+            Ok(if state.benchmark_mode == 1 {
+                5
+            } else {
+                state.selected_profile_index
+            })
+        })?
     })
+    .await
+    .map_err(|err| format!("读取性能模式任务失败: {err}"))?
 }
 
 const ULTIMATE_PERFORMANCE_TEMPLATE: GUID =
@@ -638,51 +647,50 @@ async fn set_power_plan(app: tauri::AppHandle, mode: i32) -> Result<(), String> 
 
 #[tauri::command]
 async fn set_display_mode(app: tauri::AppHandle, mode: i32) {
-    let wcf = match UniwillWcfEc::new() {
-        Ok(wcf) => wcf,
-        Err(e) => {
-            eprintln!("加载 NUCtool DLL 失败: {}", e);
-            None
+    let _ = tauri::async_runtime::spawn_blocking(move || {
+        if let Err(err) = UniwillWcfEc::with_locked(|wcf| {
+            let ret = wcf.connect();
+            println!("connect: {}", ret);
+            println!("显示设置: {}", mode);
+            if mode != 5 {
+                wcf.display_enable_mode_mgmt(1);
+                let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsOn");
+            }
+            match mode {
+                0 => {
+                    wcf.display_set_mode(mode);
+                    let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsStandard");
+                }
+                1 => {
+                    wcf.display_set_mode(mode);
+                    let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsGaming");
+                }
+                2 => {
+                    wcf.display_set_mode(mode);
+                    let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsVideo");
+                }
+                3 => {
+                    wcf.display_set_mode(mode);
+                    let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsReading");
+                }
+                4 => {
+                    wcf.display_set_mode(mode);
+                    let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsCustom");
+                }
+                5 => {
+                    wcf.display_enable_mode_mgmt(0);
+                    let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsOff");
+                }
+                _ => {
+                    eprintln!("错误的显示模式: {}", mode);
+                }
+            }
+            wcf.disconnect();
+        }) {
+            eprintln!("{err}");
         }
-        .expect("加载 NUCtool DLL 失败"),
-    };
-    let ret = wcf.connect();
-    println!("connect: {}", ret);
-    println!("显示设置: {}", mode);
-    if mode != 5 {
-        wcf.display_enable_mode_mgmt(1);
-        let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsOn");
-    }
-    match mode {
-        0 => {
-            wcf.display_set_mode(mode);
-            let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsStandard");
-        }
-        1 => {
-            wcf.display_set_mode(mode);
-            let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsGaming");
-        }
-        2 => {
-            wcf.display_set_mode(mode);
-            let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsVideo");
-        }
-        3 => {
-            wcf.display_set_mode(mode);
-            let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsReading");
-        }
-        4 => {
-            wcf.display_set_mode(mode);
-            let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsCustom");
-        }
-        5 => {
-            wcf.display_enable_mode_mgmt(0);
-            let _ = show_osd_i18n(&app, "displaySettings", "displaySettingsOff");
-        }
-        _ => {
-            eprintln!("错误的显示模式: {}", mode);
-        }
-    }
-    wcf.disconnect();
+    })
+    .await;
 }
 
 #[tauri::command]
@@ -760,33 +768,36 @@ async fn set_keyboard_blue(blue: u8, ac: bool) {
 
 #[tauri::command]
 async fn get_lightbar_profile() -> NativeLightbarProfile {
-    let wcf = match UniwillWcfEc::new() {
-        Ok(wcf) => wcf,
-        Err(e) => {
-            eprintln!("加载 NUCtool DLL 失败: {}", e);
-            None
-        }
-        .expect("加载 NUCtool DLL 失败"),
-    };
-    let ret = wcf.connect();
-    let profile = wcf.lightbar_get_profile();
-    println!("connect: {} get_lightbar_profile: {:?}", ret, &profile);
-    profile
+    tauri::async_runtime::spawn_blocking(|| {
+        UniwillWcfEc::with_locked(|wcf| {
+            let ret = wcf.connect();
+            let profile = wcf.lightbar_get_profile();
+            println!("connect: {} get_lightbar_profile: {:?}", ret, &profile);
+            wcf.disconnect();
+            profile
+        })
+        .unwrap_or_else(|err| {
+            eprintln!("{err}");
+            NativeLightbarProfile::default()
+        })
+    })
+    .await
+    .unwrap_or_default()
 }
 
 #[tauri::command]
 async fn set_lightbar_profile(profile: NativeLightbarProfile) {
-    let wcf = match UniwillWcfEc::new() {
-        Ok(wcf) => wcf,
-        Err(e) => {
-            eprintln!("加载 NUCtool DLL 失败: {}", e);
-            None
+    let _ = tauri::async_runtime::spawn_blocking(move || {
+        if let Err(err) = UniwillWcfEc::with_locked(|wcf| {
+            let ret = wcf.connect();
+            let set_ret = wcf.lightbar_set_profile(profile);
+            println!("connect: {} set_lightbar_profile: {:?}", ret, &set_ret);
+            wcf.disconnect();
+        }) {
+            eprintln!("{err}");
         }
-        .expect("加载 NUCtool DLL 失败"),
-    };
-    let ret = wcf.connect();
-    let profile = wcf.lightbar_set_profile(profile);
-    println!("connect: {} set_lightbar_profile: {:?}", ret, &profile);
+    })
+    .await;
 }
 
 #[tauri::command]
@@ -900,86 +911,88 @@ async fn set_tdp(app: tauri::AppHandle, tdp_type: String, value: u8) -> Result<(
 // =================================================    
 #[tauri::command]
 async fn get_battery_charging_level() -> i32 {
-    let wcf = match UniwillWcfEc::new() {
-        Ok(wcf) => wcf,
-        Err(e) => {
-            eprintln!("加载 NUCtool DLL 失败: {}", e);
-            None
-        }
-        .expect("加载 NUCtool DLL 失败"),
-    };
-    let ret = wcf.connect();
-    println!("connect: {}", ret);
+    tauri::async_runtime::spawn_blocking(|| {
+        UniwillWcfEc::with_locked(|wcf| {
+            let ret = wcf.connect();
+            println!("connect: {}", ret);
 
-    let battery_charglimit = wcf.battery_get_charging_level();
-    wcf.disconnect();
-    battery_charglimit
+            let battery_charglimit = wcf.battery_get_charging_level();
+            wcf.disconnect();
+            battery_charglimit
+        })
+        .unwrap_or_else(|err| {
+            eprintln!("{err}");
+            -1
+        })
+    })
+    .await
+    .unwrap_or(-1)
 }
 
 #[tauri::command]
 async fn set_battery_charging_level(app: tauri::AppHandle, level: i32) {
-    let wcf = match UniwillWcfEc::new() {
-        Ok(wcf) => wcf,
-        Err(e) => {
-            eprintln!("加载 NUCtool DLL 失败: {}", e);
-            None
+    let _ = tauri::async_runtime::spawn_blocking(move || {
+        if let Err(err) = UniwillWcfEc::with_locked(|wcf| {
+            let ret = wcf.connect();
+            println!("connect: {}", ret);
+            wcf.battery_set_charging_level(level);
+            println!("写入Battery Charging limit： {}%", level);
+            let _ = show_osd_i18n_value(&app, "batterySettings", "batteryChargingLimit", level);
+            wcf.disconnect();
+        }) {
+            eprintln!("{err}");
         }
-        .expect("加载 NUCtool DLL 失败"),
-    };
-    let ret = wcf.connect();
-    println!("connect: {}", ret);
-    wcf.battery_set_charging_level(level);
-    println!("写入Battery Charging limit： {}%", level);
-    let _ = show_osd_i18n_value(&app, "batterySettings", "batteryChargingLimit", level);
-    wcf.disconnect();
+    })
+    .await;
 }
 
 #[tauri::command]
 async fn get_battery_mode() -> i32 {
-    let wcf = match UniwillWcfEc::new() {
-        Ok(wcf) => wcf,
-        Err(e) => {
-            eprintln!("加载 NUCtool DLL 失败: {}", e);
-            None
-        }
-        .expect("加载 NUCtool DLL 失败"),
-    };
-    let ret = wcf.connect();
-    println!("connect: {}", ret);
+    tauri::async_runtime::spawn_blocking(|| {
+        UniwillWcfEc::with_locked(|wcf| {
+            let ret = wcf.connect();
+            println!("connect: {}", ret);
 
-    let mode = wcf.battery_get_mode();
-    wcf.disconnect();
-    mode
+            let mode = wcf.battery_get_mode();
+            wcf.disconnect();
+            mode
+        })
+        .unwrap_or_else(|err| {
+            eprintln!("{err}");
+            -1
+        })
+    })
+    .await
+    .unwrap_or(-1)
 }
 
 #[tauri::command]
 async fn set_battery_mode(app: tauri::AppHandle, mode: i32) {
-    let wcf = match UniwillWcfEc::new() {
-        Ok(wcf) => wcf,
-        Err(e) => {
-            eprintln!("加载 NUCtool DLL 失败: {}", e);
-            None
+    let _ = tauri::async_runtime::spawn_blocking(move || {
+        if let Err(err) = UniwillWcfEc::with_locked(|wcf| {
+            let ret = wcf.connect();
+            println!("connect: {}", ret);
+            match mode {
+                0 => {
+                    let _ = show_osd_i18n_value(&app, "batterySettings", "batteryHealthFull", mode);
+                }
+                1 => {
+                    let _ = show_osd_i18n_value(&app, "batterySettings", "batteryHealthCustom", mode);
+                }
+                2 => {
+                    let _ = show_osd_i18n_value(&app, "batterySettings", "batteryHealthBest", mode);
+                }
+                _ => {
+                    let _ = show_osd_i18n_value(&app, "batterySettings", "error", mode);
+                }
+            }
+            let _ = wcf.battery_set_mode(mode);
+            wcf.disconnect();
+        }) {
+            eprintln!("{err}");
         }
-        .expect("加载 NUCtool DLL 失败"),
-    };
-    let ret = wcf.connect();
-    println!("connect: {}", ret);
-    match mode {
-        0 => {
-            let _ = show_osd_i18n_value(&app, "batterySettings", "batteryHealthFull", mode);
-        }
-        1 => {
-            let _ = show_osd_i18n_value(&app, "batterySettings", "batteryHealthCustom", mode);
-        }
-        2 => {
-            let _ = show_osd_i18n_value(&app, "batterySettings", "batteryHealthBest", mode);
-        }
-        _ => {
-            let _ = show_osd_i18n_value(&app, "batterySettings", "error", mode);
-        }
-    }
-    let _ = wcf.battery_set_mode(mode);
-    wcf.disconnect();
+    })
+    .await;
 }
 
 #[tauri::command]
@@ -1432,17 +1445,14 @@ async fn write_bios_nvram(password: String) -> Result<(), String> {
 
 #[tauri::command]
 async fn is_wcf_is_connect() -> bool {
-    let wcf = match UniwillWcfEc::new() {
-        Ok(wcf) => wcf,
-        Err(err) => {
-            eprintln!("加载 NUCtool DLL 失败: {err}");
-            return false;
-        }
-    };
-    wcf.connect();
-    let c = wcf.is_connected();
-    println!("UniwillService Connect: {}", c);
-    c
+    tauri::async_runtime::spawn_blocking(|| {
+        UniwillWcfEc::check_connection_with_retry(3, Duration::from_millis(500))
+    })
+    .await
+    .unwrap_or_else(|err| {
+        eprintln!("UniwillService 连接检查任务异常: {err}");
+        false
+    })
 }
 
 fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
@@ -1503,49 +1513,53 @@ fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         .tooltip("NUCtool")
         // 托盘菜单
         .on_menu_event(move |app, event| {
-            let wcf = match UniwillWcfEc::new() {
-                Ok(wcf) => wcf,
-                Err(e) => {
-                    eprintln!("加载 NUCtool DLL 失败: {}", e);
-                    None
-                }
-                .expect("加载 NUCtool DLL 失败"),
-            };
-            let ret = wcf.connect();
-            println!("connect: {}", ret);
-
             match event.id().as_ref() {
                 "show" => {
                     if let Some(window) = app.get_webview_window("main") {
                         let _ = window.show();
                         let _ = window.set_focus();
                     }
-                }
-                "benchmark_on" => {
-                    println!(
-                        "benchmark_on apply_profile: {}",
-                        wcf.apply_benchmark_mode(1)
-                    );
-                }
-                "benchmark_off" => {
-                    println!(
-                        "benchmark_off apply_profile: {}",
-                        wcf.apply_benchmark_mode(0)
-                    );
-                }
-                "performance" => {
-                    println!("performance apply_profile: {}", wcf.apply_profile(1));
-                }
-                "balanced" => {
-                    println!("balanced apply_profile: {}", wcf.apply_profile(2));
-                }
-                "quiet" => {
-                    println!("quiet apply_profile: {}", wcf.apply_profile(3));
+                    return;
                 }
                 "quit" => {
                     app.exit(0);
+                    return;
                 }
                 _ => {}
+            }
+
+            let id = event.id().as_ref().to_string();
+            if let Err(err) = UniwillWcfEc::with_locked(|wcf| {
+                let ret = wcf.connect();
+                println!("connect: {}", ret);
+
+                match id.as_str() {
+                    "benchmark_on" => {
+                        println!(
+                            "benchmark_on apply_profile: {}",
+                            wcf.apply_benchmark_mode(1)
+                        );
+                    }
+                    "benchmark_off" => {
+                        println!(
+                            "benchmark_off apply_profile: {}",
+                            wcf.apply_benchmark_mode(0)
+                        );
+                    }
+                    "performance" => {
+                        println!("performance apply_profile: {}", wcf.apply_profile(1));
+                    }
+                    "balanced" => {
+                        println!("balanced apply_profile: {}", wcf.apply_profile(2));
+                    }
+                    "quiet" => {
+                        println!("quiet apply_profile: {}", wcf.apply_profile(3));
+                    }
+                    _ => {}
+                }
+                wcf.disconnect();
+            }) {
+                eprintln!("{err}");
             }
         })
         // 托盘鼠标事件

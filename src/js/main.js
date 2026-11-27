@@ -878,21 +878,90 @@ async function initTuningRefresh() {
   }
 }
 
+const WCF_DISABLE_TARGETS = [
+  { card: '.tuning-card',  header: '.tuning-header',  msg: 'UniwillService not detected as enabled' },
+  { card: '.display-card', header: '.display-header', msg: 'UniwillService not detected as enabled' },
+  { card: '#battery-card', header: '.tdp-header',     msg: 'UniwillService not detected as enabled' },
+];
+let lightbarInitialized = false;
+let wcfRetryTimer = null;
+let wcfRetryInFlight = false;
+
 // 服务连接失败置灰
 function disableTuningSections() {
-  const targets = [
-    { card: '.tuning-card',        header: '.tuning-header',        msg: 'UniwillService not detected as enabled' },
-    { card: '.display-card',       header: '.display-header',       msg: 'UniwillService not detected as enabled' },
-    { card: '#battery-card',       header: '.tdp-header',           msg: 'UniwillService not detected as enabled' },
-  ];
-
-  targets.forEach(({ card, header, msg }) => {
+  WCF_DISABLE_TARGETS.forEach(({ card, header, msg }) => {
     const el = document.querySelector(card);
     if (!el) return;
-    el.classList.add('disabled');
-    el.querySelectorAll('button, input, select').forEach(c => c.disabled = true);
-    insertWarning(el.querySelector(header), msg);
+    if (!el.classList.contains('disabled')) {
+      el.classList.add('disabled');
+      el.querySelectorAll('button, input, select').forEach((c) => {
+        c.dataset.wcfPrevDisabled = c.disabled ? '1' : '0';
+        c.disabled = true;
+      });
+    }
+    const headerEl = el.querySelector(header);
+    if (headerEl) {
+      headerEl.querySelectorAll('.connect-warning').forEach((w) => w.remove());
+      insertWarning(headerEl, msg);
+    }
   });
+}
+
+function enableTuningSections() {
+  WCF_DISABLE_TARGETS.forEach(({ card, header }) => {
+    const el = document.querySelector(card);
+    if (!el) return;
+    el.classList.remove('disabled');
+    el.querySelectorAll('button, input, select').forEach((c) => {
+      c.disabled = c.dataset.wcfPrevDisabled === '1';
+      delete c.dataset.wcfPrevDisabled;
+    });
+    const headerEl = el.querySelector(header);
+    if (headerEl) {
+      headerEl.querySelectorAll('.connect-warning').forEach((w) => w.remove());
+    }
+  });
+}
+
+async function applyWcfConnectedState() {
+  tuningWcfConnected = true;
+  enableTuningSections();
+  refreshTuningStatus();
+  await loadBatteryHealthMode();
+  if (isLapkc && !lightbarInitialized) {
+    lightbarInitialized = true;
+    await initLightbar();
+  }
+}
+
+function startWcfReconnectPolling() {
+  if (wcfRetryTimer !== null || tuningWcfConnected) return;
+  let attempts = 0;
+  const maxAttempts = 20;
+  wcfRetryTimer = setInterval(async () => {
+    if (tuningWcfConnected) {
+      clearInterval(wcfRetryTimer);
+      wcfRetryTimer = null;
+      return;
+    }
+    if (wcfRetryInFlight) return;
+    attempts += 1;
+    wcfRetryInFlight = true;
+    try {
+      const connected = await invoke("is_wcf_is_connect").catch(() => false);
+      if (connected) {
+        clearInterval(wcfRetryTimer);
+        wcfRetryTimer = null;
+        console.log("UniwillService 重连成功");
+        await applyWcfConnectedState();
+      } else if (attempts >= maxAttempts) {
+        clearInterval(wcfRetryTimer);
+        wcfRetryTimer = null;
+      }
+    } finally {
+      wcfRetryInFlight = false;
+    }
+  }, 3000);
 }
 
 function insertWarning(container, text) {
@@ -5834,12 +5903,14 @@ async function init() {
     return false;
   });
   console.log("UniwillService: " + tuningWcfConnected);
-  if (!tuningWcfConnected) {
-    disableTuningSections();
-  }
   initTuningRefresh().catch((error) => console.error("初始化性能调优刷新失败:", error));
 
-  if (tuningWcfConnected) await loadBatteryHealthMode();
+  if (tuningWcfConnected) {
+    await loadBatteryHealthMode();
+  } else {
+    disableTuningSections();
+    startWcfReconnectPolling();
+  }
   loadFanMode();
   loadAutostartState();
   await initGscCheck();
@@ -5847,7 +5918,8 @@ async function init() {
     await arcTuningModule.initArcTuning();
   }
   if (!isLapkc) await initKeyboardLed();
-  if (tuningWcfConnected && isLapkc) {
+  if (tuningWcfConnected && isLapkc && !lightbarInitialized) {
+    lightbarInitialized = true;
     await initLightbar();
   }
   checkGithubVersion();

@@ -1,8 +1,17 @@
 use crate::config::dll_dir;
 use libloading::{Library, Symbol};
 use sha2::{Digest, Sha256};
-use std::{ffi::CString, fs, os::raw::c_int};
+use std::{
+    ffi::CString,
+    fs,
+    os::raw::c_int,
+    sync::Mutex,
+    thread,
+    time::Duration,
+};
 use serde::{Deserialize, Serialize};
+
+static WCF_STATE: Mutex<Option<UniwillWcfEc>> = Mutex::new(None);
 
 const EXPECTED_HASH_V2: &str = "838E83709F1E2C45A470868F210EEF1A3A48EAE10E13DBA896905E6DAA387497";
 const KEY: &str = "NUCtool@cyear";
@@ -431,6 +440,65 @@ impl UniwillWcfEc {
             println!("lightbar_set_profile 写入失败: {}", self.last_error().expect("lightbar_set_profile error"));
         }
         ret
+    }
+
+    pub fn with_locked<F, R>(f: F) -> Result<R, String>
+    where
+        F: FnOnce(&UniwillWcfEc) -> R,
+    {
+        let mut guard = WCF_STATE.lock().unwrap_or_else(|e| e.into_inner());
+        if guard.is_none() {
+            let wcf = UniwillWcfEc::new().map_err(|err| format!("加载 NUCtool DLL 失败: {err}"))?;
+            *guard = Some(wcf);
+        }
+        let wcf = guard.as_ref().expect("WCF 实例已初始化");
+        Ok(f(wcf))
+    }
+
+    pub fn check_connection_with_retry(max_attempts: usize, retry_delay: Duration) -> bool {
+        let attempts = max_attempts.max(1);
+        for attempt in 1..=attempts {
+            let outcome = Self::with_locked(|wcf| {
+                let connect_ret = wcf.connect();
+                let connected = connect_ret != 0 && wcf.is_connected();
+                let err = if connected {
+                    String::new()
+                } else {
+                    wcf.last_error().unwrap_or_default()
+                };
+                wcf.disconnect();
+                (connected, connect_ret, err)
+            });
+
+            match outcome {
+                Ok((true, _, _)) => {
+                    println!("UniwillService Connect: true (attempt {attempt}/{attempts})");
+                    return true;
+                }
+                Ok((false, connect_ret, err)) => {
+                    if err.is_empty() {
+                        eprintln!(
+                            "UniwillService 连接尝试 {attempt}/{attempts} 失败 (connect={connect_ret})"
+                        );
+                    } else {
+                        eprintln!(
+                            "UniwillService 连接尝试 {attempt}/{attempts} 失败 (connect={connect_ret}): {err}"
+                        );
+                    }
+                }
+                Err(err) => {
+                    eprintln!("{err}");
+                    return false;
+                }
+            }
+
+            if attempt < attempts {
+                thread::sleep(retry_delay);
+            }
+        }
+
+        println!("UniwillService Connect: false");
+        false
     }
 
 }
