@@ -327,15 +327,16 @@ export async function initArcTuning() {
 
   document.querySelectorAll("[data-arc-watts]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const w = Number(btn.dataset.arcWatts);
-      el("arc-all-pl1").value = w;
-      el("arc-all-pl2").value = w;
+      const pl1 = Number(btn.dataset.arcWatts);
+      const pl2 = Number(btn.dataset.arcPl2) || Math.max(pl1, 200);
+      el("arc-all-pl1").value = pl1;
+      el("arc-all-pl2").value = pl2;
     });
   });
 
   el("arc-all-apply-btn")?.addEventListener("click", () => {
     const pl1 = Number(el("arc-all-pl1").value);
-    const pl2 = Number(el("arc-all-pl2").value) || pl1;
+    const pl2 = Number(el("arc-all-pl2").value) || Math.max(pl1, 200);
     if (!Number.isFinite(pl1) || pl1 <= 0) {
       showFeedback("arc-power-feedback", false, t("arcTuning.invalidWatts"));
       return;
@@ -363,7 +364,7 @@ export async function initArcTuning() {
 
   el("arc-sys-apply-btn")?.addEventListener("click", () => {
     const pl1 = Number(el("arc-sys-pl1").value);
-    const pl2 = Number(el("arc-sys-pl2").value) || pl1;
+    const pl2 = Number(el("arc-sys-pl2").value) || Math.max(pl1, 200);
     const tau = Number(el("arc-sys-tau").value) || 64000;
     if (!Number.isFinite(pl1) || pl1 <= 0) {
       showFeedback("arc-power-feedback", false, t("arcTuning.invalidWatts"));

@@ -824,7 +824,7 @@ impl SysmanSession {
         let peak = ZesPowerPeakLimit { power_ac_mw: mw2, power_dc_mw: mw2 };
         let rb = unsafe { (self.fn_power_set)(pdom, &sust, &burst, &peak) };
 
-        let mut cnt = 2u32;
+        let mut cnt = 3u32;
         let mut descs = [
             ZesPowerLimitExtDesc {
                 level: 1,
@@ -842,10 +842,21 @@ impl SysmanSession {
                 limit: i64::from(mw2),
                 ..Default::default()
             },
+            ZesPowerLimitExtDesc {
+                level: 3,
+                source: 0,
+                limit_unit: 2,
+                interval: 0,
+                limit: i64::from(mw2),
+                ..Default::default()
+            },
         ];
         let re = unsafe { (self.fn_power_set_ext)(pdom, &mut cnt, descs.as_mut_ptr()) };
         let readback = self.read_power_limits().ok().map(|s| {
-            format!("PL1={:.1}W (tau={}ms), PL2={:.1}W", s.sustained_w, s.sustained_tau_ms, s.burst_w)
+            format!(
+                "PL1={:.1}W (tau={}ms), PL2={:.1}W, Peak={:.1}W",
+                s.sustained_w, s.sustained_tau_ms, s.burst_w, s.peak_ac_w
+            )
         });
         ArcWriteItemResult {
             ok: rb == 0 || re == 0,
@@ -1534,7 +1545,7 @@ impl ArcState {
 
     pub fn set_power_limits(&self, req: &ArcPowerWriteRequest) -> ArcPowerWriteResult {
         let pl1 = req.pl1_w;
-        let pl2 = req.pl2_w.unwrap_or(pl1);
+        let pl2 = req.pl2_w.unwrap_or_else(|| pl1.max(200));
         let tau = req.tau_ms.unwrap_or(64000).max(1);
         let mut out = ArcPowerWriteResult::default();
 
