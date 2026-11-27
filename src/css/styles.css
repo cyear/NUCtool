@@ -1114,7 +1114,8 @@ body {
 .tuning-card.disabled,
 .power-plan-card.disabled,
 .display-card.disabled,
-#battery-card.disabled {
+#battery-card.disabled,
+.lightbar-card.disabled {
   opacity: 0.5;
   pointer-events: none;
   filter: grayscale(1);
@@ -5032,6 +5033,12 @@ label {
   border: 1px solid rgba(61, 214, 140, 0.35);
   background: rgba(61, 214, 140, 0.08);
   color: #8eecc0;
+}
+
+.arc-feedback.warn {
+  border: 1px solid rgba(255, 180, 60, 0.35);
+  background: rgba(255, 180, 60, 0.08);
+  color: #ffd080;
 }
 
 .arc-feedback.err {

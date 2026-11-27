@@ -33,6 +33,8 @@ pub struct ArcTelemetry {
     pub gpu_request_mhz: Option<f64>,
     pub gpu_tdp_mhz: Option<f64>,
     pub gpu_efficient_mhz: Option<f64>,
+    pub freq_range_min_mhz: Option<f64>,
+    pub freq_range_max_mhz: Option<f64>,
     pub gpu_voltage_v: Option<f64>,
     pub gpu_temp_c: Option<f64>,
     pub temps_c: Vec<f64>,
@@ -765,7 +767,11 @@ impl SysmanSession {
         let (can_control, hw_min, hw_max) = (gpu_dom.can_control, gpu_dom.hw_min_mhz, gpu_dom.hw_max_mhz);
 
         let (req_min, req_max) = if is_reset {
-            (-1.0, -1.0)
+            if hw_max > hw_min {
+                (hw_min, hw_max)
+            } else {
+                (-1.0, -1.0)
+            }
         } else {
             if !min_mhz.is_finite() || !max_mhz.is_finite() || min_mhz <= 0.0 || max_mhz <= 0.0 {
                 return Err("频率必须为大于 0 的有效数值".to_string());
@@ -782,11 +788,7 @@ impl SysmanSession {
         };
 
         let req = ZesFreqRange { min: req_min, max: req_max };
-        let mut res = unsafe { (self.fn_freq_set_range)(fdom, &req) };
-        if is_reset && res != 0 && hw_max > hw_min {
-            let fb = ZesFreqRange { min: hw_min, max: hw_max };
-            res = unsafe { (self.fn_freq_set_range)(fdom, &fb) };
-        }
+        let res = unsafe { (self.fn_freq_set_range)(fdom, &req) };
 
         let mut rb = ZesFreqRange::default();
         let (rb_min, rb_max) = if unsafe { (self.fn_freq_get_range)(fdom, &mut rb) } == 0 {
@@ -1272,13 +1274,21 @@ fn ec_write_power_limits(pl1_w: u32, pl2_w: u32, ensure_takeover: bool) -> ArcWr
     match write_res {
         Ok(Ok(())) => {
             thread::sleep(Duration::from_millis(350));
+            let fmt_ec_pair = |a: u8, b: u8| -> String {
+                if a == 0xFF && b == 0xFF {
+                    "N/A(0xFF)".to_string()
+                } else {
+                    let fa = if a == 0xFF { "N/A".to_string() } else { format!("{a}W") };
+                    let fb = if b == 0xFF { "N/A".to_string() } else { format!("{b}W") };
+                    format!("{fa}/{fb}")
+                }
+            };
             let rb = ec_read_pipeline(false).ok().map(|s| {
                 format!(
-                    "Host={}/{}W -> 仲裁={}/{}W -> PECI发送={}/{}W -> GPU回读={}/{}W",
+                    "Host={}/{}W -> 仲裁={} -> PECI发送={}/{}W -> GPU回读={}/{}W",
                     s.host_gpu_pl1_w,
                     s.host_gpu_pl2_w,
-                    s.final_peci_pl1_w,
-                    s.final_peci_pl2_w,
+                    fmt_ec_pair(s.final_peci_pl1_w, s.final_peci_pl2_w),
                     s.peci_sent_pl1_w,
                     s.peci_sent_pl2_w,
                     s.peci_readback_pl1_w,
@@ -1381,6 +1391,8 @@ impl ArcRuntime {
                 t.gpu_request_mhz = gpu.request_mhz;
                 t.gpu_tdp_mhz = gpu.tdp_mhz;
                 t.gpu_efficient_mhz = gpu.efficient_mhz;
+                t.freq_range_min_mhz = gpu.range_min_mhz;
+                t.freq_range_max_mhz = gpu.range_max_mhz;
                 t.gpu_voltage_v = gpu.voltage_v;
                 t.throttle_mask = gpu.throttle_mask;
                 t.throttle_reasons = gpu

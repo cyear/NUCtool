@@ -176,7 +176,7 @@ pub fn get_model() -> Result<String, Box<dyn Error>> {
 
     let model: String =
         object.get_property("Name")?.try_into()?;
-
+    // return Ok(String::from("LAPKC71F"));
     Ok(model)
 }
 

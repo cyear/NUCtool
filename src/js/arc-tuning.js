@@ -9,6 +9,7 @@ let watchTimer = null;
 let windowAvailable = true;
 let busy = false;
 let currentEcTakeover = false;
+let igclAutoSynced = false;
 
 const el = (id) => document.getElementById(id);
 const isPageActive = () => el("page-arc-tuning")?.classList.contains("active") ?? false;
@@ -19,10 +20,21 @@ const fmtNum = (v, digits = 0, unit = "") =>
 const fmtHex = (v, width = 4) =>
   typeof v === "number" ? `0x${v.toString(16).toUpperCase().padStart(width, "0")}` : "--";
 
+const fmtEcVal = (v, unit = " W") => (v === 0xff ? "N/A (0xFF)" : `${v}${unit}`);
+const fmtEcPair = (a, b, unit = "W") =>
+  a === 0xff && b === 0xff ? "N/A (0xFF)" : `${fmtEcVal(a, unit)}/${fmtEcVal(b, unit)}`;
+
 function renderTelemetry(tel) {
   if (!tel) return;
   el("arc-tel-clock").textContent = fmtNum(tel.gpu_clock_mhz, 0, " MHz");
-  el("arc-tel-req-tdp").textContent = `${fmtNum(tel.gpu_request_mhz, 0)} / ${fmtNum(tel.gpu_tdp_mhz, 0)} MHz`;
+  const rangeText =
+    typeof tel.freq_range_min_mhz === "number" && typeof tel.freq_range_max_mhz === "number"
+      ? `${Math.round(tel.freq_range_min_mhz)} ~ ${Math.round(tel.freq_range_max_mhz)} MHz`
+      : "--";
+  el("arc-tel-freq-range").textContent = rangeText;
+  if (rangeText !== "--" && el("arc-freq-current-range")) {
+    el("arc-freq-current-range").textContent = `[${rangeText}]`.replace(" ~ ", ", ");
+  }
   el("arc-tel-power").textContent = fmtNum(tel.gpu_power_w, 1, " W");
   el("arc-tel-sys-power").textContent = fmtNum(tel.system_power_w, 0, " W");
   el("arc-tel-temp").textContent = `${fmtNum(tel.gpu_temp_c, 1, " °C")} / ${fmtNum(tel.ec_gpu_temp_c, 0, " °C")}`;
@@ -114,9 +126,9 @@ function renderSnapshot(snap) {
 
     el("arc-loc-ec-info").innerHTML = [
       `Host(0x072D/2E): <b>${ec.host_gpu_pl1_w} / ${ec.host_gpu_pl2_w} W</b> · CPU PL1(0x0783): <b>${ec.cpu_pl1_w} W</b>`,
-      `仲裁(0x086B/0x09C0): <b>${ec.arb_gpu_pl1_w}/${ec.arb_gpu_pl2_w}</b> → <b>${ec.final_peci_pl1_w}/${ec.final_peci_pl2_w} W</b>`,
+      `仲裁(0x086B/0x09C0): <b>${fmtEcPair(ec.arb_gpu_pl1_w, ec.arb_gpu_pl2_w)}</b> → <b>${fmtEcPair(ec.final_peci_pl1_w, ec.final_peci_pl2_w)}</b>`,
       `PECI(0x0EF0~3) 发送/回读: <b>${ec.peci_sent_pl1_w}→${ec.peci_readback_pl1_w}W</b> | <b>${ec.peci_sent_pl2_w}→${ec.peci_readback_pl2_w}W</b>`,
-      `策略表=${ec.policy_gpu_pl1_w}/${ec.policy_gpu_pl2_w}W · 降额=${ec.thermal_derate_pl1_w}/${ec.hyst_derate_pl1_w}W · Mode=${ec.policy_mode} · PECI=${ec.peci_ready ? "OK" : "NO"}`,
+      `策略表=${fmtEcPair(ec.policy_gpu_pl1_w, ec.policy_gpu_pl2_w)} · 降额=${fmtEcPair(ec.thermal_derate_pl1_w, ec.hyst_derate_pl1_w)} · Mode=${ec.policy_mode} · PECI=${ec.peci_ready ? "OK" : "NO"}`,
     ].join("<br>");
 
     if (!el("arc-ec-pl1").value) el("arc-ec-pl1").value = ec.host_gpu_pl1_w || ec.final_peci_pl1_w;
@@ -160,7 +172,15 @@ function renderSnapshot(snap) {
 
   const igcl = p.igcl;
   if (igcl) {
-    el("arc-loc-igcl-ctrl").textContent = `OC=${igcl.oc_power_supported}`;
+    el("arc-loc-igcl-ctrl").textContent = igcl.oc_power_supported
+      ? "OC=true"
+      : t("arcTuning.igclReadOnly");
+    if (!igclAutoSynced) {
+      igclAutoSynced = true;
+      if (!igcl.oc_power_supported && el("arc-chk-igcl")) {
+        el("arc-chk-igcl").checked = false;
+      }
+    }
     el("arc-loc-igcl-info").innerHTML = [
       `V2: <b>${igcl.power_limit_v2_w != null ? `${igcl.power_limit_v2_w.toFixed(1)} W` : igcl.v2_error || "--"}</b>`,
       `V1: <b>${igcl.power_limit_v1_w != null ? `${igcl.power_limit_v1_w.toFixed(1)} W` : igcl.v1_error || "--"}</b>`,
@@ -196,11 +216,12 @@ function renderSnapshot(snap) {
   }
 }
 
-function showFeedback(id, ok, text) {
+function showFeedback(id, state, text) {
   const box = el(id);
   if (!box) return;
+  const cls = state === true ? "ok" : state === false ? "err" : state;
   box.hidden = false;
-  box.className = `arc-feedback ${ok ? "ok" : "err"}`;
+  box.className = `arc-feedback ${cls}`;
   box.textContent = text;
 }
 
@@ -255,13 +276,16 @@ async function applyPower(request) {
   try {
     const res = await invoke("arc_set_power_limits", { request });
     const lines = [];
-    let allOk = true;
+    let okCount = 0;
+    let failCount = 0;
     for (const [label, item] of [["EC", res.ec], ["Sysman", res.sysman], ["IGCL", res.igcl]]) {
       if (!item) continue;
-      if (!item.ok) allOk = false;
+      if (item.ok) okCount++;
+      else failCount++;
       lines.push(`[${label}] ${item.ok ? "OK" : "FAIL"}: ${item.message}${item.readback ? ` (${item.readback})` : ""}`);
     }
-    showFeedback("arc-power-feedback", allOk, lines.join(" | ") || "未选择写入目标");
+    const state = okCount > 0 && failCount > 0 ? "warn" : okCount > 0;
+    showFeedback("arc-power-feedback", state, lines.join(" | ") || "未选择写入目标");
     await refreshSnapshot(false);
   } catch (error) {
     showFeedback("arc-power-feedback", false, String(error));

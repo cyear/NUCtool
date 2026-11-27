@@ -879,9 +879,10 @@ async function initTuningRefresh() {
 }
 
 const WCF_DISABLE_TARGETS = [
-  { card: '.tuning-card',  header: '.tuning-header',  msg: 'UniwillService not detected as enabled' },
-  { card: '.display-card', header: '.display-header', msg: 'UniwillService not detected as enabled' },
-  { card: '#battery-card', header: '.tdp-header',     msg: 'UniwillService not detected as enabled' },
+  { card: '.tuning-card',                  header: '.tuning-header',                                           msg: 'UniwillService not detected as enabled' },
+  { card: '.display-card',                 header: '.display-header',                                          msg: 'UniwillService not detected as enabled' },
+  { card: '#battery-card',                 header: '.tdp-header',                                              msg: 'UniwillService not detected as enabled' },
+  { card: '#page-lightbar .lightbar-card', header: '.lightbar-header > div:first-child, .keyboard-header > div:first-child', msg: 'UniwillService not detected as enabled' },
 ];
 let lightbarInitialized = false;
 let wcfRetryTimer = null;
@@ -890,36 +891,36 @@ let wcfRetryInFlight = false;
 // 服务连接失败置灰
 function disableTuningSections() {
   WCF_DISABLE_TARGETS.forEach(({ card, header, msg }) => {
-    const el = document.querySelector(card);
-    if (!el) return;
-    if (!el.classList.contains('disabled')) {
-      el.classList.add('disabled');
-      el.querySelectorAll('button, input, select').forEach((c) => {
-        c.dataset.wcfPrevDisabled = c.disabled ? '1' : '0';
-        c.disabled = true;
-      });
-    }
-    const headerEl = el.querySelector(header);
-    if (headerEl) {
-      headerEl.querySelectorAll('.connect-warning').forEach((w) => w.remove());
-      insertWarning(headerEl, msg);
-    }
+    document.querySelectorAll(card).forEach((el) => {
+      if (!el.classList.contains('disabled')) {
+        el.classList.add('disabled');
+        el.querySelectorAll('button, input, select').forEach((c) => {
+          c.dataset.wcfPrevDisabled = c.disabled ? '1' : '0';
+          c.disabled = true;
+        });
+      }
+      const headerEl = el.querySelector(header);
+      if (headerEl) {
+        headerEl.querySelectorAll('.connect-warning').forEach((w) => w.remove());
+        insertWarning(headerEl, msg);
+      }
+    });
   });
 }
 
 function enableTuningSections() {
   WCF_DISABLE_TARGETS.forEach(({ card, header }) => {
-    const el = document.querySelector(card);
-    if (!el) return;
-    el.classList.remove('disabled');
-    el.querySelectorAll('button, input, select').forEach((c) => {
-      c.disabled = c.dataset.wcfPrevDisabled === '1';
-      delete c.dataset.wcfPrevDisabled;
+    document.querySelectorAll(card).forEach((el) => {
+      el.classList.remove('disabled');
+      el.querySelectorAll('button, input, select').forEach((c) => {
+        c.disabled = c.dataset.wcfPrevDisabled === '1';
+        delete c.dataset.wcfPrevDisabled;
+      });
+      const headerEl = el.querySelector(header);
+      if (headerEl) {
+        headerEl.querySelectorAll('.connect-warning').forEach((w) => w.remove());
+      }
     });
-    const headerEl = el.querySelector(header);
-    if (headerEl) {
-      headerEl.querySelectorAll('.connect-warning').forEach((w) => w.remove());
-    }
   });
 }
 
