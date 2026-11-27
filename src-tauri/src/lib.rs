@@ -1808,17 +1808,102 @@ async fn arc_get_snapshot(
 ) -> Result<ArcSnapshot, String> {
     let arc = state.inner().clone();
     let include_regs = include_ec_regs.unwrap_or(false);
-    tauri::async_runtime::spawn_blocking(move || arc.snapshot(include_regs))
+    let res = tauri::async_runtime::spawn_blocking(move || arc.snapshot(include_regs))
         .await
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string());
+    match &res {
+        Ok(snap) => {
+            let dev = snap
+                .device
+                .as_ref()
+                .map(|d| format!("{} (0x{:04X}:0x{:04X})", d.name, d.vendor_id, d.device_id))
+                .unwrap_or_else(|| "None".to_string());
+            let sys_pl = snap
+                .power_limits
+                .sysman
+                .as_ref()
+                .map(|p| format!("PL1={:.1}W/PL2={:.1}W(ctrl={})", p.sustained_w, p.burst_w, p.can_control))
+                .unwrap_or_else(|| "None".to_string());
+            let igcl_pl = snap
+                .power_limits
+                .igcl
+                .as_ref()
+                .map(|p| format!("v2={:?}W/v1={:?}W", p.power_limit_v2_w, p.power_limit_v1_w))
+                .unwrap_or_else(|| "None".to_string());
+            let ec_pl = snap
+                .power_limits
+                .ec
+                .as_ref()
+                .map(|e| {
+                    format!(
+                        "takeover={} host={}/{}W final={}/{}W rb={}/{}W regs={}",
+                        e.host_takeover,
+                        e.host_gpu_pl1_w,
+                        e.host_gpu_pl2_w,
+                        e.final_peci_pl1_w,
+                        e.final_peci_pl2_w,
+                        e.peci_readback_pl1_w,
+                        e.peci_readback_pl2_w,
+                        e.regs.len()
+                    )
+                })
+                .unwrap_or_else(|| "None".to_string());
+            println!(
+                "[ARC] arc_get_snapshot(include_ec_regs={}): device={}, clock={:?}MHz, power={:?}W, temp={:?}°C, freq(ctrl={}, range={:?}..{:?}, steps={}, domains={}), sysman=[{}], igcl=[{}], ec=[{}], errors={:?}",
+                include_regs,
+                dev,
+                snap.telemetry.gpu_clock_mhz,
+                snap.telemetry.gpu_power_w,
+                snap.telemetry.gpu_temp_c,
+                snap.freq.can_control,
+                snap.freq.range_min_mhz,
+                snap.freq.range_max_mhz,
+                snap.freq.available_clocks_mhz.len(),
+                snap.freq.domains.len(),
+                sys_pl,
+                igcl_pl,
+                ec_pl,
+                snap.errors
+            );
+        }
+        Err(e) => {
+            println!("[ARC] arc_get_snapshot(include_ec_regs={}) 失败: {}", include_regs, e);
+        }
+    }
+    res
 }
 
 #[tauri::command]
 async fn arc_get_telemetry(state: State<'_, ArcState>) -> Result<ArcTelemetry, String> {
     let arc = state.inner().clone();
-    tauri::async_runtime::spawn_blocking(move || arc.telemetry())
+    let res = tauri::async_runtime::spawn_blocking(move || arc.telemetry())
         .await
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string());
+    match &res {
+        Ok(t) => {
+            println!(
+                "[ARC] arc_get_telemetry: clock={:?}MHz req={:?} tdp={:?}, gpu_pwr={:?}W sys_pwr={:?}W, temp={:?}°C ec_temp={:?}°C, volt={:?}V, vram={:?}MHz, peci_pl={:?}/{:?}W, pwr_lim={:?} thm_lim={:?} throttle={:?}",
+                t.gpu_clock_mhz,
+                t.gpu_request_mhz,
+                t.gpu_tdp_mhz,
+                t.gpu_power_w,
+                t.system_power_w,
+                t.gpu_temp_c,
+                t.ec_gpu_temp_c,
+                t.gpu_voltage_v,
+                t.vram_clock_mhz,
+                t.peci_readback_pl1_w,
+                t.peci_readback_pl2_w,
+                t.gpu_power_limited,
+                t.gpu_temp_limited,
+                t.throttle_mask
+            );
+        }
+        Err(e) => {
+            println!("[ARC] arc_get_telemetry 失败: {}", e);
+        }
+    }
+    res
 }
 
 #[tauri::command]
@@ -1829,9 +1914,15 @@ async fn arc_set_frequency(
     max_mhz: Option<f64>,
 ) -> Result<ArcFreqWriteResult, String> {
     let arc = state.inner().clone();
-    tauri::async_runtime::spawn_blocking(move || arc.set_frequency(&mode, min_mhz, max_mhz))
+    let mode_log = mode.clone();
+    let res = tauri::async_runtime::spawn_blocking(move || arc.set_frequency(&mode, min_mhz, max_mhz))
         .await
-        .map_err(|e| e.to_string())?
+        .map_err(|e| e.to_string())?;
+    println!(
+        "[ARC] arc_set_frequency: mode={}, min_mhz={:?}, max_mhz={:?} ==> {:?}",
+        mode_log, min_mhz, max_mhz, res
+    );
+    res
 }
 
 #[tauri::command]
@@ -1840,9 +1931,12 @@ async fn arc_set_power_limits(
     request: ArcPowerWriteRequest,
 ) -> Result<ArcPowerWriteResult, String> {
     let arc = state.inner().clone();
-    tauri::async_runtime::spawn_blocking(move || arc.set_power_limits(&request))
+    let req_log = format!("{:?}", request);
+    let res = tauri::async_runtime::spawn_blocking(move || arc.set_power_limits(&request))
         .await
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string());
+    println!("[ARC] arc_set_power_limits: {} ==> {:?}", req_log, res);
+    res
 }
 
 #[tauri::command]
@@ -1851,9 +1945,18 @@ async fn arc_set_ec_takeover(
     enabled: bool,
 ) -> Result<u8, String> {
     let arc = state.inner().clone();
-    tauri::async_runtime::spawn_blocking(move || arc.set_ec_takeover(enabled))
+    let res = tauri::async_runtime::spawn_blocking(move || arc.set_ec_takeover(enabled))
         .await
-        .map_err(|e| e.to_string())?
+        .map_err(|e| e.to_string())?;
+    match &res {
+        Ok(reg) => {
+            println!("[ARC] arc_set_ec_takeover: enabled={} ==> Ok(0x{:02X})", enabled, reg);
+        }
+        Err(e) => {
+            println!("[ARC] arc_set_ec_takeover: enabled={} ==> Err({})", enabled, e);
+        }
+    }
+    res
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
